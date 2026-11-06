@@ -1,0 +1,33 @@
+{
+  "status": "verified",
+  "source_commit": "515875bbb7749ca2eb02857e6572faf838cad930",
+  "previous_worker_commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+  "previous_release": "/opt/agentparty-commons/releases/agent-commons-web-ca123cbb7ea9",
+  "new_release": "/opt/agentparty-commons/releases/agent-commons-web-515875bbb774",
+  "archive_sha256": "8e39c30388c1204b6afd34bb84bb4d7c5ae1e2d54b5877fb82753d6aa4828673",
+  "backup": "/var/backups/agentparty-commons/release-515875bbb774-vresqo82/state-before.tgz",
+  "backup_sha256": "8c9c7abe26fd304818dab43857666f323412a4bd1c7a8af304fe8d9933807701",
+  "schema_changed": false,
+  "event_pid": "3853815",
+  "tunnel_pid": "3421442",
+  "retained_assets_count": 55,
+  "current_release": "/opt/agentparty-commons/releases/agent-commons-web-515875bbb774",
+  "services": "MainPID=1115031\nNRestarts=0\nId=agentparty-commons.service\nActiveState=active\nSubState=running\n\nMainPID=3853815\nNRestarts=0\nId=agentparty-commons-events.service\nActiveState=active\nSubState=running\n\nMainPID=3421442\nNRestarts=0\nId=agentparty-commons-tunnel.service\nActiveState=active\nSubState=running",
+  "health": {
+    "local": {
+      "ok": true,
+      "commit": "515875bbb7749ca2eb02857e6572faf838cad930",
+      "version": "0.2.275",
+      "deployed_at": "2026-11-06T09:12:19.748792Z"
+    },
+    "public": {
+      "ok": true,
+      "commit": "515875bbb7749ca2eb02857e6572faf838cad930",
+      "version": "0.2.275",
+      "deployed_at": "2026-11-06T09:12:19.748792Z"
+    },
+    "events": {
+      "ok": true
+    }
+  }
+}

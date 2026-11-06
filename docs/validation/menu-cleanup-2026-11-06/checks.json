@@ -16,5 +16,33 @@
     "failed": 0
   },
   "transport": "synthetic read-only, no external calls or real writes",
-  "production": "pending deployment"
+  "production": "deployed; server checks and unauthenticated public browser review passed",
+  "production_build": "passed",
+  "runtime_commit": "515875bbb7749ca2eb02857e6572faf838cad930",
+  "public_browser": {
+    "passed": 2,
+    "failed": 0,
+    "checked_at": "2026-11-06T09:16:23.936Z",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "session": "fresh unauthenticated browser contexts",
+    "login_started": false,
+    "account_or_message_mutations": false,
+    "javascript_errors": 0,
+    "failed_requests": 0,
+    "http_errors": 0,
+    "evidence": "public-browser.json"
+  },
+  "limitations": [
+    "Public review covered the unauthenticated entry and public health endpoint only; no personal login or OAuth authorization was initiated.",
+    "Authenticated menus, groups, connection management and message workflows were exercised with local synthetic data, not with a personal production account."
+  ]
 }

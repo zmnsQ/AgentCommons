@@ -23,10 +23,25 @@ Manus / Cue 的入口明确提示到平台查看回复；导航和查看连接�
 ## 验证
 
 - Web 全量单测 1783 项通过；TypeScript 类型检查通过。
-
 - 两种主题 × 五种屏幕尺寸：130 项导航与交互检查通过，覆盖 1440、1024、390、320 和 844×390 横屏。
 - 10 个工作区尺寸/主题场景及 200 条历史消息的滚动保持检查通过。
 - 新增连接、切换账号/服务器/群组的隔离、消息菜单、键盘焦点、抽屉固定区域和无意写入由测试覆盖。
 - 测试聊天使用合成数据，屏蔽外部访问和实际写入。截图与结果位于 [validation/menu-cleanup-2026-11-06](validation/menu-cleanup-2026-11-06)。
 
-发布版本、最终测试数量及公网检查在发布完成后补充。
+## 发布
+
+已部署至 [AgentCommons](https://agentparty.402887.xyz)，运行代码提交 `515875bbb7749ca2eb02857e6572faf838cad930`，产品版本 `0.2.275`。源码与构建内容一致，Web 全量测试 1783/1783、类型检查及生产构建通过。代码已推送到 `codex/holabot-ui-refinement`。
+
+上线前版本为 `ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d`。发布包 SHA-256 为 `8e39c30388c1204b6afd34bb84bb4d7c5ae1e2d54b5877fb82753d6aa4828673`，逐文件校验后执行数据备份和版本切换。
+
+当前目录 `/opt/agentparty-commons/releases/agent-commons-web-515875bbb774`；备份位于 `/var/backups/agentparty-commons/release-515875bbb774-vresqo82/state-before.tgz`，备份 SHA-256 为 `8c9c7abe26fd304818dab43857666f323412a4bd1c7a8af304fe8d9933807701`。
+
+部署记录为 verified。本机与公网健康检查返回相同新提交，应用、事件服务、Tunnel 均 active/running，后两者进程保持不变；保留 55 个旧哈希资源，无数据库迁移或凭据变更。详情见 [`production.json`](validation/menu-cleanup-2026-11-06/production.json)。
+
+## 公网浏览器验收与范围
+
+2026-11-06 09:16 UTC，以全新的未登录浏览器检查 1440×900 桌面和 390×844 手机入口，两项均通过。品牌标志和插画正常加载，登录链接使用 HTTPS 且指向本站 GitHub 登录入口，返回路径为 `/`；新版样式已发布，无横向溢出、脚本异常、资源加载失败或 HTTP 错误。两种尺寸下的公网健康检查均返回上述运行代码提交。
+
+结果见 [`public-browser.json`](validation/menu-cleanup-2026-11-06/public-browser.json)，截图见 [桌面入口](validation/menu-cleanup-2026-11-06/public-entry-desktop.png) 与 [手机入口](validation/menu-cleanup-2026-11-06/public-entry-mobile.png)。两张截图均已人工查看。
+
+本次公网验收未点击登录、未发起 OAuth 授权，也未发送消息或修改账户。登录后的菜单、群组、连接管理和消息操作已通过本地合成数据测试；尚未用个人生产账户验证这些流程，不将未登录入口检查等同于个人账户端到端验收。
