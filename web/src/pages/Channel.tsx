@@ -147,6 +147,7 @@ import { ChannelSocket } from "../lib/ws";
 import { channelReducer, initialChannelState } from "../state";
 import { useT } from "../i18n/useT";
 import {ConversationHeader} from "../components/ConversationHeader";
+import {useConversationWidth} from "../lib/conversationWidth";
 import {ConversationDetails,ConversationTools} from "../components/ConversationDetails";
 import "../i18n/strings/CollaborationHub";
 const CollaborationHub = lazy(() => import("../components/CollaborationHub"));
@@ -2082,6 +2083,7 @@ export function ChannelPage({
   const [state, dispatch] = useReducer(channelReducer, initialChannelState);
   const [channelIdentities, setChannelIdentities] = useState<ChannelIdentity[]>([]);
   const [detailsOpen,setDetailsOpen]=useState(false);
+  const [readingWidth, setReadingWidth] = useConversationWidth();
   const [detailsRosterOpen,setDetailsRosterOpen]=useState(false);
   const [workspaceFiles,setWorkspaceFiles]=useState(false);
   const lastWorkspaceAction=useRef(0);
@@ -4688,8 +4690,9 @@ export function ChannelPage({
   );
 
   return (
-    <div className="chan">
+    <div className="chan" data-reading-width={readingWidth}>
       <ConversationHeader title={title?.trim()||slug} members={displayedChannelIdentities}
+        readingWidth={readingWidth} onReadingWidthChange={setReadingWidth}
         onDetails={()=>setDetailsOpen(true)} connectionStatus={state.status}
         attentionCount={toasts.length} onAttention={()=>{const latest=toasts[toasts.length-1];if(latest)jumpToMention(latest.seq);}}
         onAddAgent={canMintAgent&&accountKey!==null&&!state.archived?()=>setAdminSurface("agentJoin",true):undefined}/>

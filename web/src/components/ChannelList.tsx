@@ -1,6 +1,6 @@
 import { PlatformIcon } from "./PlatformIcon";
 // 左侧频道列表：频道名 + 最近一条消息 + 参与者状态点（spec §9 第 1 块）
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ChannelInfo } from "../lib/api";
 import { StudioIcon } from "./StudioIcon";
 import { useLocale } from "../i18n/locale";
@@ -111,6 +111,8 @@ type ScopedProps = Omit<Props, "scopeKey">;
 function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, onCreate, onConnect, onAgentSelect }: ScopedProps) {
   const { locale } = useLocale();
   const [query, setQuery] = useState("");
+  const [agentsExpanded, setAgentsExpanded] = useState(true);
+  const agentListId = useId();
   const searchLabel = locale === "zh" ? "搜索会话" : "Search conversations";
   const matches = (c: ChannelInfo) => [c.title, c.slug, c.topic].some(value => value?.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const uniqueAgents = [...new Map((agents ?? []).map(agent => [agent.name, agent])).values()];
@@ -156,7 +158,7 @@ function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, o
         });
   return (
     <nav className="side prototype-sidebar" aria-label={t("Home.channelsLabel")}>
-      <div className="sidebar-top"><span>{locale === "zh" ? "我的空间" : "My workspace"}</span><button type="button" className="sidebar-icon-button" aria-label={locale === "zh" ? "创建群组" : "Create group"} title={locale === "zh" ? "创建群组" : "Create group"} disabled={!onCreate} onClick={onCreate}><StudioIcon name="plus"/></button></div>
+      <div className="sidebar-top"><div className="workspace-sidebar-brand"><img src="/brand/mark.png" alt="" width="32" height="32"/><span><strong>AgentCommons</strong><small>{locale === "zh" ? "我的空间" : "My workspace"}</small></span></div><button type="button" className="sidebar-icon-button" aria-label={locale === "zh" ? "创建群组" : "Create group"} title={locale === "zh" ? "创建群组" : "Create group"} disabled={!onCreate} onClick={onCreate}><StudioIcon name="plus"/></button></div>
       <label className="prototype-sidebar-search"><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg><input type="search" aria-label={searchLabel} placeholder={searchLabel} value={query} onChange={e=>setQuery(e.currentTarget.value)}/></label>
       <div className="prototype-sidebar-scroll">
       <div className="side-section-title"><span>{locale === "zh" ? "对话" : "Conversations"}</span><button type="button" className="sidebar-icon-button" aria-label={locale === "zh" ? "新对话" : "New conversation"} disabled={!onCreate} onClick={onCreate}><StudioIcon name="plus"/></button></div>
@@ -216,8 +218,8 @@ function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, o
         </>
       )}
       {uniqueAgents.length > 0 && <section className="prototype-sidebar-agents" aria-label={locale === "zh" ? "你的 Agent" : "Your agents"}>
-        <h3 className="side-section-title agent-label">{locale === "zh" ? "你的 Agent" : "Your agents"}<span>{uniqueAgents.length}</span></h3>
-        <ul className="agent-list">{uniqueAgents.map(agent=><li key={agent.name}><button type="button" disabled={!onAgentSelect} onClick={()=>onAgentSelect?.(agent.name)} title={agent.name}><span className="prototype-agent-avatar" aria-hidden="true"><PlatformIcon platform={agent.connector_type} size={18} decorative /></span><span>{agent.display?.trim()||agent.name}</span>{agent.role&&<small>{agent.role}</small>}</button></li>)}</ul>
+        <h3 className="side-section-title agent-label"><button type="button" className="sidebar-agents-toggle" aria-expanded={agentsExpanded} aria-controls={agentListId} onClick={()=>setAgentsExpanded(expanded=>!expanded)}><span>{locale === "zh" ? "你的 Agent" : "Your agents"}</span><span>{uniqueAgents.length}</span><StudioIcon name="chevron-down" size={14}/></button></h3>
+        <ul className="agent-list" id={agentListId} hidden={!agentsExpanded}>{uniqueAgents.map(agent=><li key={agent.name}><button type="button" disabled={!onAgentSelect} onClick={()=>onAgentSelect?.(agent.name)} title={agent.name}><span className="prototype-agent-avatar" aria-hidden="true"><PlatformIcon platform={agent.connector_type} size={18} decorative /></span><span>{agent.display?.trim()||agent.name}</span>{agent.role&&<small>{agent.role}</small>}</button></li>)}</ul>
       </section>}
       {onConnect&&<button type="button" className="discover-link" onClick={onConnect}><span aria-hidden="true">＋</span>{locale==="zh"?"连接更多 Agent":"Connect more agents"}</button>}
       </div>
