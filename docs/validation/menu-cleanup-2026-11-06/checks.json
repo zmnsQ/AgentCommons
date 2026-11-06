@@ -1,0 +1,20 @@
+{
+  "web_tests": {
+    "passed": 1783,
+    "failed": 0,
+    "files": 207
+  },
+  "typecheck": "passed",
+  "navigation_browser": {
+    "passed": 130,
+    "failed": 0,
+    "themes": 2,
+    "viewports": 5
+  },
+  "workspace_browser": {
+    "passed": 11,
+    "failed": 0
+  },
+  "transport": "synthetic read-only, no external calls or real writes",
+  "production": "pending deployment"
+}

@@ -13,79 +13,32 @@ function text(node:any):string{return typeof node==="string"?node:(node?.childre
 afterEach(()=>{if(locationDescriptor)Object.defineProperty(globalThis,"location",locationDescriptor);else Reflect.deleteProperty(globalThis,"location");act(()=>renderer?.unmount());renderer=null;globalThis.fetch=originalFetch;if(storage)Object.defineProperty(globalThis,"localStorage",storage);else Reflect.deleteProperty(globalThis,"localStorage");});
 async function mount(element:React.ReactElement){await act(async()=>{renderer=create(<LocaleProvider>{element}</LocaleProvider>);});return renderer!.root;}
 describe("personal cloud agent onboarding is not a local harness form",()=>{
-  test("offers dot, Muse, Cue, Grok and Hermes; cloud selection never mints a local agent",async()=>{
-    let chosen:CloudAgentChoice|null=null,local=0,network=0;
-    globalThis.fetch=(async()=>{network++;throw new Error("no credentials should be created here");}) as typeof fetch;
-    const root=await mount(<AgentConnectionPicker onCloud={p=>{chosen=p;}} onLocal={()=>{local++;}}/>);
-    for(const provider of CLOUD_AGENT_CHOICES){
-      await act(async()=>{root.findByProps({"data-provider":provider}).props.onClick();});
-      await act(async()=>root.findByProps({"data-picker-continue":true}).props.onClick());
-      expect(chosen).toBe(provider);
-    }
-    expect(text(root)).toContain("ChatGPT dot");expect(text(root)).toContain("Meta Muse");
-    expect(text(root)).toContain("Manus / Cue");expect(local).toBe(0);expect(network).toBe(0);
-    expect(root.findAllByType("input")).toHaveLength(0);
-    const selected:string[]=[];
-    await act(async()=>renderer!.update(<LocaleProvider><AgentConnectionPicker onCloud={p=>{chosen=p;}} onLocal={p=>{selected.push(p);local++;}}/></LocaleProvider>));
-    for(const provider of CODING_AGENT_CHOICES){
-      const button=renderer!.root.findByProps({"data-coding-provider":provider});
-      expect(button.findAllByType("input")).toHaveLength(0);
-      await act(async()=>button.props.onClick());
-      await act(async()=>renderer!.root.findByProps({"data-picker-continue":true}).props.onClick());
-    }
-    expect(selected).toEqual(["codex","codebuddy","claude","other"]);expect(local).toBe(4);expect(network).toBe(0);
-    expect(renderer!.root.findAllByType("details")).toHaveLength(1);
+  test("platform tiles open their setup directly without creating credentials",async()=>{
+    const cloud:string[]=[],coding:string[]=[];let network=0;
+    globalThis.fetch=(async()=>{network++;throw Error("unexpected network");}) as typeof fetch;
+    const root=await mount(<AgentConnectionPicker onCloud={p=>cloud.push(p)} onLocal={p=>coding.push(p)}/>);
+    for(const provider of CLOUD_AGENT_CHOICES)await act(async()=>root.findByProps({"data-provider":provider}).props.onClick());
+    for(const provider of CODING_AGENT_CHOICES)await act(async()=>root.findByProps({"data-coding-provider":provider}).props.onClick());
+    expect(cloud).toEqual([...CLOUD_AGENT_CHOICES]);expect(coding).toEqual([...CODING_AGENT_CHOICES]);
+    expect(network).toBe(0);expect(root.findAllByType("input")).toHaveLength(0);
+    expect(root.findAllByProps({"data-picker-continue":true})).toHaveLength(0);
   });
-  test("generic MCP is discoverable without requiring a development machine",async()=>{
+  test("all platforms remain discoverable while optional team guidance is collapsed",async()=>{
     const root=await mount(<AgentConnectionPicker onCloud={()=>{}} onLocal={()=>{}}/>);
-    await act(async()=>root.findByProps({"data-coding-provider":"other"}).props.onClick());
-    const detail=text(root.findByProps({className:"agent-platform-next"}));
-    expect(detail).toContain("Other MCP platforms");
-    expect(detail).toContain("Authorization header");
-    expect(detail).not.toContain("development machine");
-    expect(detail).toContain("does not add event support");
+    expect(root.findAllByProps({className:"agent-platform-category"})).toHaveLength(2);
+    expect(root.findAllByProps({className:"agent-platform-tile"})).toHaveLength(9);
+    expect(root.findByType("details").props.open).toBeUndefined();
+    expect(text(root.findByProps({"data-coding-provider":"other"}))).toContain("Other MCP platforms");
+    expect(text(root)).toContain("ChatGPT dot");expect(text(root)).toContain("Meta Muse");
+    expect(text(root)).not.toContain("AgentConnect.");
   });
-  test("keeps all new choices, security explanations and instructions bilingual",async()=>{
+  test("platform choices and labels remain bilingual",async()=>{
     expect(Object.keys(AgentConnectStrings.en).sort()).toEqual(Object.keys(AgentConnectStrings.zh).sort());
     Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{getItem:()=>"zh",setItem:()=>{}}});
     const root=await mount(<AgentConnectionPicker onCloud={()=>{}} onLocal={()=>{}}/>);
     expect(text(root)).toContain("个人 Agent 与服务");expect(text(root)).toContain("MCP 客户端与编程 Agent");
     expect(text(root)).toContain("Codex");expect(text(root)).toContain("Claude Code");
-    expect(text(root)).toContain("同一个群");expect(text(root)).toContain("防循环");
     expect(text(root)).not.toContain("AgentConnect.");
-  });
-  test("both categories remain visible and platform selection is reversible without side effects",async()=>{
-    let cloud:CloudAgentChoice|null=null;let coding:string|null=null;
-    const root=await mount(<AgentConnectionPicker onCloud={v=>{cloud=v;}} onLocal={v=>{coding=v;}}/>);
-    expect(root.findAllByProps({className:"agent-platform-category"})).toHaveLength(2);
-    expect(root.findAllByType("details")).toHaveLength(1);
-    expect(root.findByType("details").props.open).toBeUndefined();
-    await act(async()=>root.findByProps({"data-coding-provider":"claude"}).props.onClick());
-    expect(coding).toBeNull();expect(cloud).toBeNull();
-    await act(async()=>root.findByProps({"data-picker-continue":true}).props.onClick());
-    expect(coding).toBe("claude");
-    await act(async()=>root.findByProps({"data-provider":"dot"}).props.onClick());
-    expect(cloud).toBeNull();
-    await act(async()=>root.findByProps({"data-picker-continue":true}).props.onClick());
-    expect(cloud).toBe("dot");expect(coding).toBe("claude");
-    expect(root.findByProps({"data-coding-provider":"codex"})).toBeTruthy();
-    expect(text(root)).toContain("not permission changes");
-  });
-  test("compact tiles defer prerequisites until selected and never claim a connection",async()=>{
-    let selections=0,requests=0;globalThis.fetch=(async()=>{requests++;throw Error("unexpected request");}) as typeof fetch;
-    const root=await mount(<AgentConnectionPicker onCloud={()=>{selections++;}} onLocal={()=>{selections++;}}/>);
-    expect(root.findAllByProps({className:"agent-platform-tile"})).toHaveLength(9);
-    expect(root.findAllByProps({className:"agent-platform-next"})).toHaveLength(0);
-    expect(root.findAllByProps({className:"agent-connect-prerequisite"})).toHaveLength(0);
-    expect(text(root.findByProps({"data-provider":"grok"}))).toContain("no auto replies");
-    await act(async()=>root.findByProps({"data-provider":"muse"}).props.onClick());
-    expect(text(root.findByProps({className:"agent-platform-next"}))).toContain("Neither option is direct Muse login");
-    expect(selections).toBe(0);expect(requests).toBe(0);
-    await act(async()=>root.findByProps({"data-provider":"hermes"}).props.onClick());
-    expect(text(root.findByProps({className:"agent-platform-next"}))).toContain("running Hermes API Server");
-    expect(text(root)).toContain("connection not checked");
-    await act(async()=>root.findByProps({"data-picker-continue":true}).props.onClick());
-    expect(selections).toBe(1);expect(requests).toBe(0);
   });
   test("MCP address contains no token and no policy changes happen until the human saves",async()=>{
     const calls:Array<{url:string;method:string;body:any}>=[];

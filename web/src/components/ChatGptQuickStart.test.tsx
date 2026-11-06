@@ -35,9 +35,9 @@ const copies=(root:ReactTestInstance)=>root.findAllByType("button").filter(b=>te
 describe("authorized plugin first-use guidance",()=>{
   test("explains authorization, three usage steps and no automatic subscription",async()=>{
     const root=await render(),body=text(root);
-    expect(body).toContain("Authorization recorded");expect(body).toContain("client manages credentials");expect(body).toContain("does not prove that ChatGPT has refreshed");expect(body).toContain("No event subscription recorded here");
+    expect(body).toContain("Authorization recorded");expect(body).toContain("existing connection");expect(body).toContain("read-only test prompt");expect(body).toContain("No event subscription");
     expect(body).toContain("Verify identity and read access");expect(body).toContain("Send one message back");
-    expect(body).toContain("Copying does not count as a passed test");expect(body).not.toContain("credential missing");
+    expect(body).toContain("Copy the verification prompt");expect(body).not.toContain("credential missing");
     expect(root.findAllByType("textarea")).toHaveLength(4);
     expect(root.findByProps({href:"https://chatgpt.com/"}).props.rel).toContain("noopener");
   });
@@ -64,17 +64,17 @@ describe("authorized plugin first-use guidance",()=>{
     expired=true;const root=await render();expect(text(root)).toContain("Reauthorization required");expect(copies(root).every(b=>b.props.disabled)).toBe(true);
   });
   test("another agent's subscription does not imply this ChatGPT identity is subscribed",async()=>{
-    otherSubscribed=true;const root=await render();expect(text(root)).toContain("No event subscription recorded here");expect(text(root)).not.toContain("Subscription exists");
+    otherSubscribed=true;const root=await render();expect(text(root)).toContain("No event subscription");expect(text(root)).not.toContain("Subscription exists");
   });
   test("missing grant shows first-time guidance, not an empty authorized state",async()=>{
     empty=true;const root=await render();expect(text(root)).toContain("No active ChatGPT OAuth connection");expect(copies(root)).toHaveLength(0);
   });
   test("a status failure is visible and does not claim connection succeeded",async()=>{
-    failed=true;const root=await render();expect(text(root)).toContain("Connection status could not be checked");expect(copies(root)).toHaveLength(0);
+    failed=true;const root=await render();expect(text(root)).toContain("Could not load connection status");expect(copies(root)).toHaveLength(0);
   });
   test("server event configuration failure is actionable and does not disable existing read or reply",async()=>{
-    serverMissing=true;const root=await render();expect(text(root)).toContain("Event callbacks are not configured");
-    expect(text(root)).toContain("operator configures callback security");
+    serverMissing=true;const root=await render();expect(text(root)).toContain("configure callback security");
+    expect(text(root)).toContain("Reading and replying remain available");
     expect(copies(root).map(b=>b.props.disabled)).toEqual([false,false,false]);
     expect(calls.every(c=>c.method==="GET")).toBe(true);
   });

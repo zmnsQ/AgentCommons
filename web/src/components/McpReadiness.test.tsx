@@ -10,19 +10,19 @@ function stub(k,v){saved.set(k,Object.getOwnPropertyDescriptor(globalThis,k));Ob
 beforeEach(()=>{calls=[];response={policy:{enabled:false,owner_mfa_enabled:false,allow_write:false,allow_events:false},can_manage:false};stub('IS_REACT_ACT_ENVIRONMENT',true);stub('location',{origin:'https://fixture.test'});stub('localStorage',{getItem:()=>null});stub('fetch',async(url,init)=>{calls.push({url,method:init?.method});return Response.json(response);});});
 afterEach(async()=>{await act(async()=>renderer?.unmount());for(const[k,v]of saved){if(v)Object.defineProperty(globalThis,k,v);else Reflect.deleteProperty(globalThis,k);}saved.clear();});
 test('default closed and MFA unmet are explicit, never silently enable or mint',async()=>{
- await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('disabled (returns 403)');expect(text(renderer.root)).toContain('not enabled (returns 403)');expect(text(renderer.root)).toContain('does not mean the Token is invalid');expect(calls).toHaveLength(1);expect(calls[0].method).toBe('GET');expect(calls[0].url).toContain('/channels/a/mcp-security');
+ await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('Group MCP:  disabled');expect(text(renderer.root)).toContain('Owner two-step verification:  not enabled');expect(text(renderer.root)).toContain('Complete the settings below');expect(calls).toHaveLength(1);expect(calls[0].method).toBe('GET');expect(calls[0].url).toContain('/channels/a/mcp-security');
 });
 test('readiness is not connected claim; recheck is read-only',async()=>{
- response.policy.enabled=true;response.policy.owner_mfa_enabled=true;await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('prerequisites are satisfied; verify');
+ response.policy.enabled=true;response.policy.owner_mfa_enabled=true;await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('MCP reading is enabled');
  await act(async()=>renderer.root.findByType('button').props.onClick());expect(calls).toHaveLength(2);expect(calls.every(c=>c.method==='GET')).toBe(true);
 });
 test('network or malformed response is unknown, never ready',async()=>{
- response={};await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('Could not verify');expect(text(renderer.root)).not.toContain('prerequisites are satisfied');
+ response={};await act(async()=>{renderer=create(node());});expect(text(renderer.root)).toContain('Could not verify');expect(text(renderer.root)).not.toContain('MCP reading is enabled');
 });
 test('late old-group status cannot overwrite current group',async()=>{
  let resolve;const pending=new Promise(r=>resolve=r);globalThis.fetch=async(url)=>String(url).includes('/a/')?pending:Response.json(response);
  await act(async()=>{renderer=create(node());});await act(async()=>renderer.update(node('b')));await act(async()=>resolve(Response.json({policy:{enabled:true,owner_mfa_enabled:true},can_manage:true})));
- expect(text(renderer.root)).toContain('disabled (returns 403)');expect(text(renderer.root)).not.toContain('prerequisites are satisfied');
+ expect(text(renderer.root)).toContain('Group MCP:  disabled');expect(text(renderer.root)).not.toContain('MCP reading is enabled');
 });
 
 test('owner can expand real settings and explicitly save; viewing never changes permissions',async()=>{
@@ -37,4 +37,14 @@ test('owner can expand real settings and explicitly save; viewing never changes 
 test('non-owner sees status without owner permission controls',async()=>{
  await act(async()=>{renderer=create(node());});await act(async()=>renderer.root.findByType('details').props.onToggle({currentTarget:{open:true}}));
  expect(renderer.root.findAllByType('input').filter(n=>n.props.type==='checkbox')).toHaveLength(0);expect(calls.every(c=>c.method==='GET')).toBe(true);
+});
+
+test('closing permission settings refreshes readiness with a read only request',async()=>{
+ response.can_manage=true;response.policy.owner_mfa_enabled=true;
+ await act(async()=>{renderer=create(node());});
+ await act(async()=>renderer.root.findByType('details').props.onToggle({currentTarget:{open:true}}));
+ const beforeClose=calls.length;response.policy.enabled=true;
+ await act(async()=>renderer.root.findByType('details').props.onToggle({currentTarget:{open:false}}));
+ expect(calls).toHaveLength(beforeClose+1);expect(calls.every(c=>c.method==='GET')).toBe(true);
+ expect(text(renderer.root)).toContain('MCP reading is enabled');
 });

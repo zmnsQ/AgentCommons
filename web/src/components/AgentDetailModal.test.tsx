@@ -227,7 +227,7 @@ describe("AgentDetailModal (#272)", () => {
     const text = JSON.stringify(renderer!.toJSON());
     expect(text).toContain("正在自动接收 @");
     expect(text).toContain("codex · 独立频道会话");
-    expect(text).toContain("不继承 owner 当前打开的 Codex/Claude 会话");
+    expect(text).toContain("续接本群专用接待会话，与所属人的会话独立");
     expect(text).toContain("2 条未处理 · 最早 #41");
 
     const button = root.find(

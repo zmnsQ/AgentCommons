@@ -50,6 +50,70 @@ describe("teamLaneOf：泳道判定顺序", () => {
   });
 });
 
+describe("team board connection and activity stay consistent", () => {
+  test("connected participants without presence remain online without fabricated activity", () => {
+    const model = buildTeamBoard({
+      participants: [sender("human", "human"), sender("agent")],
+      presence: [],
+      roles: [],
+      tasks: [task(1, "agent", "in_progress")],
+      deliveries: [delivery("pending", "agent", "running")],
+      now: NOW,
+    });
+    expect(model.counts).toMatchObject({ idle: 2, offline: 0, working: 0, people: 1, agents: 1 });
+    for (const card of model.cards) {
+      expect(card).toMatchObject({ online: true, lane: "idle", state: "online", presence: null, busy: false, lastSeen: null });
+      expect(card.doing).toMatchObject({ heartbeatAt: null, taskId: null, taskStartedAt: null, activity: null });
+    }
+    const agent = model.cards.find(card => card.name === "agent")!;
+    expect(agent.work.inProgress).toBe(1);
+    expect(agent.work.deliveries).toHaveLength(1);
+  });
+
+  test("stale working reports and outstanding tasks do not keep a disconnected member online", () => {
+    const model = buildTeamBoard({
+      participants: [],
+      presence: [presence("agent", { state: "working", live: false, busy: true })],
+      roles: [role("agent", "worker")],
+      tasks: [task(1, "agent", "in_progress")],
+      deliveries: [delivery("pending", "agent", "running")],
+      now: NOW,
+    });
+    expect(model.cards[0]).toMatchObject({ online: false, lane: "offline", state: "offline" });
+    expect(model.counts).toMatchObject({ offline: 1, idle: 0, working: 0 });
+    expect(model.cards[0]!.work.inProgress).toBe(1);
+  });
+
+  test("an explicit offline report remains offline while participant removal catches up", () => {
+    const model = buildTeamBoard({
+      participants: [sender("agent")],
+      presence: [presence("agent", { state: "offline", live: false })],
+      roles: [],
+      now: NOW,
+    });
+    expect(model.cards[0]).toMatchObject({ online: false, lane: "offline", state: "offline" });
+    expect(model.counts.offline).toBe(1);
+  });
+
+  test("live presence remains a connection signal without a websocket participant", () => {
+    const heartbeat = presence("agent", { state: "working", live: true, heartbeat_at: NOW - 500 });
+    const model = buildTeamBoard({ participants: [], presence: [heartbeat], roles: [], now: NOW });
+    expect(model.cards[0]).toMatchObject({ online: true, lane: "working", state: "working", presence: heartbeat });
+    expect(model.cards[0]!.doing.heartbeatAt).toBe(NOW - 500);
+    expect(model.counts).toMatchObject({ working: 1, offline: 0 });
+  });
+
+  test("identity and role records alone do not imply a connection", () => {
+    const model = buildTeamBoard({
+      participants: [], presence: [], roles: [role("authorized-agent", "worker")],
+      identities: [{ name: "authorized-agent", kind: "agent", display: "Authorized agent" }],
+      now: NOW,
+    });
+    expect(model.cards).toEqual([]);
+    expect(model.counts).toMatchObject({ idle: 0, working: 0, offline: 0, unassignedRoles: 1 });
+  });
+});
+
 describe("buildTeamBoard：一张卡一份事实", () => {
   const roles = [
     role("lead", "host", { reports_to: null }),

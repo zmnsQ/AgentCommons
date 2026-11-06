@@ -45,6 +45,8 @@ export function SettingsPanel({
   onHandleSaved,
   onShowOnboarding,
   desktopAppSettings = null,
+  helpActions = null,
+  accountExtras = null,
   initialSection = "preferences",
   restoreFocusOnUnmount = true,
 }: {
@@ -57,6 +59,8 @@ export function SettingsPanel({
   onHandleSaved?: (value: string) => void;
   onShowOnboarding?: () => void;
   desktopAppSettings?: ReactNode;
+  helpActions?: ReactNode;
+  accountExtras?: ReactNode;
   initialSection?: SettingsSectionId;
   restoreFocusOnUnmount?: boolean;
 }) {
@@ -122,7 +126,6 @@ export function SettingsPanel({
               <p className="settings-hint" role="status">{notifyHint}</p>
             )}
           </section>
-          {!isTauriEnvironment() && <HomeScreenGuide />}
         </>
       ),
     },
@@ -164,6 +167,7 @@ export function SettingsPanel({
               </div>
             )}
             {!isTauriEnvironment() && me.provider === "github" && <p><a className="d-btn" href="/auth/security">{t("App.settings.section.account")} · GitHub / 2FA</a></p>}
+            {accountExtras}
             {onLogout !== null && (
               <button type="button" className="settings-logout" onClick={onLogout}>
                 <StudioIcon name="logout" />{t("App.settings.logout")}
@@ -190,10 +194,11 @@ export function SettingsPanel({
       content: (
         <>
           <h3 className="settings-module-title">{t("App.settings.section.help")}</h3>
+          <div className="settings-help-actions">{helpActions}</div>
+          {!isTauriEnvironment() && <HomeScreenGuide />}
           <section className="settings-section">
             <OriginalProjectCredit />
             <p className="studio-design-credit"><a href="https://github.com/Caho1/open-claude-ui" target="_blank" rel="noopener noreferrer">{t("Studio.reference")}</a> · <a href="/third-party-notices.txt" target="_blank" rel="noopener noreferrer">MIT</a></p>
-            <p>{t("Collab.updatesDisabled")}</p>
           </section>
           <section className="settings-section">
             <button type="button" className="d-btn settings-onboarding" onClick={onShowOnboarding}>

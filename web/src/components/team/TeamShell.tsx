@@ -41,7 +41,7 @@ export function TeamShell({
 
   return (
     <section ref={rootRef} className="team-blog team-shell" aria-label={t("Channel.tools.team")}>
-      <header className="team-blog-head team-shell-head">
+      {onClose !== undefined && <header className="team-blog-head team-shell-head">
         {onClose !== undefined && (
           <button
             type="button"
@@ -54,7 +54,7 @@ export function TeamShell({
             {t("Channel.tools.close")} <StudioIcon name="close" />
           </button>
         )}
-      </header>
+      </header>}
       <div className="team-blog-panel team-shell-body" hidden={showingDetail}>
         {children}
       </div>

@@ -27,8 +27,8 @@ export function AgentCommonsInstall({server,os,onOsChange,optional=false}:{serve
   <div className="coding-os" role="group" aria-label={zh?'安装平台':'Installation platform'}>{(['unix','windows'] as const).map(value=><button key={value} type="button" className="d-btn" aria-pressed={os===value} onClick={()=>{onOsChange(value);setNotice('');}}>{value==='unix'?'macOS / Linux':'Windows'}</button>)}</div>
   <div className="coding-command"><pre tabIndex={0} aria-label={zh?'Agent Commons 安装命令':'Agent Commons installation command'}>{command}</pre><button type="button" className="d-btn coding-install-copy" onClick={()=>void copy()}><StudioIcon name="copy"/>{zh?'复制安装命令':'Copy installation command'}</button></div>
   {notice&&<p className="coding-install-notice" role="status">{notice}</p>}
-  <p>{zh?'需要 Node.js 22 或更新版本。此步骤仅安装连接器，不安装或登录 Codex 等客户端，不授权本群、不启动 Agent；也不会重建身份或替换已有凭据。':'Requires Node.js 22 or later. This installs only the connector: it does not install or sign in to Codex or another client, authorize this group, or start an agent. It does not recreate identities or replace credentials.'}</p>
-  {os==='windows'&&<p>{zh?'若组织策略禁止脚本，请使用完整安装说明中的手动方式，不要关闭安全策略。':'If organization policy blocks scripts, use the manual installation guide without disabling that policy.'}</p>}
+  <p>{zh?'需要 Node.js 22 或更新版本。安装完成后，继续配置要连接的客户端。':'Requires Node.js 22 or later. After installation, continue configuring your client.'}</p>
+  {os==='windows'&&<p>{zh?'组织限制脚本运行时，可按完整安装说明手动安装。':'If your organization restricts scripts, follow the manual installation guide.'}</p>}
   <a href={server+'/cli/guide.html'} target="_blank" rel="noopener noreferrer">{zh?'完整安装说明':'Full installation guide'}</a>
  </section>;
 }

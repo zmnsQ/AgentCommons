@@ -25,7 +25,8 @@ describe("DesktopDownloadLink", () => {
     expect(renderer.root.findByProps({ href: DESKTOP_BUILD_GUIDE_URL }).props.target).toBe("_blank");
     expect(renderer.root.findAllByType("textarea")).toHaveLength(0);
     expect(JSON.stringify(renderer.toJSON())).not.toContain("ALLOW_UNNOTARIZED");
-    expect(JSON.stringify(renderer.toJSON())).toContain("have not been published");
+    expect(JSON.stringify(renderer.toJSON())).toContain("Signed macOS and Windows installers are unavailable for this preview");
+    expect(JSON.stringify(renderer.toJSON())).toContain("Use the web app");
     await act(async () => renderer.unmount());
   });
 

@@ -44,8 +44,9 @@ export function CollaborationHub(props: CollaborationHubProps) {
 function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, token, slug, archived = false, onAuthFailed, client = collaborationApi, server, initialTab, initialProvider, viewMemory }: CollaborationHubProps & { server: string }) {
   const t = useT();
   const [apiProvider,setApiProvider] = useState<"hermes"|"manus"|undefined>();
+  const [savedConnectionId,setSavedConnectionId] = useState<string|undefined>();
   const [tab, setTab] = useState<Tab>(initialTab==="agents"?"bridges":initialTab??viewMemory?.current?.tab??"bridges");
-  const [connectionView,setConnectionView]=useState<"setup"|"manage"|"configure">(viewMemory?.current?.view==="manage"?"manage":initialTab==="agents"?"manage":"setup");
+  const [connectionView,setConnectionView]=useState<"setup"|"manage"|"configure">(initialProvider?"setup":viewMemory?.current?.view==="setup"?"setup":"manage");
   const [selectedProvider,setSelectedProvider]=useState<CloudAgentChoice|null>(initialProvider??viewMemory?.current?.provider??null);
   useEffect(()=>{if(viewMemory)viewMemory.current={tab,view:connectionView,provider:selectedProvider};},[tab,connectionView,selectedProvider,viewMemory]);
   // Keep the selected tab visible without scrolling the whole mobile dialog.
@@ -92,9 +93,8 @@ function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, tok
     document.getElementById(`commons-tab-${next}`)?.focus();
   };
   const current = summary === null ? null : { ...summary, permissions: { manage: !archived && summary.permissions.manage, run: !archived && summary.permissions.run, upload: !archived && summary.permissions.upload } };
-  return <div className="commons-hub">
-    <header className="commons-hero"><div><span className="commons-kicker">AGENT COMMONS</span><h2>{t("Studio.connectLead")}</h2><p>{t("Studio.connectSub")}</p></div><details className="studio-group-detail"><summary>{t("Studio.id")}</summary><code>#{slug}</code></details></header>
-    <div className="commons-nav"><div role="tablist" aria-label={t("Collab.title")}>{TABS.map((item) => <button className={`commons-tab ${tab === item ? "is-active" : ""}`} key={item} id={`commons-tab-${item}`} type="button" role="tab" aria-selected={tab === item} aria-controls={`commons-panel-${item}`} tabIndex={tab === item ? 0 : -1} onKeyDown={(event) => selectWithKeyboard(event, item)} onClick={() => setTab(item)}>{t(item==="bridges"?"Studio.addAgent":item==="files"?"Studio.files":"Studio.code")}{summary !== null && ((item === "repositories" && summary.repositories.length > 0)) && <span>{summary.repositories.length}</span>}</button>)}</div><button className="d-btn" type="button" disabled={loading} onClick={() => void refresh()} aria-label={t("Collab.refresh")}>{t(loading ? "Collab.loading" : "Collab.refresh")}</button></div>
+  return <div className="commons-hub" data-channel={slug}>
+    <div className="commons-nav"><div role="tablist" aria-label={t("Collab.title")}>{TABS.map((item) => <button className={`commons-tab ${tab === item ? "is-active" : ""}`} key={item} id={`commons-tab-${item}`} type="button" role="tab" aria-selected={tab === item} aria-controls={`commons-panel-${item}`} tabIndex={tab === item ? 0 : -1} onKeyDown={(event) => selectWithKeyboard(event, item)} onClick={() => setTab(item)}>{t(item==="bridges"?"Studio.connections":item==="files"?"Studio.files":"Studio.code")}{summary !== null && ((item === "repositories" && summary.repositories.length > 0)) && <span>{summary.repositories.length}</span>}</button>)}</div><button className="d-btn" type="button" disabled={loading} onClick={() => void refresh()} aria-label={t("Collab.refresh")}>{t(loading ? "Collab.loading" : "Collab.refresh")}</button></div>
     {error !== null && <p className="commons-error" role="alert">{error}</p>}
     {summary === null && loading && <p className="commons-empty" role="status">{t("Collab.loading")}</p>}
     {current !== null && <>
@@ -104,14 +104,11 @@ function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, tok
         {tab === "repositories" && <RepositoryConnections token={token} slug={slug} summary={current} client={client} onChanged={() => refresh()} />}
         {tab === "files" && <ChannelFiles token={token} slug={slug} canUpload={current.permissions.upload} client={client} />}
         {tab === "bridges" && <>
-          <nav className="commons-actions" aria-label={t("Studio.addAgent")}>
-            <button className="d-btn" type="button" aria-pressed={connectionView!=="manage"} onClick={()=>{setApiProvider(undefined);setConnectionView("setup");}}>{t("Studio.setup")}</button>
-            <button className="d-btn" type="button" aria-pressed={connectionView==="manage"} onClick={()=>{setApiProvider(undefined);setConnectionView("manage");}}>{t("Studio.manage")}</button>
-          </nav>
-          {connectionView==="setup" && <CloudBridges submissionSafety={submissionSafety} showAuthorizationManagement={false} token={token} slug={slug} canManage={current.permissions.manage} canRun={current.permissions.run&&dispatchScopeReady} initialProvider={selectedProvider??undefined} onProviderChange={setSelectedProvider} onConfigureApi={provider=>{setApiProvider(provider);setConnectionView("configure");}} />}
+          {connectionView==="setup"&&<div className="commons-actions"><button className="d-btn" type="button" onClick={()=>{setApiProvider(undefined);setConnectionView("manage");}}>{t("Studio.manage")}</button></div>}
+          {connectionView==="setup" && <CloudBridges submissionSafety={submissionSafety} showAuthorizationManagement={false} token={token} slug={slug} canManage={current.permissions.manage} canRun={current.permissions.run&&dispatchScopeReady} initialProvider={selectedProvider??undefined} onProviderChange={setSelectedProvider} onConfigureApi={provider=>{setSavedConnectionId(undefined);setApiProvider(provider);setConnectionView("configure");}} />}
           {connectionView!=="setup" && <>
-            {connectionView==="configure" && <button className="d-btn" type="button" onClick={()=>setConnectionView("setup")}>{t("Studio.backPlatforms")}</button>}
-            <CloudAgentConnections key={connectionView+":"+(apiProvider??"")} initialProvider={connectionView==="configure"?apiProvider:undefined} token={token} slug={slug} summary={current} client={client} onChanged={()=>refresh()} onConnect={()=>{setApiProvider(undefined);setConnectionView("setup");}} />
+            {connectionView==="configure" && <button className="d-btn" type="button" onClick={()=>{setSavedConnectionId(undefined);setConnectionView("setup");}}>{t("Studio.backPlatforms")}</button>}
+            <CloudAgentConnections key={connectionView+":"+(apiProvider??"")} initialProvider={connectionView==="configure"?apiProvider:undefined} initialSavedConnectionId={connectionView==="manage"?savedConnectionId:undefined} token={token} slug={slug} summary={current} client={client} onChanged={()=>refresh()} onSetupDone={connectionView==="configure"?id=>{setSavedConnectionId(id);setApiProvider(undefined);setConnectionView("manage");}:undefined} onConnect={()=>{setSavedConnectionId(undefined);setApiProvider(undefined);setConnectionView("setup");}} />
             {connectionView==="manage" && current.permissions.manage && <section><h3>{t("Studio.authorizedConnections")}</h3><ConnectorGrants slug={slug}/></section>}
           </>}
         </>}

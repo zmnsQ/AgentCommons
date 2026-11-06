@@ -9,8 +9,8 @@ test('account and advanced controls live in the sidebar footer, not a standalone
  expect(app).not.toContain('<header className="app-head prototype-rail">');
  expect(app).toContain('const accountControls =');expect(app).toContain('className="workspace-account-controls"');
  expect(app).toContain('mobileActions={accountControls} navigationFooter={accountControls}');
- expect(app).toContain('ref={settingsButtonRef}');expect(app).toContain('onClick={openSettings}');expect(app).toContain('App.workspace.tools');
- expect(shell).toContain('workspace-navigation-footer');expect(app).toContain('workspace-brand-label">Agent Commons');
+ expect(app).toContain('ref={settingsButtonRef}');expect(app).toContain('onClick={openSettings}');expect(app).toContain('App.settings.section.help');
+ expect(shell).toContain('workspace-navigation-footer');expect(app).toContain('workspace-account-name');
 });
 test('current surface layer fills viewport and removes the framed rail layout',()=>{
  expect(css).toMatch(/#root:has\(>\.prototype-native-workspace\)\s*\{padding:0;height:var\(--ac-viewport-height,100dvh\)/);

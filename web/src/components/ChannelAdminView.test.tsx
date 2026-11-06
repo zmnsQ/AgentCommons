@@ -117,7 +117,7 @@ describe("ChannelAdminView structure", () => {
     });
 
     const all = text(r);
-    expect(all).toContain("Channel administration");
+    expect(all).toContain("Group settings");
     expect(all).toContain("2 members");
     expect(all).toContain("private");
   });
@@ -246,12 +246,12 @@ describe("ChannelAdminView actions", () => {
 
   test("shows an explicit unavailable state when authority exists but an action is not wired", () => {
     const r = render({ safetyControls: undefined });
-    expect(text(panels(r)[0]!)).toContain("not connected");
+    expect(text(panels(r)[0]!)).toContain("This action is unavailable here");
     select(r, "safety");
-    expect(text(panels(r)[2]!)).toContain("not connected");
+    expect(text(panels(r)[2]!)).toContain("This action is unavailable here");
     select(r, "lifecycle");
     expect(r.root.findAllByProps({ "data-admin-archive": true })).toHaveLength(0);
-    expect(text(panels(r)[3]!)).toContain("not connected");
+    expect(text(panels(r)[3]!)).toContain("This action is unavailable here");
   });
 
   test("routes member view/remove callbacks by stable member name", () => {

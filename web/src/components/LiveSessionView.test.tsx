@@ -239,7 +239,8 @@ describe("entries open the same stream (#1103)", () => {
     expect(opened).toEqual([]);
     const liveBox = renderer!.root.find((n) => n.props["data-live-session"] === "builder");
     const liveText = text(liveBox);
-    expect(liveText).toContain("No live run session to follow");
+    expect(liveText).toContain("No run output reported");
+    expect(liveText).toContain("Check that the agent’s runner is active");
     expect(liveText).not.toContain("OLD CHANNEL HISTORY LINE");
   });
 

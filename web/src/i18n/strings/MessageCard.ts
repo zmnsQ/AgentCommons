@@ -30,9 +30,9 @@ export const MessageCardStrings: LocaleDict = {
     "MessageCard.clientVersion.outdated": "sender CLI v{version} is behind the recommended v{min} — upgrade suggested",
     "MessageCard.receptionReply": "auto-reply via {runner}",
     "MessageCard.receptionReply.started":
-      "Answered by a separate auto-reply session for this channel; it does not inherit the owner's open conversation. That session started for message #{seq}.",
+      "Replied from this channel’s dedicated auto-reply session, started for message #{seq}.",
     "MessageCard.receptionReply.resumed":
-      "Answered by a separate auto-reply session for this channel; it does not inherit the owner's open conversation. That session resumed for message #{seq}.",
+      "Replied from this channel’s dedicated auto-reply session, resumed for message #{seq}.",
     "MessageCard.receptionReply.unavailable":
       "Answered by the always-on auto-reply process for message #{seq}; there was no earlier session to resume.",
     // 回执（#828）：徽标文案。它表达的是「收到了」，绝不能读成「处理完了」——手搓版当年就是被读成了
@@ -41,7 +41,7 @@ export const MessageCardStrings: LocaleDict = {
     "MessageCard.receipt.reason.not_in_turn": "{name} received this but is not in a turn right now",
     "MessageCard.receipt.reason.queued": "{name} has this queued and is busy",
     "MessageCard.receipt.reason.seen": "{name} saw this",
-    "MessageCard.receipt.hint": "Receipt only — not a reply, and not a sign the work is done.",
+    "MessageCard.receipt.hint": "Message receipt. Check the agent’s reply for task progress.",
     "MessageCard.owner.unresolved": "Owner unknown",
     "MessageCard.agent.ownedLabel": "{owner} · {name}",
     "MessageCard.agentCard.identity": "Identity",
@@ -83,16 +83,16 @@ export const MessageCardStrings: LocaleDict = {
     "MessageCard.clientVersion.outdated": "发送方 CLI v{version} 落后于推荐版本 v{min}，建议升级",
     "MessageCard.receptionReply": "{runner} 自动接待回复",
     "MessageCard.receptionReply.started":
-      "由本频道独立的自动接待会话回复，不继承 owner 当前打开的会话；该会话为消息 #{seq} 新建。",
+      "由本群独立的自动接待会话回复；该会话为消息 #{seq} 启动。",
     "MessageCard.receptionReply.resumed":
-      "由本频道独立的自动接待会话回复，不继承 owner 当前打开的会话；该会话为消息 #{seq} 续接。",
+      "由本群独立的自动接待会话回复；该会话为消息 #{seq} 恢复。",
     "MessageCard.receptionReply.unavailable":
       "由常驻的自动接待进程为消息 #{seq} 回复；没有可续接的先前会话。",
     "MessageCard.receipt": "{names} 已收到",
     "MessageCard.receipt.reason.not_in_turn": "{name} 收到了，但当前不在轮次里",
     "MessageCard.receipt.reason.queued": "{name} 已排进队列，正忙",
     "MessageCard.receipt.reason.seen": "{name} 看到了",
-    "MessageCard.receipt.hint": "仅为回执——不是回复，也不代表已处理。",
+    "MessageCard.receipt.hint": "消息接收回执，处理结果请查看 Agent 回复。",
     "MessageCard.owner.unresolved": "归属待确认",
     "MessageCard.agent.ownedLabel": "{owner} · {name}",
     "MessageCard.agentCard.identity": "身份",

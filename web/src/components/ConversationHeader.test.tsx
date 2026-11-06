@@ -51,3 +51,13 @@ test('header uses declared platform metadata with neutral unknown, not nickname 
  expect(r!.root.findAllByProps({'data-platform':'chatgpt'})).toHaveLength(1);
  expect(r!.root.findAllByProps({'data-platform':'unknown'})).toHaveLength(1);
 });
+
+test('frequent actions and member roster open directly with their own callbacks',()=>{
+ let details=0,members=0,tasks=0;
+ act(()=>{r=create(<LocaleProvider><ConversationHeader title="Group" members={[]} onDetails={()=>details++} onMembers={()=>members++} shortcuts={[{key:'tasks',label:'Tasks',icon:'tasks',onClick:()=>tasks++}]}/></LocaleProvider>);});
+ act(()=>r!.root.findByProps({className:'avatar-stack'}).props.onClick());
+ act(()=>r!.root.findByProps({className:'conversation-shortcut-actions'}).findByType('button').props.onClick());
+ expect([details,members,tasks]).toEqual([0,1,1]);
+ act(()=>r!.root.findByProps({className:'conversation-shortcut-menu'}).findByType('button').props.onClick());
+ expect(tasks).toBe(2);
+});

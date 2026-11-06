@@ -14,6 +14,10 @@
 .mobile-groups-drawer > header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 12px; padding: max(10px,env(safe-area-inset-top)) 14px 10px; border-bottom: 1px solid var(--t-faint); }
 .mobile-groups-drawer h2 { margin: 0; font-size: 18px; }
 .mobile-groups-content { min-height: 0; overflow: auto; padding: 16px 14px max(16px,env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+/* Keep account actions reachable while the channel list scrolls, including
+   short landscape screens. These are siblings of the scrollable content. */
+html:root.ac-mobile .mobile-groups-drawer > .mobile-groups-content { flex: 1 1 0; min-height: 0; }
+html:root.ac-mobile .mobile-groups-drawer > .mobile-drawer-actions { flex: none; margin: 0; padding: 10px 12px max(10px,env(safe-area-inset-bottom)); border-top: 1px solid var(--t-faint); }
 :root .mobile-groups-content .studio-channel-items { flex-direction: column; overflow: visible; }
 :root .mobile-groups-content .chan-pill { width: 100%; max-width: none; min-height: 48px; }
 :root .mobile-groups-content .chan-name { max-width: none; font-size: 14px; }

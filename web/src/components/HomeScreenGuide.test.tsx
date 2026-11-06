@@ -8,10 +8,10 @@ import {readFileSync} from "node:fs";
 const original=Object.getOwnPropertyDescriptor(globalThis,"localStorage");
 afterEach(()=>{if(original)Object.defineProperty(globalThis,"localStorage",original);else Reflect.deleteProperty(globalThis,"localStorage");});
 function render(locale:string){Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{getItem:()=>locale}});return renderToStaticMarkup(<LocaleProvider><HomeScreenGuide/></LocaleProvider>);}
-test("guide is explicit user action, bilingual and honest about limitations",()=>{
+test("guide gives explicit setup steps and connection requirements in both languages",()=>{
  const en=render("en"),zh=render("zh");
- expect(en).toContain("Add to Home Screen");expect(en).toContain("Edit Actions");expect(en).toContain("not a native app");expect(en).toContain("<details>");
- expect(zh).toContain("添加到主屏幕");expect(zh).toContain("仍需联网与有效登录");expect(zh).toContain("不是原生 App");expect(zh).toContain("support.apple.com");
+ expect(en).toContain("Add to Home Screen");expect(en).toContain("Edit Actions");expect(en).toContain("Stay connected to the internet and signed in");expect(en).toContain("<details>");
+ expect(zh).toContain("添加到主屏幕");expect(zh).toContain("保持联网并登录");expect(zh).toContain("support.apple.com");
 });
 test("manifest uses stable scoped standalone launch without locking orientation or caching",()=>{
  const manifest=JSON.parse(readFileSync(new URL("../../public/manifest.webmanifest",import.meta.url),"utf8"));

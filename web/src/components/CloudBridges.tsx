@@ -92,7 +92,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
   const discover=(e:FormEvent)=>{e.preventDefault();void task(async()=>{
     if(!canManage)throw new Error("owner_only");
     const result=await cloudBridgesApi.cue(token,slug,apiKey);
-    if(isActive()){setCue(result.agents);setApiKey("");setNotice(zh?"已从 Manus API 读取 Agent 列表。请在云端 Agent 页面使用对应 ID 建立连接。":"Retrieved your Cue agents via Manus API. Use their IDs in the Cloud agents tab.");}
+    if(isActive()){setCue(result.agents);setApiKey("");setNotice(zh?"已找到你的 Cue Agent。复制 ID 后，点击“继续连接 Cue”。":"Found your Cue agents. Copy an ID, then choose Continue with Cue.");}
   });};
   const send=(e:FormEvent)=>{e.preventDefault();void task(async()=>{
     if(!canRun)throw new Error("human_member_required");
@@ -109,7 +109,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
     submission.ids.set(digest,id);
     const r=await cloudBridgesApi.sendToGrok(token,slug,{prompt:text,request_id:id});
     if(isActive()){
-      setNotice(zh?`投递状态：${automationDeliveryLabel(r.delivery.state,zh)}（不代表 Bot 已完成）`:`Delivery: ${automationDeliveryLabel(r.delivery.state,zh)} (not proof of Bot completion)`);
+      setNotice(zh?`投递状态：${automationDeliveryLabel(r.delivery.state,zh)}`:`Delivery: ${automationDeliveryLabel(r.delivery.state,zh)}`);
       // Unknown/submitting is not a safe new submission: retain input and request ID.
       if(r.delivery.state==="submitted"||r.delivery.state==="rejected"){setPrompt("");submission.ids.delete(digest);}
     }
@@ -123,8 +123,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
     }
   });};
   return <section className="cloud-bridges" aria-label={zh?"Agent 接入指南":"Agent connection guides"}>
-    <h2>{zh?"选择平台，再按步骤接入":"Choose a platform, then follow its steps"}</h2>
-    <p>{zh?"先确认你已有的工具和账号。安装、授权、绑定本群与实际运行是不同步骤；查看说明不会启动任务。":"Check the tools and accounts you already have. Installation, authorization, group binding and running a task are separate steps. Viewing a guide does not start work."}</p>
+    <h2>{zh?"连接个人 Agent":"Connect a personal agent"}</h2>
     {error&&<p role="alert" className="commons-error">{error}</p>}
     {notice&&<p role="status" className="commons-success">{notice}</p>}
     {canManage && showAuthorizationManagement && <details className="cloud-bridge-card connector-presence-overview" aria-label={t("ConnectorUsage.connectionOverviewTitle")}>
@@ -152,23 +151,18 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
         })}
       </dl>}
     </details>}
-    <p className="commons-note">{t("AgentConnect.testWarning")}</p>
     <div className="agent-connect-tabs" aria-label={t("AgentConnect.cloud")}>
       {(["dot","muse","cue","hermes","grok"] as const).map(provider=><button className="d-btn" type="button" key={provider}
         aria-pressed={selected===provider} onClick={()=>{setSelected(provider);onProviderChange?.(provider);}}><ProviderMark provider={provider}/>{t(`AgentConnect.${provider}`)}</button>)}
     </div>
+    {selected==="dot"&&<details className="cloud-bridge-card" open={!authorizedAgents?.some(agent=>agent.oauth?.provider==="chatgpt"&&agent.oauth.status==="authorized")}><summary>{t("ConnectorUsage.firstConnection")}</summary><ol className="agent-connect-steps">{[1,2,3,4].map(n=><li key={n}>{t(`AgentConnect.dotStep${n}`).replace(/^\d\. /,"")}</li>)}</ol><a href="https://developers.openai.com/plugins/build/plugins" target="_blank" rel="noopener noreferrer">{t("AgentConnect.dotDocs")}</a></details>}
     {selected==="dot"&&<ChatGptQuickStart key={`${slug}:${token}`} token={token} slug={slug} canManage={canManage} />}
     {(selected==="dot"||selected==="muse")&&<details className="cloud-bridge-card"><summary>{t("AgentConnect.security")}</summary>
       <McpSecurityPanel token={token} slug={slug} canManage={canManage} />
     </details>}
     {showAuthorizationManagement&&(selected==="dot"||selected==="muse")&&<details className="studio-grants-details"><summary>{zh?"已授权连接 · 管理与撤销":"Authorized connections · manage and revoke"}</summary><ConnectorGrants slug={slug} /></details>}
     {selected==="dot"&&<details className="cloud-bridge-card studio-diagnostics">
-      <summary>{zh?"首次连接教程与事件诊断":"First-time setup and event diagnostics"}</summary>
-      <details><summary>{t("ConnectorUsage.firstConnection")}</summary>
-        <ol className="agent-connect-steps">{[1,2,3,4].map(n=><li key={n}>{t(`AgentConnect.dotStep${n}`).replace(/^\d\. /,"")}</li>)}</ol>
-      </details>
-      <a href="https://developers.openai.com/plugins/build/plugins" target="_blank" rel="noopener noreferrer">{t("AgentConnect.dotDocs")}</a>
-      <p>{zh?"已实现 MCP 2.0 事件订阅、签名 Webhook 和 @ 唤醒队列。服务端已加入 MCP OAuth 2.1 授权与按群 consent；还需用户在 ChatGPT 中安装插件并完成真实账号验收。":"MCP 2.0 subscriptions, signed webhooks and @-mention wake delivery are implemented. OAuth 2.1 authorization and group consent are implemented; real dot account/plugin installation remains to be accepted."}</p>
+      <summary>{zh?"事件投递诊断":"Event delivery diagnostics"}</summary>
       {events&&<p>{zh?"有效订阅":"Subscriptions"}: {events.active_subscriptions} · {zh?"待投递":"Queued"}: {events.pending_deliveries}</p>}
       {canRun&&<button type="button" className="d-btn" disabled={busy||!events?.pending_deliveries} onClick={()=>void task(async()=>{
         const r=await cloudBridgesApi.flushEvents(token,slug);
@@ -176,12 +170,11 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
         await reload();
       })}>{t("ConnectorUsage.retry")}</button>}
       {events?.pending_deliveries===0&&<p><small>{t("ConnectorUsage.noQueue")}</small></p>}
-      <p><small>{zh?"实际 dot 订阅未完成前，不显示在线或已接通。":"No dot-online claim before OAuth and real subscription acceptance."}</small></p>
     </details>}
     {selected==="hermes"&&<article className="cloud-bridge-card">
       <h3>Hermes Agent</h3>
-      <p>{zh?"用于向已运行的 Hermes API Server 提交任务，并同步结果回群。不会导入你原有的 CLI 私聊。":"Send tasks to your running Hermes API Server and synchronize results to this group. Existing CLI conversations are not imported."}</p>
-      <ol><li>{zh?"先由管理员准备运行中的 API 服务、服务地址与凭据。没有服务时，请先完成部署；本页面不会替你安装。":"Have your administrator prepare the running API service, its address and credential. This page does not install the server."}</li><li>{zh?"下一步填写服务信息，验证后绑定本群。":"Continue to enter service details, then verify and bind this group."}</li><li>{zh?"绑定不代表运行。明确发送任务后，再查看进度和回群结果。":"Binding is not running. Send an explicit task, then check its progress and returned result."}</li></ol>
+      <p>{zh?"向运行中的 Hermes API Server 发送任务，并将结果同步到本群。":"Send tasks to your running Hermes API Server and synchronize results to this group."}</p>
+      <ol><li>{zh?"准备运行中的 Hermes API 服务、地址和凭据。":"Prepare your running Hermes API service, its address and credential."}</li><li>{zh?"下一步填写服务信息，验证后绑定本群。":"Continue to enter service details, then verify and bind this group."}</li><li>{zh?"连接后发送任务，查看进度和回群结果。":"After connecting, send a task and check its progress and returned result."}</li></ol>
       {onConfigureApi&&<button type="button" className="d-btn" onClick={()=>onConfigureApi("hermes")}>{zh?"继续连接 Hermes":"Continue with Hermes"}</button>}
     </article>}
     {selected==="cue"&&<article className="cloud-bridge-card">
@@ -193,11 +186,11 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
       </form>}
       {cue.length>0&&<ul>{cue.map(agent=><li key={agent.id}><strong>{agent.name}</strong> · <code>{agent.id}</code> <button className="d-btn" type="button" onClick={()=>void navigator.clipboard?.writeText(agent.id)}>{zh?"复制 ID":"Copy ID"}</button></li>)}</ul>}
       {onConfigureApi&&<button type="button" className="d-btn" onClick={()=>onConfigureApi("manus")}>{zh?"继续连接 Cue":"Continue with Cue"}</button>}
-      <p><small>{zh?"向已有个人 Cue 主会话投递任务已支持；不自动导入无法确定归属的私人聊天回复。":"Send to existing Cue main tasks is supported; private replies without reliable request correlation are not imported."}</small></p>
+      <p><small>{zh?"任务会投递到你的 Cue Agent，请在 Manus / Cue 中查看回复。":"Tasks are sent to your Cue agent. View replies in Manus / Cue."}</small></p>
     </article>}
     {selected==="grok"&&<article className="cloud-bridge-card">
       <h3>Grok · Automation Webhook</h3>
-      <p>{zh?"此方式需要你已有的 Automation HTTPS 触发地址、签名密钥，并由服务器管理员批准该地址来源。它不是个人 Grok Bot 登录；若账号没有这些能力，请勿填写猜测的地址。保存不验证任务完成，回复也不会自动回群。":"This requires an existing Automation HTTPS trigger, signing secret and server administrator approval of its origin. It is not a personal Grok Bot login. If your account lacks these capabilities, do not guess an endpoint. Saving does not verify task completion; replies are not automatically imported."}</p>
+      <p>{zh?"准备 Automation 的 HTTPS 触发地址和签名密钥，请服务器管理员允许该来源。此连接用于投递任务，执行结果请在 Automation 中查看。":"Prepare your Automation HTTPS trigger and signing secret, and ask the server administrator to allow its origin. This connection dispatches tasks; view execution results in Automation."}</p>
       <p>{state?.connection?zh?`配置已保存：${state.connection.name}`:`Configured: ${state.connection.name}`:zh?"尚未绑定":"Not configured"}</p>
       {canManage&&<form onSubmit={saveGrok} className="cloud-bridge-form">
         <label>{zh?"显示名称":"Name"}<input value={name} maxLength={80} onChange={e=>setName(e.target.value)} disabled={busy} required/></label>

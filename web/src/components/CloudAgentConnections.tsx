@@ -17,7 +17,9 @@ interface AgentProps {
   client: CollaborationClient;
   onChanged(): Promise<void>;
   initialProvider?: DirectAgentProvider;
+  initialSavedConnectionId?: string;
   onConnect?():void;
+  onSetupDone?(savedId?:string):void;
 }
 
 function ConnectionForm({ token, slug, connection, client, onSaved, onClose, initialProvider }: {
@@ -65,9 +67,9 @@ function ConnectionForm({ token, slug, connection, client, onSaved, onClose, ini
   return (
     <form className="commons-form" onSubmit={(event) => void save(event)} aria-label={t("Collab.addAgent")}>
       <p className="commons-note" data-connection-guide={provider}>{provider === "hermes"
-        ? (zh ? "填写已运行的 Hermes API Server 地址；API 凭证从该服务的管理员或部署配置获得。使用你已有的 profile，不要填写普通网页地址。" : "Use your running Hermes API Server address. Obtain its API credential from your server administrator or deployment configuration. Use your existing profile, not a regular website URL.")
-        : (zh ? "填写已有 Cue agent 的 ID，可从该 agent 的官方 API 信息中获取；API 凭证从你自己的 Manus / Cue 官方账号管理界面获得。不要填写聊天标题或分享链接。" : "Use the ID of your existing Cue agent from its official API information, and API credentials from your own Manus / Cue account settings. Do not enter a chat title or sharing URL.")}</p>
-      <p className="commons-muted">{zh ? "显示名称仅用于本群。保存会校验并保存连接配置，不会发送任务或开始付费运行；任务需之后另行明确提交。" : "The display name is only a label in this group. Save validates and stores the connection configuration; it does not send a task or start a paid run. Tasks require a separate explicit submission."}</p>
+        ? (zh ? "填写 Hermes API Server 地址、API 凭证和已有的 profile。服务管理员可提供这些信息。" : "Enter your Hermes API Server URL, API credential and existing profile. Your server administrator can provide these details.")
+        : (zh ? "从 Manus / Cue 的账号设置中获取 Agent ID 和 API 凭证。" : "Get your Agent ID and API credentials from your Manus / Cue account settings.")}</p>
+      <p className="commons-muted">{zh ? "保存连接后，即可在本群选择它并提交任务。" : "Save the connection, then select it in this group to submit tasks."}</p>
       <div className="commons-form-grid">
         <label>{t("Collab.provider")}<select value={provider} disabled={connection !== null || saving} onChange={(event) => setProvider(event.target.value as DirectAgentProvider)}>
           <option value="hermes">Hermes Agent</option><option value="manus">Manus / Cue</option>
@@ -185,30 +187,35 @@ export function CloudAgentRuns({ token, slug, connection, canRun, client }: {
   );
 }
 
-export function CloudAgentConnections({ token, slug, summary, client, onChanged, initialProvider, onConnect }: AgentProps) {
+export function CloudAgentConnections({ token, slug, summary, client, onChanged, initialProvider, initialSavedConnectionId, onConnect, onSetupDone }: AgentProps) {
   const t = useT();
   const { locale } = useLocale();
-  const [selectedId, setSelectedId] = useState<string | null>(summary.connections[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSavedConnectionId ?? summary.connections[0]?.id ?? null);
+  const [savedSelectionId, setSavedSelectionId] = useState<string | undefined>(initialSavedConnectionId);
   const [form, setForm] = useState<CloudAgentConnection | "new" | null>(initialProvider && summary.permissions.manage ? "new" : null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const selected = summary.connections.find((item) => item.id === selectedId) ?? summary.connections[0] ?? null;
+  const [notice, setNotice] = useState<string | null>(initialSavedConnectionId ? t("Collab.saved") : null);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  // A stale summary must not silently route a newly saved connection's task to
+  // an older connection. Refresh will reveal the saved record when available.
+  const selected = summary.connections.find((item) => item.id === selectedId) ?? (selectedId === savedSelectionId ? null : summary.connections[0] ?? null);
   const remove = async (id: string) => {
     if (deleting) return;
     setDeleting(true); setError(null);
-    try { await client.removeConnection(token, slug, id); setConfirmId(null); await onChanged(); }
+    try { await client.removeConnection(token, slug, id); setConfirmId(null); setSelectedId(null); await onChanged(); }
     catch (cause) { setError(collaborationError(cause)); }
     finally { setDeleting(false); }
   };
   return (
     <div className="commons-agents">
-      <div className="commons-section-head"><h2>{t("Collab.agents")}</h2>{summary.permissions.manage && <button className="d-btn commons-primary" type="button" onClick={() => { if(onConnect){onConnect();return;} setForm("new"); setNotice(null); }}>{t("Collab.addAgent")}</button>}</div>
+      <div className="commons-section-head"><h2>{t("Collab.agents")}</h2>{summary.permissions.manage && form === null && <button className="d-btn commons-primary" type="button" onClick={() => { if(onConnect){onConnect();return;} setForm("new"); setNotice(null); }}>{t("Collab.addAgent")}</button>}</div>
       {notice && <p className="commons-success" role="status">{notice}</p>}
       {error && <p className="commons-error" role="alert">{error}</p>}
-      {form !== null && <ConnectionForm initialProvider={initialProvider} key={form === "new" ? "new" : form.id} token={token} slug={slug} connection={form === "new" ? null : form} client={client} onClose={() => setForm(null)} onSaved={async (id) => { setForm(null); setSelectedId(id); setNotice(t("Collab.saved")); await onChanged(); }} />}
-      {summary.connections.length === 0 ? <div className="commons-empty"><span className="commons-empty-symbol" aria-hidden="true">↗</span><h3>{t("Collab.noAgents")}</h3><p>{t("Collab.noAgentsHint")}</p></div> : <div className="commons-agent-layout">
+      {form !== null && <ConnectionForm initialProvider={initialProvider} key={form === "new" ? "new" : form.id} token={token} slug={slug} connection={form === "new" ? null : form} client={client} onClose={() => {setForm(null);onSetupDone?.();}} onSaved={async (id) => { setForm(null); setSelectedId(id); setSavedSelectionId(id); setNotice(t("Collab.saved")); await onChanged(); if(alive.current)onSetupDone?.(id); }} />}
+      {form === null && (summary.connections.length === 0 ? <div className="commons-empty"><span className="commons-empty-symbol" aria-hidden="true">↗</span><h3>{t("Collab.noAgents")}</h3><p>{t("Collab.noAgentsHint")}</p></div> : <div className="commons-agent-layout">
         <div className="commons-agent-list" role="group" aria-label={t("Collab.agents")}>
           {summary.connections.map((connection) => <button className={`commons-agent-card ${selected?.id === connection.id ? "is-selected" : ""}`} type="button" key={connection.id} aria-pressed={selected?.id === connection.id} onClick={() => { setSelectedId(connection.id); setConfirmId(null); }}>
             <span className={`commons-agent-monogram commons-agent-monogram--${connection.provider}`} aria-hidden="true">{connection.provider === "hermes" ? "H" : "M"}</span>
@@ -220,7 +227,7 @@ export function CloudAgentConnections({ token, slug, summary, client, onChanged,
           {confirmId === selected.id && <div className="commons-confirm"><p>{t("Collab.confirmDisconnect")}</p><button className="d-btn" type="button" disabled={deleting} onClick={() => void remove(selected.id)}>{t(deleting ? "Collab.busy" : "Collab.confirm")}</button><button className="d-btn" type="button" disabled={deleting} onClick={() => setConfirmId(null)}>{t("Collab.close")}</button></div>}
           <CloudAgentRuns key={selected.id} token={token} slug={slug} connection={selected} client={client} canRun={summary.permissions.run} />
         </div>}
-      </div>}
+      </div>)}
 
     </div>
   );

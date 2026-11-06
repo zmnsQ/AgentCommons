@@ -211,7 +211,7 @@ describe("Claude inbox receipts on the sender's message (#1130)", () => {
     // 没有回执时这里会写「1 位处理中」——那句会让发信人以为消息已经在对方手里。
     expect(collapsed).not.toContain("处理中");
     const text = expand(r);
-    expect(text).toContain("被扣留待审 · 尚未送达");
+    expect(text).toContain("待批准");
     expect(text).toContain("5 分钟内无人批准即丢弃");
     // 可靠投递那一行照旧：回执不改它的状态。
     expect(text).toContain("已排队");
@@ -239,11 +239,12 @@ describe("Claude inbox receipts on the sender's message (#1130)", () => {
     const collapsed = JSON.stringify(r.toJSON());
     expect(collapsed).toContain("1 位处理中");
     const text = expand(r);
-    expect(text).toContain("已获批准 · 进入对话（尚未回复）");
-    expect(text).toContain("这不是回复");
+    expect(text).toContain("已获批准 · 已进入会话");
+    expect(text).toContain("处理结果请查看 Agent 回复");
     const row = r.root.find((node) => node.props["data-inbox-state"] === "delivered");
     expect(String(row.props.className)).toContain("msg-inbox--delivered");
-    expect(row.findAll((node) => String(node.props.className ?? "").includes("ap-sprite--success"))).toHaveLength(0);
+    expect(row.findAll((node) => node.type === "svg" && node.props["data-icon"] === "success")).toHaveLength(0);
+    expect(row.findAll((node) => node.type === "svg" && node.props["data-icon"] === "waiting")).toHaveLength(1);
   });
 
   test("unknown after a hold is shown as unknown, not as delivered or failed", () => {

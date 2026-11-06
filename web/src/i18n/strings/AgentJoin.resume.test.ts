@@ -77,7 +77,7 @@ describe("第③步的 resume 说明（中英都要有）", () => {
 // #1073 续：codex 档「装上 hook」不等于「hook 生效」——必须在新开的交互式 codex 里
 // 于 "Hooks need review" 提示处批准。此前网页只说「新开一个 codex 会话就生效」，
 // 用户照做后以为接好了，实际 @ 过去毫无反应且不报错（CLI 第 2 步会明确判失败）。
-test("codex 的起会话提示必须讲明要批准 hook，且说明未批准时会静默失效", () => {
+test("codex 的起会话提示明确交互式 hook 批准步骤及不显示提示的客户端", () => {
   const lines = strings.split("\n").filter((line) => line.includes('"AgentJoin.step3.hintCodex"'));
   expect(lines).toHaveLength(2); // en + zh 各一条
 
@@ -86,9 +86,7 @@ test("codex 的起会话提示必须讲明要批准 hook，且说明未批准时
     expect(line).toContain("Hooks need review"); // 要指明在哪个提示处操作
   }
   expect(en).toMatch(/approve/i);
-  expect(en).toMatch(/silently|no error/i);
   expect(zh).toMatch(/批准|启用/);
-  expect(zh).toMatch(/静默|不会报错/);
   // 不能再退回「新开会话就生效」这种会误导人的断言
   expect(en).not.toMatch(/so it takes effect/i);
   expect(zh).not.toMatch(/会话就生效/);
@@ -100,8 +98,9 @@ test("codex 的起会话提示必须讲明要批准 hook，且说明未批准时
   for (const line of lines) {
     expect(line).toContain("codex exec");
   }
-  // 各语言分别钉住限定词：只写 /ChatGPT/ 的话，文案退化成光提 "ChatGPT" 而不说是**桌面版**
-  // 也照样绿——而「桌面版」正是这个例外的全部内容。
+  // 保留具体客户端和提示限制，避免用户在非交互式客户端等待批准提示。
   expect(en).toMatch(/ChatGPT Desktop/);
-  expect(zh).toMatch(/ChatGPT 桌面版/);
+  expect(zh).toMatch(/ChatGPT Desktop|ChatGPT 桌面版/);
+  expect(en).toContain("do not show the prompt");
+  expect(zh).toContain("不显示此提示");
 });

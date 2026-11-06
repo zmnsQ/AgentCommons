@@ -112,7 +112,7 @@ describe("cloud agent collaboration controls", () => {
       run: async () => { starts++; return { run }; },
       syncRun: async () => { syncs++; return { run: { ...run, state: "completed", result: "Useful answer", reply_message_seq: 81 } }; },
     })} />);
-    expect(text(renderer!.root)).toContain("has not been posted to the group");
+    expect(text(renderer!.root)).toContain("Result saved. Retry posting it to the group");
     await click("Retry posting result");
     expect(syncs).toBe(1); expect(starts).toBe(0);
     expect(text(renderer!.root)).toContain("message #81");
@@ -121,7 +121,7 @@ describe("cloud agent collaboration controls", () => {
 
   test("labels Manus as delivery only and never offers to fetch personal replies", async () => {
     await mount(<CloudAgentRuns token="token" slug="demo" connection={{ ...connection, provider: "manus" }} canRun client={client({ runs: async () => ({ runs: [{ ...run, state: "submitted" }] }) })} />);
-    expect(text(renderer!.root)).toContain("Open Manus / Cue to confirm the result");
+    expect(text(renderer!.root)).toContain("Task submitted. View the reply in Manus / Cue");
     expect(renderer!.root.findAll((node) => node.type === "button" && text(node) === "Sync status & result")).toHaveLength(0);
     expect(text(renderer!.root)).not.toContain("Posted to group as message");
   });
@@ -132,8 +132,8 @@ describe("cloud agent collaboration controls", () => {
     await mount(<CloudAgentConnections token="token" slug="demo" summary={summary} client={api} onChanged={async () => {}} />);
     expect(renderer!.root.findAllByProps({className:"commons-mcp"})).toHaveLength(0);
     await click("Edit");
-    expect(text(renderer!.root)).toContain("running Hermes API Server address");
-    expect(text(renderer!.root)).toContain("does not send a task or start a paid run");
+    expect(text(renderer!.root)).toContain("Hermes API Server URL, API credential and existing profile");
+    expect(text(renderer!.root)).toContain("Save the connection, then select it in this group to submit tasks");
     expect(saves).toBe(0);
     const password = renderer!.root.findByProps({ type: "password" });
     expect(password.props.value).toBe(""); expect(password.props.required).toBe(false);
@@ -354,7 +354,7 @@ describe("collaboration session isolation", () => {
     await mount(<CollaborationHub initialTab="agents" token="token" slug="demo" client={service} />);
     await act(async () => { renderer!.update(<LocaleProvider><CollaborationHub initialTab="agents" token="token" slug="other-group" client={service} /></LocaleProvider>); });
     await act(async () => { complete(summary); });
-    expect(text(renderer!.root)).toContain("#other-group");
+    expect(renderer!.root.findByProps({ className: "commons-hub" }).props["data-channel"]).toBe("other-group");
     expect(text(renderer!.root)).not.toContain("Research helper");
   });
 
@@ -401,11 +401,15 @@ describe("private workspace scope isolation", () => {
     let reads = 0;
     const scopedClient = client({ summary: async () => ++reads === 1 ? summary : next.promise });
     await mount(<CollaborationHub initialTab="agents" token="old-token" slug="demo" client={scopedClient} />);
+    await act(async () => {
+      renderer!.root.findByType("textarea").props.onChange({ target: { value: "OLD PRIVATE PROMPT" } });
+    });
+    expect(renderer!.root.findByType("textarea").props.value).toBe("OLD PRIVATE PROMPT");
     await click("Edit");
     await act(async () => {
       renderer!.root.findByProps({ type: "password" }).props.onChange({ target: { value: "OLD PRIVATE SECRET" } });
-      renderer!.root.findByType("textarea").props.onChange({ target: { value: "OLD PRIVATE PROMPT" } });
     });
+    expect(renderer!.root.findByProps({ type: "password" }).props.value).toBe("OLD PRIVATE SECRET");
     if (change === "server") setApiBase("https://different-server.example");
     await rerender(<CollaborationHub initialTab="agents" token={change === "account" ? "new-token" : "old-token"} slug={change === "group" ? "new-group" : "demo"} client={scopedClient} />);
     expect(reads).toBe(2);
@@ -498,22 +502,45 @@ test("one connection entry leads from platform choice to configuration; existing
  const previousFetch=globalThis.fetch;
  globalThis.fetch=(async()=>new Response(JSON.stringify({connections:[],agents:[],enabled:false}),{status:200,headers:{"content-type":"application/json"}})) as typeof fetch;
  try {
-  await mount(<CollaborationHub token="token" slug="demo" client={client()} />);
+  let mutations=0;
+  const service=client({saveConnection:async()=>{mutations++;return {connection};},run:async()=>{mutations++;return {run};}});
+  const configurationForms=()=>renderer!.root.findAll(node=>node.type==="form"&&node.props["aria-label"]==="Connect an agent");
+  await mount(<CollaborationHub token="token" slug="demo" client={service} />);
   expect(renderer!.root.findAllByProps({role:"tab"})).toHaveLength(3);
   expect(renderer!.root.findAllByProps({id:"commons-tab-agents"})).toHaveLength(0);
+  expect(configurationForms()).toHaveLength(0);
+  expect(text(renderer!.root)).toContain("Research helper");
+  expect(text(renderer!.root)).toContain("Platform authorizations");
+  expect(renderer!.root.findAllByProps({className:"commons-runs"})).toHaveLength(1);
+  expect(renderer!.root.findAllByProps({className:"commons-mcp"})).toHaveLength(0);
+  await click("Connect an agent");
   expect(renderer!.root.findAllByType("form")).toHaveLength(0);
   expect(renderer!.root.findAllByType("article")).toHaveLength(0);
   await click("Hermes Agent");
   await click("Continue with Hermes");
-  expect(renderer!.root.findAllByType("form").length).toBeGreaterThan(0);
-  expect(text(renderer!.root)).toContain("running Hermes API Server address");
+  expect(configurationForms()).toHaveLength(1);
+  expect(renderer!.root.findByType("select").props.value).toBe("hermes");
+  expect(text(renderer!.root)).toContain("Hermes API Server URL, API credential and existing profile");
+  expect(renderer!.root.findAllByProps({className:"commons-agent-layout"})).toHaveLength(0);
+  expect(renderer!.root.findAllByProps({className:"commons-runs"})).toHaveLength(0);
+  expect(renderer!.root.findAll(node=>node.type==="button"&&text(node)==="Connect an agent")).toHaveLength(0);
+  await click("Cancel");
+  expect(configurationForms()).toHaveLength(0);
+  expect(text(renderer!.root)).toContain("Research helper");
+  expect(text(renderer!.root)).toContain("Platform authorizations");
+  expect(renderer!.root.findAllByProps({className:"commons-runs"})).toHaveLength(1);
+  expect(renderer!.root.findAll(node=>node.type==="button"&&text(node)==="Connect an agent")).toHaveLength(1);
+  await click("Connect an agent");
   await click("Existing connections");
   expect(text(renderer!.root)).toContain("Research helper");
   expect(text(renderer!.root)).toContain("Platform authorizations");
   expect(renderer!.root.findAllByProps({className:"commons-mcp"})).toHaveLength(0);
-  await act(async()=>{renderer!.root.find(node=>node.type==="button"&&node.props.className==="d-btn commons-primary"&&text(node)==="Connect an agent").props.onClick();});
-  expect(text(renderer!.root)).toContain("Choose a platform, then follow its steps");
+  await click("Connect an agent");
+  expect(renderer!.root.findByProps({className:"agent-connect-tabs"}).findAllByType("button")).toHaveLength(5);
+  expect(button("Hermes Agent").props["aria-pressed"]).toBe(true);
+  expect(button("Continue with Hermes")).toBeTruthy();
   expect(renderer!.root.findAllByType("form")).toHaveLength(0);
+  expect(mutations).toBe(0);
  } finally {globalThis.fetch=previousFetch;}
 });
 
@@ -523,4 +550,62 @@ test('an explicit files entry overrides a remembered connection tab without revi
  expect(renderer!.root.findByProps({id:'commons-tab-files'}).props['aria-selected']).toBe(true);
  expect(renderer!.root.findAll(n=>n.type==='input'&&n.props.type==='password')).toHaveLength(0);
  expect(text(renderer!.root)).toContain('notes.txt');
+});
+
+test('saving a new connection among existing connections keeps its confirmation and task target',async()=>{
+ const previousFetch=globalThis.fetch;
+ globalThis.fetch=(async()=>Response.json({connections:[],agents:[],enabled:false})) as typeof fetch;
+ try {
+  const existing=[connection,{...connection,id:'cloud-2',name:'Existing writer'}];
+  const created={...connection,id:'cloud-new',name:'New editor',agent_name:'new-editor'};
+  let connections=existing,saves=0;
+  const starts:string[]=[];
+  const service=client({
+   summary:async()=>({...summary,connections}),
+   saveConnection:async()=>{saves++;connections=[...existing,created];return {connection:created};},
+   run:async(_token,_slug,id)=>{starts.push(id);return {run:{...run,connection_id:id}};},
+  });
+  await mount(<CollaborationHub token="token" slug="demo" client={service}/>);
+  await click('Connect an agent');await click('Hermes Agent');await click('Continue with Hermes');
+  const form=renderer!.root.find(node=>node.type==='form'&&node.props['aria-label']==='Connect an agent');
+  await act(async()=>{
+   form.findByProps({maxLength:80}).props.onChange({target:{value:created.name}});
+   form.findByProps({type:'url'}).props.onChange({target:{value:created.endpoint}});
+   form.findByProps({type:'password'}).props.onChange({target:{value:'new-private-credential'}});
+  });
+  await act(async()=>{form.props.onSubmit({preventDefault(){}});});
+  expect(saves).toBe(1);expect(starts).toHaveLength(0);
+  expect(renderer!.root.findByType(CloudAgentRuns).props.connection.id).toBe(created.id);
+  const selectedCard=renderer!.root.find(node=>node.type==='button'&&node.props['aria-pressed']===true&&text(node).includes(created.name));
+  expect(selectedCard).toBeTruthy();
+  expect(text(renderer!.root)).toContain(CollaborationStrings.en['Collab.saved']);
+  expect(text(renderer!.root)).not.toContain('new-private-credential');
+  await sendPrompt('Review the draft');expect(starts).toEqual([created.id]);
+  await click('Connect an agent');await click('Continue with Hermes');await click('Cancel');
+  expect(text(renderer!.root)).not.toContain(CollaborationStrings.en['Collab.saved']);
+ } finally {globalThis.fetch=previousFetch;}
+});
+
+test('saved connection waits for its record instead of offering an older task target',async()=>{
+ const created={...connection,id:'cloud-new',name:'New editor'};
+ const service=client();
+ const view=(connections:CloudAgentConnection[])=><CloudAgentConnections token="token" slug="demo" summary={{...summary,connections}} initialSavedConnectionId={created.id} client={service} onChanged={async()=>{}}/>;
+ await mount(view([connection]));
+ expect(renderer!.root.findAllByType(CloudAgentRuns)).toHaveLength(0);
+ expect(renderer!.root.findAllByType('textarea')).toHaveLength(0);
+ await act(async()=>renderer!.update(<LocaleProvider>{view([connection,created])}</LocaleProvider>));
+ expect(renderer!.root.findByType(CloudAgentRuns).props.connection.id).toBe(created.id);
+});
+
+test('pending saved-record refresh offers no older task target and cannot reopen setup after leaving',async()=>{
+ const refreshed=scopePending<void>();let completions=0;
+ const created={...connection,id:'cloud-new',name:'New editor'};
+ await mount(<CloudAgentConnections token="token" slug="demo" summary={summary} initialProvider="hermes" client={client({saveConnection:async()=>({connection:created})})} onChanged={()=>refreshed.promise} onSetupDone={()=>{completions++;}}/>);
+ await act(async()=>renderer!.root.findByType('form').props.onSubmit({preventDefault(){}}));
+ expect(renderer!.root.findAllByType(CloudAgentRuns)).toHaveLength(0);
+ expect(renderer!.root.findAllByType('textarea')).toHaveLength(0);
+ expect(completions).toBe(0);
+ await act(async()=>{renderer!.unmount();renderer=null;});
+ await act(async()=>refreshed.resolve());
+ expect(completions).toBe(0);
 });

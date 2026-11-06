@@ -8,8 +8,9 @@ const channelSource = readFileSync(new URL("./pages/Channel.tsx", import.meta.ur
 const visibilitySource = readFileSync(new URL("./components/VisibilityToggle.tsx", import.meta.url), "utf8");
 
 describe("channel header controls", () => {
-  test("the shared sidebar account tools own the mention toggle and the channel only consumes its state", () => {
-    expect(appSource).toMatch(/const accountControls = \([\s\S]*<header className="workspace-account-controls">[\s\S]*className="app-channel-notify"[\s\S]*<NotifyToggle/);
+  test("settings own notification preferences while the channel consumes their state", () => {
+    expect(appSource).not.toContain("<NotifyToggle");
+    expect(appSource).toContain("onNotifyOptinChange={setNotifyOptin}");
     expect(appSource).toContain("navigationFooter={accountControls}");
     expect(appSource).toContain("mobileActions={accountControls}");
     expect(appSource).not.toContain('className="app-head prototype-rail"');

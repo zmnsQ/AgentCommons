@@ -21,7 +21,7 @@ test('explicit group agent creation separates URL, token and header; no human se
  const url=renderer.root.findByProps({'aria-label':'MCP server URL'});expect(text(url)).toBe('https://commons.test/api/channels/group/mcp');expect(text(url)).not.toContain(secret);
  for(const label of ['MCP server URL','Agent Token','Authorization header'])await act(async()=>renderer.root.findByProps({'aria-label':`Copy ${label}`}).props.onClick());
  expect(copies).toEqual(['https://commons.test/api/channels/group/mcp',secret,`Authorization: Bearer ${secret}`]);
- expect(text(renderer.root)).not.toContain('human-fixture');expect(text(renderer.root)).toContain('not an MCP-only key');expect(text(renderer.root)).toContain('not the created credential');
+ expect(text(renderer.root)).not.toContain('human-fixture');expect(text(renderer.root)).toContain('permitted tools and APIs');expect(text(renderer.root)).toContain('Created credentials remain active');
 });
 test('same-turn repeat and unknown result never blindly retry creation',async()=>{
  pending=deferred();await mount();const click=createButton().props.onClick;
@@ -40,7 +40,7 @@ test('OAuth default and manual branch return preserve local connector, discard r
  await act(async()=>{renderer=create(node);});expect(calls).toHaveLength(0);expect(text(renderer.root)).toContain('Sign in and approve this group');
  await act(async()=>renderer.root.findAllByType('button').find(b=>text(b)==='Manual Token / header').props.onClick());
  expect(text(renderer.root)).not.toContain('Sign in and approve this group');await act(async()=>createButton().props.onClick());
- await act(async()=>renderer.root.findAllByType('button').find(b=>text(b)==='Back to authorization methods').props.onClick());
+ await act(async()=>renderer.root.findAllByType('button').find(b=>text(b)==='OAuth sign-in').props.onClick());
  expect(text(renderer.root)).not.toContain(secret);expect(text(renderer.root)).toContain('Sign in and approve this group');expect(text(renderer.root)).toContain('Configure local connector');
 });
 test('unmount ignores late creation and copy completion',async()=>{
@@ -58,9 +58,9 @@ test('returning to manual branch after unknown attempt does not silently permit 
  pending=deferred();await act(async()=>{renderer=create(<LocaleProvider><DirectMcpSetup server="https://commons.test" slug="group" token="human-fixture" client="generic" os="unix" onOsChange={()=>{}} onBack={()=>{}} onLocal={()=>{}}/></LocaleProvider>);});
  const choose=()=>renderer.root.findAllByType('button').find(b=>text(b)==='Manual Token / header').props.onClick();
  await act(async()=>choose());await act(async()=>createButton().props.onClick());await act(async()=>pending.reject(new Error('timeout')));
- await act(async()=>renderer.root.findAllByType('button').find(b=>text(b)==='Back to authorization methods').props.onClick());await act(async()=>choose());
+ await act(async()=>renderer.root.findAllByType('button').find(b=>text(b)==='OAuth sign-in').props.onClick());await act(async()=>choose());
  expect(createButton().props.disabled).toBe(true);await act(async()=>createButton().props.onClick());expect(calls).toHaveLength(1);
- expect(text(renderer.root)).toContain('already attempted');
+ expect(text(renderer.root)).toContain('creation was submitted');
 });
 test('unsafe endpoint cannot create credentials',async()=>{
  await act(async()=>{renderer=create(manual({endpoint:'http://commons.test/api/channels/group/mcp?t=bad'}));});
@@ -83,7 +83,7 @@ test('endpoint is available before creation and confirmed validation rejection p
 test('generic OAuth guide uses platform settings rather than a coding-only /mcp command',async()=>{
  await act(async()=>{renderer=create(<LocaleProvider><DirectMcpSetup server="https://commons.test" slug="group" token="human-fixture" client="generic" os="unix" onOsChange={()=>{}} onBack={()=>{}} onLocal={()=>{}}/></LocaleProvider>);});
  expect(renderer.root.findAllByProps({'aria-label':'Client authorization entry'})).toHaveLength(0);
- expect(text(renderer.root)).toContain('No coding client or local connector is required');expect(text(renderer.root)).toContain('platform’s MCP server settings');
+ expect(text(renderer.root)).toContain('choose an authorization method');expect(text(renderer.root)).toContain('platform’s MCP server settings');
 });
 test('token refresh clears reveal scope but retains unknown creation lock for this group',async()=>{
  const view=token=><LocaleProvider><DirectMcpSetup server="https://commons.test" slug="group" token={token} client="generic" os="unix" onOsChange={()=>{}} onBack={()=>{}} onLocal={()=>{}}/></LocaleProvider>;
@@ -110,7 +110,7 @@ test('verified same-account refresh preserves revealed token and complete parsea
 });
 test('same verified owner renews during pending creation without dropping response or creating twice',async()=>{
  pending=deferred();await act(async()=>{renderer=create(manual({accountKey:'owner'}));});await act(async()=>createButton().props.onClick());
- await act(async()=>renderer.update(manual({accountKey:'owner',token:'renewed'})));const busyButton=renderer.root.findAllByType('button').find(b=>text(b).startsWith('Creating, please wait'));expect(busyButton.props.disabled).toBe(true);
+ await act(async()=>renderer.update(manual({accountKey:'owner',token:'renewed'})));const busyButton=renderer.root.findAllByType('button').find(b=>text(b).startsWith('Creating…'));expect(busyButton.props.disabled).toBe(true);
  await act(async()=>busyButton.props.onClick());expect(calls).toHaveLength(1);
  await act(async()=>pending.resolve(Response.json({name:'test-mcp',token:secret})));expect(text(renderer.root)).toContain(secret);
 });
@@ -134,7 +134,7 @@ test('complete JSON safely escapes credential bytes; leaving and returning never
 test('removed identity is not presented as an authorization or token expiry problem',async()=>{
  pending={promise:Promise.resolve(Response.json({error:{code:'participant_removed',message:'participant was removed from this channel'}},{status:403}))};
  await mount();await act(async()=>createButton().props.onClick());
- expect(text(renderer.root)).toContain('Creating or rotating tokens cannot restore membership');
+ expect(text(renderer.root)).toContain('Ask a moderator to re-add it');
  expect(renderer.root.findAllByProps({'aria-label':'Agent Token'})).toHaveLength(0);
  expect(copies).toHaveLength(0);expect(calls.filter(c=>c.url.endsWith("/api/agents"))).toHaveLength(1);
 });
@@ -156,8 +156,8 @@ test('invalid edited name stays editable with an explicit error and never sends'
 test('request deadline exits pending into explicit unknown state without resubmitting',async()=>{
  let expire;const nativeTimer=globalThis.setTimeout;stub('setTimeout',(cb,ms,...args)=>ms===30000?(expire=cb,999):nativeTimer(cb,ms,...args));
  globalThis.fetch=async(url,init)=>{if(String(url).endsWith('/mcp-security'))return Response.json({policy:{enabled:true,owner_mfa_enabled:true},can_manage:false});calls.push({url:String(url),init});return new Promise((_,reject)=>init.signal.addEventListener('abort',()=>reject(new DOMException('deadline','AbortError'))));};
- await mount();await act(async()=>createButton().props.onClick());expect(text(renderer.root)).toContain('up to 30 seconds');
- await act(async()=>expire());expect(text(renderer.root)).toContain('Creation outcome unknown');expect(text(renderer.root)).not.toContain('up to 30 seconds');expect(createButton().props.disabled).toBe(true);expect(calls).toHaveLength(1);expect(copies).toHaveLength(0);
+ await mount();await act(async()=>createButton().props.onClick());expect(text(renderer.root)).toContain('Creating…');
+ await act(async()=>expire());expect(text(renderer.root)).toContain('Creation outcome unknown');expect(text(renderer.root)).not.toContain('Creating…');expect(createButton().props.disabled).toBe(true);expect(calls).toHaveLength(1);expect(copies).toHaveLength(0);
 });
 
 test('removed creation offers precise inline restoration; a new credential still needs another explicit click',async()=>{

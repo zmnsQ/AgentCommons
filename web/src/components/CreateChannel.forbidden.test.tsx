@@ -70,7 +70,8 @@ describe("CreateChannel 403 rendering (#919)", () => {
   test("readonly token gets a token-swap instruction, not a quota one", async () => {
     const text = await submitAndReadError(READONLY);
     expect(text).toContain(READONLY_MESSAGE);
-    expect(text.toLowerCase()).toContain("read-only");
+    expect(text.toLowerCase()).toContain("requires write access");
+    expect(text).toContain("Sign in with an account or token that has it");
     expect(text.toLowerCase()).not.toContain("quota reached");
   });
 

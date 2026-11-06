@@ -88,7 +88,7 @@ describe("human approval of agent code proposals", () => {
     const calls: string[] = [];
     await mount(client({ detail: async () => ({ proposal: uncertain }), publish: async (_token, _slug, _repo, id) => { calls.push(id); return { proposal: published }; } }));
     await openReview();
-    expect(text(renderer!.root)).toContain("cannot be rejected until its remote state is known");
+    expect(text(renderer!.root)).toContain("Retry this proposal to recover its state before rejecting it");
     expect(renderer!.root.findAll((node) => node.type === "button" && text(node) === "Reject proposal")).toHaveLength(0);
     await acknowledgeAndCredential(); await submit();
     expect(calls).toEqual([proposal.id]);

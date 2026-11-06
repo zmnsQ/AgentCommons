@@ -79,10 +79,10 @@ export function ChatGptQuickStart({token,slug,canManage}:{token:string;slug:stri
       </dl>
       {value.events?.callback_policy_configured===false&&<p className="commons-note" role="status">{t("ConnectorUsage.serverNotReady")}</p>}
       <a className="d-btn connector-open-chat" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">{t("ConnectorUsage.open")}</a>
-      <p className="commons-note">{zh?"先做只读验证即可。下面的发帖与任务测试是自愿的写入操作，不是完成接入的必需步骤；复制提示词不会自动执行。":"Start with read-only verification. Posting and task tests below are optional write actions, not requirements for connecting. Copying a prompt does not execute it."}</p>
+      <p className="commons-note">{zh?"先复制验证指令，在 ChatGPT 中检查连接。":"Copy the verification prompt and check the connection in ChatGPT."}</p>
       <ol className="connector-first-steps">
         {(["read","post","task"] as const).map((kind,i)=><li key={kind}>
-          <details className="connector-step" open={i===0}><summary><span className="studio-step-number">{i+1}</span><h4>{t(`ConnectorUsage.step${i+1}`)}</h4></summary><div className="connector-step-body"><p>{t(`ConnectorUsage.step${i+1}Help`)}</p>
+          <details className="connector-step" open={i===0}><summary><h4>{t(`ConnectorUsage.step${i+1}`)}{i>0&&(zh?'（可选）':' (optional)')}</h4></summary><div className="connector-step-body"><p>{t(`ConnectorUsage.step${i+1}Help`)}</p>
           <textarea readOnly rows={4} aria-label={t(`ConnectorUsage.step${i+1}`)} value={connectorTestPrompt(kind,slug,agent.name,zh)} onFocus={e=>e.currentTarget.select()}/>
           <button type="button" className="d-btn" disabled={kind==="read"?!readable:!writable} onClick={()=>void copy(kind)}>
             {t(copied===kind?"ConnectorUsage.copied":"ConnectorUsage.copy")}</button>
@@ -92,9 +92,8 @@ export function ChatGptQuickStart({token,slug,canManage}:{token:string;slug:stri
       </ol>
       {copyFailed&&<p role="alert">{t("ConnectorUsage.copyFailed")}</p>}
       {copied&&<p role="status">{t("ConnectorUsage.copied")}</p>}
-      <small>{t("ConnectorUsage.noAutoSend")}</small>
       <details className="connector-subscription-setup connector-step" aria-label={t("ConnectorUsage.subscribeTitle")}>
-        <summary><span className="studio-step-number">4</span><h4>{t("ConnectorUsage.subscribeTitle")}</h4></summary><div className="connector-step-body">
+        <summary><h4>{t("ConnectorUsage.subscribeTitle")}</h4></summary><div className="connector-step-body">
         <p>{t(value.events?.callback_policy_configured?"ConnectorUsage.serverPrepared":"ConnectorUsage.serverNotReady")}</p>
         <p>{t("ConnectorUsage.subscribeHow")}</p>
         <textarea readOnly rows={5} aria-label={t("ConnectorUsage.subscribePrompt")} value={connectorTestPrompt("subscribe",slug,agent.name,zh)} onFocus={e=>e.currentTarget.select()}/>

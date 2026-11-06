@@ -21,7 +21,6 @@ import {
   type MentionTier,
 } from "../lib/mentions";
 import { useT, type TFunc } from "../i18n/useT";
-import { FeatureTip } from "./FeatureTip";
 import { desktopClipboardReader } from "../lib/desktopClipboard";
 import "../i18n/strings/Composer";
 import "../i18n/strings/WakeReceipt";
@@ -515,7 +514,7 @@ export function Composer({
           })}
         </ul>
       )}
-      {<button type="button" className="composer-more" aria-label={locale==="zh"?"附件与更多":"Attachments and more"} aria-expanded={extrasOpen} onClick={()=>setExtrasOpen(value=>!value)}><StudioIcon name={extrasOpen?"close":"plus"}/></button>}
+      {<button type="button" className="composer-more" aria-label={locale==="zh"?"添加内容":"Add content"} aria-expanded={extrasOpen} onClick={()=>setExtrasOpen(value=>!value)}><StudioIcon name={extrasOpen?"close":"plus"}/></button>}
       <textarea
         ref={taRef}
         className="composer-input t-mono"
@@ -639,7 +638,6 @@ export function Composer({
         >
           <StudioIcon name="copy"/><span>{t("Composer.paste.label")}</span>
         </button>
-        <FeatureTip tip="Tips.wake" className="composer-wake-tip"/>
         </div>
         <span className="composer-keyboard-hint">{t("Composer.keyboardHint")}</span>
         <button

@@ -280,11 +280,12 @@ test("desktop separates personal settings from the local-agent control center", 
   expect(root.findByProps({ id: "desktop-settings-panel" })).toBeTruthy();
   expect(root.findAllByProps({ className: "desktop-agent" })).toHaveLength(0);
   expect(root.findAllByProps({ className: "local-agents" })).toHaveLength(0);
-  expect(root.findByProps({ className: "d-btn notify-toggle-btn" }).props["aria-pressed"]).toBe(false);
+  expect(root.findAllByProps({ className: "d-btn notify-toggle-btn" })).toHaveLength(0);
+  expect(root.findByProps({ className: "settings-toggle" }).props["aria-pressed"]).toBe(false);
 
   await act(async () => root.findByProps({ className: "settings-toggle" }).props.onClick());
 
-  expect(root.findByProps({ className: "d-btn notify-toggle-btn is-active" }).props["aria-pressed"]).toBe(true);
+  expect(root.findAllByProps({ className: "d-btn notify-toggle-btn is-active" })).toHaveLength(0);
   expect(root.findByProps({ className: "settings-toggle is-on" }).props["aria-pressed"]).toBe(true);
 
   await act(async () => root.findByProps({ className: "settings-close" }).props.onClick());

@@ -9,7 +9,6 @@ import { BrowserSecurity, GithubAuthSetup, SecondFactorGate } from "./components
 // 应用骨架：登录闸 → 头部 + 左侧频道列表 + 右侧（首页 | 频道页）
 import { isMember } from "@agentparty/shared";
 import { agentNameOwnerLabel } from "./lib/agentNameOwner";
-import { isOpaqueAccount } from "@agentparty/shared/identity";
 import { membershipApplyMailto, membershipStatusOf } from "./lib/membership";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChannelList } from "./components/ChannelList";
@@ -25,7 +24,7 @@ import { TokenGate } from "./components/TokenGate";
 import { SettingsPanel, type SettingsSectionId } from "./components/SettingsPanel";
 import { LocalAgentCenter } from "./components/LocalAgentCenter";
 import { OnboardingGuide } from "./components/OnboardingGuide";
-import { NotifyToggle, readNotifyOptin } from "./components/NotifyToggle";
+import { readNotifyOptin } from "./components/NotifyToggle";
 import { ServerProfileAddGate, ServerSwitcher } from "./components/ServerProfiles";
 import {
   applyShareToken,
@@ -130,24 +129,6 @@ import "./i18n/strings/App";
 const PENDING_JOIN_KEY = "ap_pending_join";
 // 外部协作者邀请（#593）：/invite/<code> 同款跨登录暂存。
 const PENDING_INVITE_KEY = "ap_pending_invite";
-function readableOwner(me: MeInfo): string | null {
-  if (me.kind !== "agent") return null;
-  for (const candidate of [me.owner_display_name, me.owner_handle, me.owner]) {
-    const value = typeof candidate === "string" ? candidate.trim() : "";
-    if (value !== "" && value !== me.name && !isOpaqueAccount(value)) return value;
-  }
-  return null;
-}
-function meTitle(me: MeInfo): string {
-  const parts = [`token: ${me.name}`, `kind: ${me.kind}`, `role: ${me.role}`];
-  if (me.display_name !== null) parts.push(`display: ${me.display_name}`);
-  if (me.owner !== null) parts.push(`owner: ${me.owner}`);
-  if (me.email !== null) parts.push(`email: ${me.email}`);
-  if (me.provider !== null) parts.push(`provider: ${me.provider}`);
-  if (me.channel_scope != null) parts.push(`scope: ${me.channel_scope}`);
-  return parts.join(" · ");
-}
-
 function DesktopRecoveryUpdater() {
   return (
     <aside className="desktop-recovery-updater">
@@ -562,6 +543,7 @@ export function App() {
   const [localAgentCenterOpen, setLocalAgentCenterOpen] = useState(false);
   const [handleBannerDismissed, setHandleBannerDismissed] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement | null>(null);
+  const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const handleSetupButtonRef = useRef<HTMLButtonElement | null>(null);
   const handleBannerButtonRef = useRef<HTMLButtonElement | null>(null);
   const settingsFocusOriginRef = useRef<"settings" | "handle-setup" | "handle-banner">("settings");
@@ -570,7 +552,7 @@ export function App() {
   const settingsFocusTarget = useCallback((): HTMLButtonElement | null => {
     if (settingsFocusOriginRef.current === "handle-setup") return handleSetupButtonRef.current;
     if (settingsFocusOriginRef.current === "handle-banner") return handleBannerButtonRef.current;
-    return settingsButtonRef.current;
+    return settingsTriggerRef.current?.isConnected ? settingsTriggerRef.current : settingsButtonRef.current;
   }, []);
   const onboardingReturnFocusRef = useMemo(() => ({
     get current(): HTMLButtonElement | null {
@@ -582,6 +564,7 @@ export function App() {
     section: SettingsSectionId = "preferences",
     origin: "settings" | "handle-setup" | "handle-banner" = "settings",
   ) => {
+    settingsTriggerRef.current = _event?.currentTarget ?? null;
     setLocalAgentCenterOpen(false);
     setSettingsInitialSection(section);
     settingsFocusOriginRef.current = origin;
@@ -1283,122 +1266,18 @@ export function App() {
   const currentChannel = channels?.find(channel => channel.slug === slug);
 
   const accountControls = (
-      <header className="workspace-account-controls">
-
-        <a
-          className="d-title app-logo"
-          href={"/" + location.search}
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/");
-          }}
-        >
-          <span className="workspace-brand-label">Agent Commons</span>
-        </a>
-
-        <div className="prototype-rail-footer">
-          <details className="prototype-rail-more" onKeyDown={event=>{if(event.key==="Escape"){event.currentTarget.open=false;event.currentTarget.querySelector("summary")?.focus();}}}><summary className="prototype-rail-button" aria-label={t("App.workspace.tools")} title={t("App.workspace.tools")}><StudioIcon name="tools"/></summary><div className="prototype-rail-popover">
-        <span className="d-hand app-tag">{t("App.tagline")}</span>
-        <a className="app-docs t-mono" href="/docs">
-          {t("App.docs")}
-        </a>
-        <DesktopDownloadLink desktop={desktop} />
-        {me !== null && (
-          <span className="t-mono app-me" title={meTitle(me)}>
-            {me.avatar_thumb !== null || me.avatar_url !== null ? (
-              <img className="app-me-avatar" src={me.avatar_thumb ?? me.avatar_url ?? ""} alt="" />
-            ) : null}
-            <strong className="app-me-name">{preferredMeDisplay(me)}</strong>
-            <span className={`app-me-chip app-me-chip--${me.kind}`}>{me.kind}</span>
-            {/* role 与 kind 相同时（human/human、agent/agent）不重复显示，只有 readonly 等差异角色才补一个 chip */}
-            {me.role !== me.kind && <span className="app-me-chip">{me.role}</span>}
-            {/* #1044：所属人只在 agent 身份下、且拿得到人可读名字时显示（display_name > handle > owner，
-                不透明账号 id 一律不露——人类账号的 owner 就是自己，显示它纯属噪音）。完整信息仍在 title 里。 */}
-            {readableOwner(me) !== null && <span className="app-me-owner">· {readableOwner(me)}</span>}
-            {/* 会员骨架（#277）：账号 free/member 状态就近展示（不进 #273 全局设置面板，避免并行冲突）。 */}
-            {me.kind === "human" && isLeeguoooooDeployment(deploymentOrigin) && (
-              isMember(membershipStatusOf(me)) ? (
-                <span
-                  className="app-me-chip app-me-chip--member"
-                  title={t("App.membership.memberTitle")}
-                >
-                  {t("App.membership.member")}
-                </span>
-              ) : (
-                <a
-                  className="app-me-membership-apply"
-                  href={membershipApplyMailto(
-                    me,
-                    t("App.membership.applySubject"),
-                    t("App.membership.applyBody"),
-                  )}
-                  title={t("App.membership.freeTitle")}
-                >
-                  {t("App.membership.apply")}
-                </a>
-              )
-            )}
-          </span>
-        )}
-        {canSetHandle && me !== null && me.handle === null && (
-          <button
-            ref={handleSetupButtonRef}
-            type="button"
-            className="d-btn handlesetup-trigger handlesetup-trigger--cta"
-            onClick={(event) => openSettings(event, "account", "handle-setup")}
-            title={t("App.handle.setCta")}
-          >
-            <span className="handlesetup-trigger-edit" aria-hidden="true">
-              <StudioIcon name="edit"/>
-            </span>
-            <span className="handlesetup-trigger-value">{t("App.handle.chipUnset")}</span>
-          </button>
-        )}
-        {desktop && (
-          <ServerSwitcher
-            profiles={serverProfiles}
-            activeOrigin={activeOrigin}
-            onSwitch={switchDesktopOrigin}
-            onAddPair={() => setServerPairingFlow(beginDesktopServerAdd(initialDesktopServerPairingFlow(activeOrigin)))}
-            onPair={(origin) => setServerPairingFlow(beginDesktopServerPairing(
-              initialDesktopServerPairingFlow(activeOrigin),
-              origin,
-            ))}
-          />
-        )}
+    <header className="workspace-account-controls">
+      <button ref={handleSetupButtonRef} type="button" className="prototype-rail-account" title={t("App.settings.section.account")} aria-label={t("App.settings.section.account")} onClick={event=>openSettings(event,"account","handle-setup")}>
+        {me?.avatar_thumb || me?.avatar_url ? <img src={me.avatar_thumb || me.avatar_url || ""} alt=""/> : <StudioIcon name="human"/>}
+        <span className="workspace-account-name">{me ? preferredMeDisplay(me) : t("App.settings.section.account")}</span>
+      </button>
+      <div className="prototype-rail-footer">
+        <button ref={settingsButtonRef} type="button" className="app-settings-btn" aria-label={t("App.settings.title")} title={t("App.settings.title")} onClick={openSettings}><StudioIcon name="settings"/></button>
+        <button type="button" className="prototype-rail-button" aria-label={t("App.settings.section.help")} title={t("App.settings.section.help")} onClick={event=>openSettings(event,"help")}><StudioIcon name="help"/></button>
+        {desktop&&<button ref={localAgentCenterButtonRef} type="button" className="app-agent-center-btn" aria-label={t("App.localAgentCenter.open")} title={t("App.localAgentCenter.open")} onClick={openLocalAgentCenter}><StudioIcon name="agent"/></button>}
         <DesktopUpdater />
-        {desktop && (
-          <button
-            ref={localAgentCenterButtonRef}
-            type="button"
-            className="app-agent-center-btn"
-            aria-label={t("App.localAgentCenter.open")}
-            title={t("App.localAgentCenter.open")}
-            aria-expanded={localAgentCenterOpen}
-            onClick={openLocalAgentCenter}
-          >
-            <StudioIcon name="agent" />
-          </button>
-        )}
-        {slug !== null && (
-          <div className="app-channel-notify" aria-label={t("Channel.notify.headerLabel")}>
-            <NotifyToggle optin={notifyOptin} onChange={setNotifyOptin} />
-          </div>
-        )}
-        <button
-          ref={settingsButtonRef}
-          type="button"
-          className="app-settings-btn"
-          aria-label={t("App.settings.title")}
-          title={t("App.settings.title")}
-          onClick={openSettings}
-        >
-          <StudioIcon name="settings" /><span>{t("App.settings.title")}</span>
-        </button>
-          </div></details>
-        <button type="button" className="prototype-rail-account" title={t("App.settings.section.account")} aria-label={t("App.settings.section.account")} onClick={event=>openSettings(event,"account")}><StudioIcon name="human"/></button>
-        </div>
-      </header>
+      </div>
+    </header>
   );
 
   return (
@@ -1431,7 +1310,11 @@ export function App() {
             setSettingsOpen(false);
             setGuideOpen(true);
           }}
-          desktopAppSettings={desktop ? <DesktopSettings embedded serverOrigin={activeOrigin} /> : null}
+          helpActions={<><a className="d-btn" href="/docs">{t("App.docs")}</a><DesktopDownloadLink desktop={desktop} /></>}
+          accountExtras={me?.kind === "human" && isLeeguoooooDeployment(deploymentOrigin) ? (
+            isMember(membershipStatusOf(me)) ? <span className="app-me-chip app-me-chip--member">{t("App.membership.member")}</span> : <a className="d-btn" href={membershipApplyMailto(me,t("App.membership.applySubject"),t("App.membership.applyBody"))}>{t("App.membership.apply")}</a>
+          ) : null}
+          desktopAppSettings={desktop ? <DesktopSettings embedded serverOrigin={activeOrigin}/> : null}
           initialSection={settingsInitialSection}
           restoreFocusOnUnmount={false}
         />
@@ -1465,6 +1348,9 @@ export function App() {
       <WorkspaceShell route={slug} navigationError={listError} requestOpen={createGroupRequest} title={currentChannel?.title}
         mobileActions={accountControls} navigationFooter={accountControls}
         navigation={<>
+          {desktop && <div className="sidebar-server-switcher"><ServerSwitcher profiles={serverProfiles} activeOrigin={activeOrigin} onSwitch={switchDesktopOrigin}
+            onAddPair={() => setServerPairingFlow(beginDesktopServerAdd(initialDesktopServerPairingFlow(activeOrigin)))}
+            onPair={origin => setServerPairingFlow(beginDesktopServerPairing(initialDesktopServerPairingFlow(activeOrigin),origin))}/></div>}
           {canCreate && token !== null && (
             <CreateChannel showTrigger={false} token={token} onCreated={onChannelCreated} requestOpen={createGroupRequest} />
           )}

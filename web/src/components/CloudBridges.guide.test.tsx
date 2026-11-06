@@ -21,11 +21,11 @@ test("Hermes choice has a real next step and does not mutate configuration",asyn
  expect(next).toBe("hermes");expect(calls.every(m=>m==="GET")).toBe(true);
  expect(text(root)).not.toContain("two-step verification");
 });
-test("Cue discovery is separate from binding and Grok does not promise personal login",async()=>{
+test("Cue offers configuration and Grok identifies its task dispatch and result location",async()=>{
  await act(async()=>{renderer=create(<LocaleProvider><CloudBridges token="fixture" slug="group" canManage canRun initialProvider="cue" onConfigureApi={()=>{}}/></LocaleProvider>);});
- const root=renderer!.root;expect(text(root)).toContain("Continue with Cue");
+ const root=renderer!.root;expect(text(root)).toContain("Continue with Cue");expect(text(root)).toContain("View replies in Manus / Cue");
  await act(async()=>root.findAllByType("button").find(n=>text(n).includes("Grok Bot"))!.props.onClick());
- expect(text(root)).toContain("not a personal Grok Bot login");expect(text(root)).toContain("replies are not automatically imported");
+ expect(text(root)).toContain("Automation HTTPS trigger");expect(text(root)).toContain("This connection dispatches tasks; view execution results in Automation.");
  expect(root.findAllByProps({type:"password"})).toHaveLength(1);
  expect(calls.every(m=>m==="GET")).toBe(true);
 });

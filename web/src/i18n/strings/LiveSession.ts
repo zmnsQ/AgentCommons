@@ -11,8 +11,8 @@ export const LiveSessionStrings: LocaleDict = {
     "LiveSession.primaryAction": "Watch live session",
     "LiveSession.section": "live session",
     "LiveSession.empty":
-      "No live run session to follow. This member has not reported runner output — it may only be watching, never armed a runner, or its runner has not started a run since you connected.",
-    "LiveSession.readonly": "Read-only. To talk to this agent, post in the channel composer.",
+      "No run output reported. Check that the agent’s runner is active.",
+    "LiveSession.readonly": "Read-only output. Send messages to this agent in the group.",
     "LiveSession.task": "run for #{seq}",
     "LiveSession.session": "session {id}",
     "LiveSession.follow": "follow",
@@ -38,8 +38,8 @@ export const LiveSessionStrings: LocaleDict = {
     "LiveSession.primaryAction": "查看实时会话",
     "LiveSession.section": "实时会话",
     "LiveSession.empty":
-      "没有可跟的运行会话。这个成员没有上报 runner 输出：可能只在 watch、从未武装 runner，或者你连上之后它还没开始新一轮。",
-    "LiveSession.readonly": "只读。要和它说话，请在频道输入框里发消息。",
+      "暂无运行输出，请检查 Agent 运行器状态。",
+    "LiveSession.readonly": "只读输出。与此 Agent 对话，请在群内发消息。",
     "LiveSession.task": "处理 #{seq}",
     "LiveSession.session": "会话 {id}",
     "LiveSession.follow": "跟随",

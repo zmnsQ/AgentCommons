@@ -20,19 +20,17 @@ export function McpReadiness({token,slug}:{token:string;slug:string}){
  },[token,slug,base,revision]);
  const ready=!!state?.policy.enabled&&!!state.policy.owner_mfa_enabled;
  return <section className="commons-note" aria-label={zh?'本群 MCP 前提检查':'Group MCP prerequisites'}>
-  <h4>{zh?'先检查本群服务状态':'Check group service readiness first'}</h4>
-  <p>{zh?'生成 Token 不会自动开启 MCP。以下只检查服务侧前提，不代表第三方客户端已经连接。':'Creating a Token does not enable MCP. This checks server prerequisites only, not your external client connection.'}</p>
+  <h4>{zh?'本群 MCP 状态':'Group MCP status'}</h4>
   {!state&&!failed&&<p role="status">{zh?'正在读取本群设置…':'Reading group settings…'}</p>}
-  {failed&&<p role="alert">{zh?'暂时无法确认本群 MCP 状态；不要据此重复生成 Token。请刷新检查或让群主检查服务权限。':'Could not verify MCP readiness. Do not create another Token to fix this; refresh or ask the owner to check service permissions.'}</p>}
+  {failed&&<p role="alert">{zh?'暂时无法读取本群设置。请刷新重试，或联系群主检查权限。':'Could not verify group settings. Refresh or ask the owner to check permissions.'}</p>}
   {state&&<>
-   <p role={ready?'status':'alert'}>{ready?(zh?'本群 MCP 读取前提已满足；仍需在客户端验证连接。':'Group MCP read prerequisites are satisfied; verify the connection in your client.'):(zh?'当前还不能通过 MCP 初始化，先处理下列前提；Token 本身不一定失效。':'MCP initialization is currently blocked by the prerequisites below; this does not mean the Token is invalid.')}</p>
+   <p role={ready?'status':'alert'}>{ready?(zh?'本群已允许 MCP 读取，可继续配置客户端。':'MCP reading is enabled for this group. Continue with client setup.'):(zh?'请先完成下方设置，再连接 MCP。':'Complete the settings below before connecting MCP.')}</p>
    <ul>
-    <li>{zh?'本群 MCP：':'Group MCP: '}{state.policy.enabled?(zh?'已启用':'enabled'):(zh?'未启用（会返回 403）':'disabled (returns 403)')}</li>
-    <li>{zh?'群主二步验证：':'Owner two-step verification: '}{state.policy.owner_mfa_enabled?(zh?'已启用':'enabled'):(zh?'未启用（会返回 403）':'not enabled (returns 403)')}</li>
+    <li>{zh?'本群 MCP：':'Group MCP: '}{state.policy.enabled?(zh?'已启用':'enabled'):(zh?'未启用':'disabled')}</li>
+    <li>{zh?'群主二步验证：':'Owner two-step verification: '}{state.policy.owner_mfa_enabled?(zh?'已启用':'enabled'):(zh?'未启用':'not enabled')}</li>
    </ul>
-   {!ready&&<p>{zh?'请群主完成账户二步验证，再明确开启本群 MCP；读取、写入和事件权限分别控制。这里不会自动替你更改权限。':'The owner must complete account two-step verification and explicitly enable group MCP. Read, write and event access are separate; nothing is enabled automatically here.'}</p>}
-   <p>{zh?'在下面保存权限后，请点击“重新检查状态”更新此处结果。':'After saving permissions below, choose Recheck readiness to update this result.'}</p>
-   <details onToggle={event=>setShowSettings(event.currentTarget.open)}><summary>{zh?'查看本群 MCP 权限设置':'Review group MCP permissions'}</summary>{showSettings&&<McpSecurityPanel token={token} slug={slug} canManage={state.can_manage}/>}</details>
+   {!ready&&<p>{zh?'请群主启用账户二步验证，并在群权限中开启 MCP。':'Ask the owner to enable account two-step verification and MCP access for this group.'}</p>}
+   <details onToggle={event=>{setShowSettings(event.currentTarget.open);if(!event.currentTarget.open)setRevision(v=>v+1);}}><summary>{zh?'查看本群 MCP 权限设置':'Review group MCP permissions'}</summary>{showSettings&&<McpSecurityPanel token={token} slug={slug} canManage={state.can_manage}/>}</details>
   </>}
   <button type="button" className="d-btn" onClick={()=>setRevision(v=>v+1)}>{zh?'重新检查状态':'Recheck readiness'}</button>
  </section>;

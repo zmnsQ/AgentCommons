@@ -11,24 +11,23 @@ test("desktop guidance separates setup, execution and connection in both locales
     for (const step of [1, 2, 3]) expect(DesktopSettingsStrings[locale][`DesktopSettings.agent.setup${step}`]).toBeTruthy();
     expect(DesktopSettingsStrings[locale]["DesktopSettings.agent.empty"]).not.toContain("party init");
   }
-  expect(DesktopSettingsStrings.en["DesktopSettings.agent.setup3"]).toContain("not just a saved configuration");
+  expect(DesktopSettingsStrings.en["DesktopSettings.agent.setup3"]).toContain("Check its connection in Overview, then test a reply in the group");
   expect(DesktopSettingsStrings.zh["DesktopSettings.agent.persistMode"]).not.toContain("不断线");
-  expect(DesktopSettingsStrings.en["DesktopSettings.agent.empty"]).toContain("Configure local connector");
-  expect(DesktopSettingsStrings.en["DesktopSettings.agent.empty"]).toContain("Advanced runtime options");
+  expect(DesktopSettingsStrings.en["DesktopSettings.agent.empty"]).toContain("Codex or Claude Code");
   expect(DesktopSettingsStrings.en["DesktopSettings.agent.empty"]).toContain("Manage resident sessions");
-  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.empty"]).toContain("高级：本地连接器（可选）");
-  expect(DesktopSettingsStrings.en["DesktopSettings.agent.empty"]).toContain("Ordinary MCP authorization does not create");
-  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.empty"]).toContain("勿重复启动");
-  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.setup1"]).toContain("不读取普通 MCP");
+  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.empty"]).toContain("其他接入方式");
+  expect(DesktopSettingsStrings.en["DesktopSettings.agent.setup2"]).toContain("Check the working directory before allowing code execution");
+  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.setup2"]).toContain("允许执行代码前先核对工作目录");
+  expect(DesktopSettingsStrings.zh["DesktopSettings.agent.setup1"]).toContain("管理常驻会话");
   expect(LocalAgentsOverviewStrings.en["LocalAgents.empty"]).toContain("records");
   expect(LocalAgentsOverviewStrings.zh["LocalAgents.empty"]).toContain("记录");
 });
 
-test("desktop account approval and human invitations do not imply agent pairing", () => {
-  expect(DesktopPairingStrings.en["DesktopPairing.subtitle"]).toContain("does not connect Muse");
-  expect(DesktopPairingStrings.zh["DesktopPairing.subtitle"]).toContain("不是 Muse");
-  expect(PairStrings.en["Pair.status.approved"]).toContain("separate step");
-  expect(PairStrings.zh["Pair.status.approved"]).toContain("另外操作");
-  expect(InviteLandingStrings.en["InviteLanding.signInHint"]).toContain("automatically joins");
-  expect(InviteLandingStrings.zh["InviteLanding.signInHint"]).toContain("不会连接 Agent");
+test("desktop approval and human invitations name the account action and next destination", () => {
+  expect(DesktopPairingStrings.en["DesktopPairing.subtitle"]).toContain("Approve this desktop app");
+  expect(DesktopPairingStrings.zh["DesktopPairing.subtitle"]).toContain("批准此桌面端登录");
+  expect(PairStrings.en["Pair.status.approved"]).toContain("Return to the desktop app");
+  expect(PairStrings.zh["Pair.status.approved"]).toContain("请返回桌面端");
+  expect(InviteLandingStrings.en["InviteLanding.signInHint"]).toContain("join this group with your account");
+  expect(InviteLandingStrings.zh["InviteLanding.signInHint"]).toContain("以你的账号加入本群");
 });

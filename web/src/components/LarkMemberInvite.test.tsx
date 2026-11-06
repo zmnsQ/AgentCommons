@@ -294,7 +294,8 @@ test("renders Chinese labels and a contact-permission error", async () => {
   const input = renderer!.root.findByType("input");
   act(() => input.props.onChange({ target: { value: "张" } }));
   await act(async () => renderer!.root.findByType("form").props.onSubmit({ preventDefault() {} }));
-  expect(JSON.stringify(renderer!.toJSON())).toContain("当前部署尚未开通 Lark 通讯录权限");
+  expect(JSON.stringify(renderer!.toJSON())).toContain("请让管理员在 Lark 后台开通通讯录权限后刷新");
+  expect(JSON.stringify(renderer!.toJSON())).toContain("也可使用上方邀请链接");
   expect(renderer!.root.findAllByType("form")).toHaveLength(0);
   expect(renderer!.root.findByProps({ role: "status" })).toBeTruthy();
 });

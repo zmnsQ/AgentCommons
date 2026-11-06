@@ -77,7 +77,7 @@ describe("MessageCard receipts (#828)", () => {
     }
   });
 
-  test("the title says it is a receipt, not a reply and not done", () => {
+  test("the title identifies the receipt and directs task progress to the agent reply", () => {
     const msg = {
       ...base,
       receipts: [{ by: { name: "leo-claude", kind: "agent" }, reason: "not_in_turn", note: "next turn", ts: 1 }],
@@ -85,7 +85,8 @@ describe("MessageCard receipts (#828)", () => {
     const title = String(receiptBadges(render(msg))[0]!.props.title ?? "");
     expect(title).toContain("not in a turn");
     expect(title).toContain("next turn");
-    expect(title).toContain("not a reply");
+    expect(title).toContain("Message receipt");
+    expect(title).toContain("Check the agent’s reply for task progress");
   });
 
   test("no receipts → no badge", () => {

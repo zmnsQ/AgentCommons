@@ -66,7 +66,7 @@ test('account rename refreshes channel names and help returns to its settings or
  const before=channelProps.identityRevision;
  await act(async()=>panel.props.onHandleSaved('fresh-name'));
  expect(channelProps.identityRevision).toBe(before+1);
- expect(renderer!.root.findByProps({className:'app-me-name'}).children).toEqual(['fresh-name']);
+ expect(renderer!.root.findByProps({className:'workspace-account-name'}).children).toEqual(['fresh-name']);
  expect(renderer!.root.findByType(SettingsPanel).props.me.preferred_display).toBe('fresh-name');
  await act(async()=>renderer!.root.findByType(SettingsPanel).props.onShowOnboarding());
  expect(renderer!.root.findAllByType(SettingsPanel)).toHaveLength(0);
@@ -85,5 +85,19 @@ test('agent nickname save updates its preferred label without rewriting legacy o
  const me=renderer!.root.findByType(SettingsPanel).props.me;
  expect(me.nickname).toBe('agent-renamed');expect(me.preferred_display).toBe('agent-renamed');
  expect(me.handle).toBe('owner-handle');
- expect(renderer!.root.findByProps({className:'app-me-name'}).children).toEqual(['agent-renamed']);
+ expect(renderer!.root.findByProps({className:'workspace-account-name'}).children).toEqual(['agent-renamed']);
+});
+
+
+test('settings and help open directly from the shared footer',async()=>{
+ await mount();
+ const footer=renderer!.root.findByProps({className:'workspace-account-controls'});
+ expect(footer.findAllByType('details')).toHaveLength(0);
+ const settings=footer.findAllByType('button').find(button=>button.props['aria-label']==='设置');
+ await act(async()=>settings!.props.onClick());
+ expect(renderer!.root.findByType(SettingsPanel).props.initialSection).toBe('preferences');
+ await act(async()=>renderer!.root.findByType(SettingsPanel).props.onClose());
+ const help=footer.findAllByType('button').find(button=>button.props['aria-label']==='帮助');
+ await act(async()=>help!.props.onClick());
+ expect(renderer!.root.findByType(SettingsPanel).props.initialSection).toBe('help');
 });

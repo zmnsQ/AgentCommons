@@ -899,6 +899,9 @@ function MessageCardImpl({
       />
       {menu !== null && (
         <div ref={menuRef} className="msg-menu" style={{ left: menu.x, top: menu.y }}>
+          <button type="button" className="msg-menu-item" onClick={copyText}>
+            {t("MessageCard.menu.copy")}
+          </button>
           {canReply && (
             <button
               type="button"
@@ -947,9 +950,6 @@ function MessageCardImpl({
               {t("MessageCard.menu.retract")}
             </button>
           )}
-          <button type="button" className="msg-menu-item" onClick={copyText}>
-            {t("MessageCard.menu.copy")}
-          </button>
         </div>
       )}
       {artifact !== undefined && (

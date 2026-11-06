@@ -1,0 +1,1930 @@
+[
+  {
+    "name": "midnight-1440x900",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 260,
+      "y": 0,
+      "right": 1440,
+      "bottom": 76,
+      "width": 1180,
+      "height": 76,
+      "scrollWidth": 1180,
+      "clientWidth": 1180,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 200,
+      "y": 64,
+      "right": 1240,
+      "bottom": 573.328125,
+      "width": 1040,
+      "height": 509.328125,
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 197.75,
+      "right": 1210,
+      "bottom": 702.234375,
+      "width": 980,
+      "height": 504.484375,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 180,
+      "y": 167.421875,
+      "right": 1260,
+      "bottom": 732.5625,
+      "width": 1080,
+      "height": 565.140625,
+      "scrollWidth": 1078,
+      "clientWidth": 1078,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 324.140625,
+      "right": 1210,
+      "bottom": 575.859375,
+      "width": 980,
+      "height": 251.71875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 230.015625,
+      "right": 1210,
+      "bottom": 669.984375,
+      "width": 980,
+      "height": 439.96875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 129.265625,
+      "right": 1210,
+      "bottom": 770.71875,
+      "width": 980,
+      "height": 641.453125,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 180,
+      "y": 80.765625,
+      "right": 1260,
+      "bottom": 819.21875,
+      "width": 1080,
+      "height": 738.453125,
+      "scrollWidth": 1078,
+      "clientWidth": 1078,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 1226.5,
+      "y": 509.9375,
+      "right": 1382.5,
+      "bottom": 721.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "avatar-and-collapse",
+    "passed": true
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "midnight-1440x900",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 260,
+      "y": 0,
+      "right": 1024,
+      "bottom": 76,
+      "width": 764,
+      "height": 76,
+      "scrollWidth": 764,
+      "clientWidth": 764,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 16,
+      "y": 64,
+      "right": 1008,
+      "bottom": 573.328125,
+      "width": 992,
+      "height": 509.328125,
+      "scrollWidth": 990,
+      "clientWidth": 990,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 131.75,
+      "right": 1002,
+      "bottom": 636.234375,
+      "width": 980,
+      "height": 504.484375,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 18,
+      "y": 101.421875,
+      "right": 1006,
+      "bottom": 666.5625,
+      "width": 988,
+      "height": 565.140625,
+      "scrollWidth": 986,
+      "clientWidth": 986,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 258.140625,
+      "right": 1002,
+      "bottom": 509.859375,
+      "width": 980,
+      "height": 251.71875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 164.015625,
+      "right": 1002,
+      "bottom": 603.984375,
+      "width": 980,
+      "height": 439.96875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 63.265625,
+      "right": 1002,
+      "bottom": 704.71875,
+      "width": 980,
+      "height": 641.453125,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 18,
+      "y": 46.078125,
+      "right": 1006,
+      "bottom": 721.90625,
+      "width": 988,
+      "height": 675.828125,
+      "scrollWidth": 986,
+      "clientWidth": 986,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 836,
+      "y": 435.9375,
+      "right": 992,
+      "bottom": 647.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "avatar-and-collapse",
+    "passed": true
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "midnight-1024x768",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 70,
+      "width": 390,
+      "height": 70,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 202,
+      "y": 540.4375,
+      "right": 358,
+      "bottom": 752.390625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 93.578125,
+      "y": 64.5,
+      "right": 273.578125,
+      "bottom": 210.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "midnight-390x844",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 70,
+      "width": 320,
+      "height": 70,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 132,
+      "y": 410.6875,
+      "right": 288,
+      "bottom": 622.640625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 86,
+      "y": 64.5,
+      "right": 266,
+      "bottom": 210.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "midnight-320x740",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 52,
+      "width": 844,
+      "height": 52,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 656,
+      "y": 127.9375,
+      "right": 812,
+      "bottom": 339.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 547.578125,
+      "y": 55.5,
+      "right": 727.578125,
+      "bottom": 201.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "midnight-844x390",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 260,
+      "y": 0,
+      "right": 1440,
+      "bottom": 76,
+      "width": 1180,
+      "height": 76,
+      "scrollWidth": 1180,
+      "clientWidth": 1180,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 200,
+      "y": 64,
+      "right": 1240,
+      "bottom": 573.328125,
+      "width": 1040,
+      "height": 509.328125,
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 197.75,
+      "right": 1210,
+      "bottom": 702.234375,
+      "width": 980,
+      "height": 504.484375,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 180,
+      "y": 167.421875,
+      "right": 1260,
+      "bottom": 732.5625,
+      "width": 1080,
+      "height": 565.140625,
+      "scrollWidth": 1078,
+      "clientWidth": 1078,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 324.140625,
+      "right": 1210,
+      "bottom": 575.859375,
+      "width": 980,
+      "height": 251.71875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 230.015625,
+      "right": 1210,
+      "bottom": 669.984375,
+      "width": 980,
+      "height": 439.96875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 230,
+      "y": 129.265625,
+      "right": 1210,
+      "bottom": 770.71875,
+      "width": 980,
+      "height": 641.453125,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 180,
+      "y": 80.765625,
+      "right": 1260,
+      "bottom": 819.21875,
+      "width": 1080,
+      "height": 738.453125,
+      "scrollWidth": 1078,
+      "clientWidth": 1078,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 1226.5,
+      "y": 509.9375,
+      "right": 1382.5,
+      "bottom": 721.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "avatar-and-collapse",
+    "passed": true
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "doodle-1440x900",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 260,
+      "y": 0,
+      "right": 1024,
+      "bottom": 76,
+      "width": 764,
+      "height": 76,
+      "scrollWidth": 764,
+      "clientWidth": 764,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 16,
+      "y": 64,
+      "right": 1008,
+      "bottom": 573.328125,
+      "width": 992,
+      "height": 509.328125,
+      "scrollWidth": 990,
+      "clientWidth": 990,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 131.75,
+      "right": 1002,
+      "bottom": 636.234375,
+      "width": 980,
+      "height": 504.484375,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 18,
+      "y": 101.421875,
+      "right": 1006,
+      "bottom": 666.5625,
+      "width": 988,
+      "height": 565.140625,
+      "scrollWidth": 986,
+      "clientWidth": 986,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 258.140625,
+      "right": 1002,
+      "bottom": 509.859375,
+      "width": 980,
+      "height": 251.71875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 164.015625,
+      "right": 1002,
+      "bottom": 603.984375,
+      "width": 980,
+      "height": 439.96875,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 22,
+      "y": 63.265625,
+      "right": 1002,
+      "bottom": 704.71875,
+      "width": 980,
+      "height": 641.453125,
+      "scrollWidth": 978,
+      "clientWidth": 978,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 18,
+      "y": 46.078125,
+      "right": 1006,
+      "bottom": 721.90625,
+      "width": 988,
+      "height": 675.828125,
+      "scrollWidth": 986,
+      "clientWidth": 986,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 836,
+      "y": 435.9375,
+      "right": 992,
+      "bottom": 647.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 1024,
+      "viewportWidth": 1024,
+      "viewportHeight": 768
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "avatar-and-collapse",
+    "passed": true
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "doodle-1024x768",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 70,
+      "width": 390,
+      "height": 70,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 390,
+      "bottom": 844,
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 202,
+      "y": 540.4375,
+      "right": 358,
+      "bottom": 752.390625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 93.578125,
+      "y": 64.5,
+      "right": 273.578125,
+      "bottom": 210.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "doodle-390x844",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 70,
+      "width": 320,
+      "height": 70,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 320,
+      "bottom": 740,
+      "width": 320,
+      "height": 740,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 132,
+      "y": 410.6875,
+      "right": 288,
+      "bottom": 622.640625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 86,
+      "y": 64.5,
+      "right": 266,
+      "bottom": 210.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 320,
+      "viewportWidth": 320,
+      "viewportHeight": 740
+    }
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "doodle-320x740",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "main",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 52,
+      "width": 844,
+      "height": 52,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "sidebar-settings",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "footer-help-account",
+    "passed": true
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "tasks-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "files-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "search-direct",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "group-team-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "task-detail-return",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "connections-manage",
+    "passed": true,
+    "metrics": {
+      "x": 0,
+      "y": 0,
+      "right": 844,
+      "bottom": 390,
+      "width": 844,
+      "height": 390,
+      "scrollWidth": 844,
+      "clientWidth": 844,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "message-composer",
+    "passed": true,
+    "metrics": {
+      "x": 656,
+      "y": 127.9375,
+      "right": 812,
+      "bottom": 339.890625,
+      "width": 156,
+      "height": 211.953125,
+      "scrollWidth": 154,
+      "clientWidth": 154,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "mobile-menu-escape",
+    "passed": true,
+    "metrics": {
+      "x": 547.578125,
+      "y": 55.5,
+      "right": 727.578125,
+      "bottom": 201.5,
+      "width": 180,
+      "height": 146,
+      "scrollWidth": 178,
+      "clientWidth": 178,
+      "pageWidth": 844,
+      "viewportWidth": 844,
+      "viewportHeight": 390
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "keyboard-modal-focus",
+    "passed": true
+  },
+  {
+    "name": "doodle-844x390",
+    "step": "transport",
+    "passed": true,
+    "errors": [],
+    "blocked": [],
+    "writes": []
+  }
+]

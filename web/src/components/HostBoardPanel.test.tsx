@@ -57,7 +57,7 @@ describe("HostBoardPanel", () => {
     expect(hostCandidateStatus({name:"codex",label:"Codex",online:false},statuses,t)).toBe("离线");
     expect(hostCandidateStatus(chatgpt,new Map([[chatgpt.name,{authorized:false,subscriptions:1}]]),t)).toContain("需重新授权");
   });
-  test("warns that OAuth/MCP identity is not an always-on Host", () => {
+  test("asks for a cloud agent wake-and-reply test before assigning coordination", () => {
     act(()=>{renderer=create(<LocaleProvider><HostBoardPanel
       board={board([action()])}
       candidates={[{name:"ac-oauth-muse",label:"Muse Cloud",online:false}]}
@@ -66,7 +66,8 @@ describe("HostBoardPanel", () => {
     /></LocaleProvider>);});
     const markup=JSON.stringify(renderer!.toJSON());
     expect(markup).toContain("OAuth/MCP identity");
-    expect(markup).toContain("persistent WebSocket");
+    expect(markup).toContain("no live session");
+    expect(markup).toContain("Before assigning coordination, test this cloud agent’s automatic wake-up and reply in the group");
     expect(markup).not.toContain("Muse Cloud · offline");
   });
 

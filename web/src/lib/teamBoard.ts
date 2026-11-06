@@ -168,8 +168,12 @@ export function teamLaneOf(
   presence: PresenceEntry | null,
   deliveries: PublicDirectedDelivery[],
   tasks: TaskRecord[],
+  connected = presence?.live === true,
 ): TeamLane {
-  if (presence === null || presence.state === "offline") return "offline";
+  if (!connected || presence?.state === "offline") return "offline";
+  // A live participant can arrive before its first presence report. Keep that
+  // connection visible without inventing activity or a heartbeat from tasks.
+  if (presence === null) return "idle";
   if (presence.state === "blocked" || deliveries.some((d) => d.state === "waiting_owner")) return "blocked";
   if (tasks.some((task) => task.state === "blocked")) return "blocked";
   if (
@@ -287,7 +291,8 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
     });
     const memberTasks = tasksByName.get(name) ?? [];
     const memberDeliveries = deliveriesByName.get(name) ?? [];
-    const lane = teamLaneOf(entry, memberDeliveries, memberTasks);
+    const online = view.runtime.online && entry?.state !== "offline";
+    const lane = teamLaneOf(entry, memberDeliveries, memberTasks, online);
     const host = hostByName.get(name);
     const lineage = lineageByName.get(name) ?? null;
     const currentTaskId = entry?.current_task ?? null;
@@ -307,7 +312,7 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
       avatarUrl: entry?.avatar_url ?? null,
       avatarThumb: entry?.avatar_thumb ?? null,
       lane,
-      online: view.runtime.online,
+      online,
       paused: entry?.paused === true,
       busy: entry?.busy === true,
       queueDepth: entry?.queue_depth ?? 0,

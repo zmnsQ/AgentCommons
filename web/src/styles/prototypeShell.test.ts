@@ -5,10 +5,10 @@ import {readFileSync} from 'node:fs';
 const read=(path:string)=>readFileSync(new URL(path,import.meta.url),'utf8');
 const css=read('./workspace-surfaces.css'),legacy=read('./prototype-shell.css');
 const tokens=read('./tokens.css'),app=read('../App.tsx'),main=read('../main.tsx');
-test('sidebar retains real tool actions and native disclosure without a permanent rail',()=>{
- expect(app).not.toContain('className="prototype-rail-nav"');expect(app).toContain('workspace-account-controls');expect(app).toContain('prototype-rail-popover');expect(app).toContain('App.workspace.tools');expect(app).toContain('event.key==="Escape"');
- expect(css).toContain('.workspace-account-controls .prototype-rail-popover');expect(css).toContain('position:fixed');expect(css).toContain('overflow:auto');
- expect(legacy).toContain('details.prototype-rail-more::details-content {height:auto;overflow:visible');
+test('sidebar exposes settings directly without a second utility menu or permanent rail',()=>{
+ expect(app).not.toContain('className="prototype-rail-nav"');expect(app).toContain('workspace-account-controls');
+ expect(app).not.toContain('className="prototype-rail-popover"');expect(app).toContain('className="app-settings-btn"');
+ expect(app).toContain('App.settings.section.help');expect(app).toContain('navigationFooter={accountControls}');
 });
 test('default root is dark and explicit doodle supplies the full shared light palette',()=>{
  const dark=tokens.match(/:root,:root\[data-theme="midnight"\]\s*\{([^}]+)\}/)![1]!;

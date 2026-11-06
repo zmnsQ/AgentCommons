@@ -878,7 +878,7 @@ describe("presence roster flat list (#1047)", () => {
     const statusOf = (name: string) =>
       String(rows.find((n) => n.props["data-name"] === name)?.findAll((c) => c.props.className === "roster-status-text")[0]?.children.join(""));
     expect(statusOf("worker")).toMatch(/can be woken/);
-    expect(statusOf("watcher")).toMatch(/watching only/);
+    expect(statusOf("watcher")).toContain("Online · automatic wake-up off");
     expect(statusOf("gone")).toMatch(/away/);
     // 行话不再出现在名单里
     const json = JSON.stringify(r.toJSON());

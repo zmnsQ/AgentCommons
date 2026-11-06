@@ -1082,6 +1082,7 @@ export function TaskLedgerPanel({
   onUploadAttachment,
   onOpenMessage,
   onClose,
+  embeddedHeader = false,
   selectedTaskId = null,
   onSelectedTaskDismiss,
   viewMemory,
@@ -1091,6 +1092,7 @@ export function TaskLedgerPanel({
   error: string | null;
   canWrite: boolean;
   onClose?: () => void;
+  embeddedHeader?: boolean;
   busyTaskId: number | null;
   actionError: string | null;
   creating: boolean;
@@ -1505,7 +1507,7 @@ export function TaskLedgerPanel({
       {detailTask === null ? (
         <>
           <header className="task-blog-head">
-            <div className="task-blog-title">
+            {!embeddedHeader && <div className="task-blog-title">
               <h2 className="task-blog-name">{t("Channel.tasks.title")}</h2>
               <span className="task-blog-prompt">
                 {t("Channel.tasks.overviewSummary", {
@@ -1515,7 +1517,7 @@ export function TaskLedgerPanel({
                   blocked: counts.blocked ?? 0,
                 })}
               </span>
-            </div>
+            </div>}
             <div className="task-blog-head-actions">
               {canWrite && (
                 <button
@@ -2083,6 +2085,7 @@ export function ChannelPage({
   const [state, dispatch] = useReducer(channelReducer, initialChannelState);
   const [channelIdentities, setChannelIdentities] = useState<ChannelIdentity[]>([]);
   const [detailsOpen,setDetailsOpen]=useState(false);
+  const detailsButtonRef=useRef<HTMLButtonElement|null>(null);
   const [readingWidth, setReadingWidth] = useConversationWidth();
   const [detailsRosterOpen,setDetailsRosterOpen]=useState(false);
   const [workspaceFiles,setWorkspaceFiles]=useState(false);
@@ -4691,12 +4694,18 @@ export function ChannelPage({
 
   return (
     <div className="chan" data-reading-width={readingWidth}>
-      <ConversationHeader title={title?.trim()||slug} members={displayedChannelIdentities}
+      <ConversationHeader detailsButtonRef={detailsButtonRef} title={title?.trim()||slug} members={displayedChannelIdentities}
         readingWidth={readingWidth} onReadingWidthChange={setReadingWidth}
+        onMembers={()=>openPanel("team")}
+        shortcuts={[
+          {key:"tasks",label:t("Channel.tasks.title"),icon:"tasks",count:taskOpenCount,onClick:()=>openPanel("tasks")},
+          {key:"files",label:t("Studio.files"),icon:"folder",onClick:()=>{setWorkspaceFiles(true);setCloudConnectTarget(null);collaborationViewMemory.current=null;openPanel("collaboration");}},
+          {key:"search",label:t("Channel.tools.timeline"),icon:"search",onClick:()=>openPanel("search")},
+        ]}
         onDetails={()=>setDetailsOpen(true)} connectionStatus={state.status}
         attentionCount={toasts.length} onAttention={()=>{const latest=toasts[toasts.length-1];if(latest)jumpToMention(latest.seq);}}
         onAddAgent={canMintAgent&&accountKey!==null&&!state.archived?()=>setAdminSurface("agentJoin",true):undefined}/>
-      <ConversationDetails suspended={detailsRosterOpen} open={detailsOpen} onClose={()=>setDetailsOpen(false)} restoreFocus={activePanel===null&&activeAdminSurface===null}>
+      <ConversationDetails returnFocusRef={detailsButtonRef} suspended={detailsRosterOpen} open={detailsOpen} onClose={()=>setDetailsOpen(false)} restoreFocus={activePanel===null&&activeAdminSurface===null}>
       <PresenceBar
         onRosterOpenChange={setDetailsRosterOpen}
         attentionCount={hostBoardAttentionCount}
@@ -4962,7 +4971,6 @@ export function ChannelPage({
               : undefined
           }
           shouldRestoreFocus={() => !skipPanelFocusRestoreRef.current}
-          hideHeader={activePanel === "team" || activePanel === "tasks"}
         >
           {activePanel === "collaboration" && (
             <Suspense fallback={<p role="status">{t("Collab.loading")}</p>}>
@@ -5003,7 +5011,6 @@ export function ChannelPage({
           {activePanel === "team" && (
             // #1060 PR B：一个看板替代 分工 / 团队 / agent 泳道 / 组织树。点卡片 → 面板内展开成员详情。
             <TeamShell
-              onClose={closeChannelPanel}
               closeDisabled={roleSaving !== null}
               detail={memberDetailRoute?.source === "team" ? memberDetailContent : null}
               detailBackLabel={t("Channel.team.member.back")}
@@ -5062,6 +5069,7 @@ export function ChannelPage({
           )}
           {activePanel === "tasks" && (
             <TaskLedgerPanel
+              embeddedHeader
               tasks={tasks}
               loading={tasksLoading}
               error={tasksError}
@@ -5087,7 +5095,7 @@ export function ChannelPage({
                   closeChannelPanel();
                 }
               }}
-              onClose={closeChannelPanel}
+
             />
           )}
           {activePanel === "admin" && (

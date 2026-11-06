@@ -81,7 +81,8 @@ describe("MessageCard sender CLI version (#434)", () => {
     const badges = receptionBadges(render(msg));
     expect(badges).toHaveLength(1);
     expect(badges[0]!.children.join("")).toBe("auto-reply via codex");
-    expect(String(badges[0]!.props.title)).toContain("does not inherit");
+    expect(String(badges[0]!.props.title)).toContain("this channel’s dedicated auto-reply session");
+    expect(String(badges[0]!.props.title)).toContain("resumed");
     expect(String(badges[0]!.props.title)).toContain("#6");
   });
 });

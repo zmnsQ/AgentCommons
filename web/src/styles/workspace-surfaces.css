@@ -135,7 +135,7 @@ html:root[data-theme] .workspace-navigation-footer{background:var(--ac-surface-1
 html:root[data-theme] .workspace-account-controls :is(.prototype-rail-button,.prototype-rail-account):hover{background:var(--ac-hover);color:var(--t-text);}
 
 /* Conversation title, live membership and actions have distinct visual roles. */
-html:root[data-theme] .chat-header.conversation-header{height:76px;min-height:76px;padding:0 32px;gap:16px;background:var(--t-bg);border-bottom:1px solid var(--t-border);box-shadow:0 1px 0 var(--ac-silver-edge);}
+html:root[data-theme] .chat-header.conversation-header{position:relative;z-index:12;overflow:visible;height:76px;min-height:76px;padding:0 32px;gap:16px;background:var(--t-bg);border-bottom:1px solid var(--t-border);box-shadow:0 1px 0 var(--ac-silver-edge);}
 html:root[data-theme] .conversation-header .header-title{flex:1;gap:12px;color:var(--t-muted);}
 html:root[data-theme] .conversation-heading{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;}
 html:root[data-theme] .conversation-header .conversation-title{max-width:100%;min-width:0;gap:8px;}
@@ -315,4 +315,45 @@ html:root[data-theme] :is(.prototype-sidebar button,.prototype-sidebar summary,.
  html:root[data-theme] :is(.workspace-navigation,.chat-header.conversation-header,.conversation-details-panel,.channel-panel-card,.settings-panel,.agentjoin-dialog,.agent-join-card,.agentmanager-dialog,.sectioned-dialog,.sectioned-dialog-panel,div.composer[data-prototype-composer]){background:Canvas;color:CanvasText;border-color:CanvasText;box-shadow:none;}
  html:root[data-theme] .stream article.msg-card[data-prototype-message]>.msg-body{background:Canvas;color:CanvasText;border-color:CanvasText;}
  html:root[data-theme] .prototype-sidebar .chan-pill.is-active{outline:1px solid Highlight;outline-offset:-1px;}
+}
+
+/* Direct entry points: account, settings and help share one footer. */
+html:root[data-theme] .workspace-account-controls>.prototype-rail-account{display:flex;align-items:center;gap:8px;flex:1;min-width:0;width:auto;height:40px;padding:6px;border:0;border-radius:10px;background:transparent;color:var(--t-text);font:500 12px/1.4 var(--t-sans);cursor:pointer;}
+html:root[data-theme] .workspace-account-controls>.prototype-rail-account :is(img,svg){width:26px;height:26px;flex:none;border-radius:50%;}
+html:root[data-theme] .workspace-account-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+html:root[data-theme] .workspace-account-controls .prototype-rail-footer{flex:none;gap:2px;}
+html:root[data-theme] .workspace-account-controls :is(.app-settings-btn,.app-agent-center-btn){display:grid;place-items:center;width:30px;height:32px;min-width:30px;min-height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--t-muted);cursor:pointer;}
+html:root[data-theme] .sidebar-server-switcher{padding:12px 12px 0;}
+html:root[data-theme] .workspace-account-controls button:hover{background:var(--ac-hover);}
+html:root[data-theme] .navigation-collapsed .workspace-account-controls{flex-direction:column;}
+html:root[data-theme] .navigation-collapsed .workspace-account-name{display:none;}
+html:root[data-theme] .navigation-collapsed .workspace-account-controls>.prototype-rail-account{padding:4px;flex:none;}
+html:root[data-theme] .prototype-sidebar .side-section-title .sidebar-icon-button{display:flex;align-items:center;gap:4px;width:auto;height:32px;padding:4px 6px;font:500 11px/1.4 var(--t-sans);}
+html:root[data-theme] .prototype-sidebar .side-section-title .sidebar-icon-button svg{width:14px;height:14px;}
+html:root[data-theme] .settings-help-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 20px;}
+
+/* Frequent group actions are reachable from the transcript. */
+html:root[data-theme] .conversation-shortcut-actions{display:flex;align-items:center;gap:4px;}
+html:root[data-theme] .conversation-shortcut-actions button{display:flex;align-items:center;gap:5px;min-width:36px;min-height:36px;padding:7px 9px;border:0;border-radius:9px;background:transparent;color:var(--t-muted);font:12px/1.4 var(--t-sans);cursor:pointer;}
+html:root[data-theme] .conversation-shortcut-actions button:hover{background:var(--ac-hover);color:var(--t-text);}
+html:root[data-theme] :is(.conversation-shortcut-actions,.conversation-shortcut-menu) small{padding:1px 4px;border-radius:5px;background:var(--ac-accent-soft);color:var(--t-accent);font:11px/1.4 var(--t-sans);}
+html:root[data-theme] .conversation-shortcut-menu{display:none;}
+html:root[data-theme] .msg-menu .msg-menu-item--danger{border-top:1px solid var(--t-border);border-radius:0;margin-top:4px;padding-top:10px;}
+html:root[data-theme] .channel-panel-card .team-shell-head:empty{display:none;}
+html:root[data-theme] .channel-panel-card .task-blog-head{padding-top:0;}
+@media(max-width:1250px){html:root[data-theme] .conversation-shortcut-actions button>span{display:none;}}
+@media(max-width:760px),(max-height:760px) and (pointer:coarse),(max-device-width:760px) and (pointer:coarse),(max-device-height:760px) and (pointer:coarse){
+ html:root[data-theme] .conversation-shortcut-actions{display:none;}
+ html:root[data-theme] .conversation-shortcut-menu{display:block;position:relative;flex:none;}
+ html:root[data-theme] .conversation-shortcut-menu>summary{display:grid;place-items:center;width:44px;height:44px;list-style:none;cursor:pointer;color:var(--t-muted);border-radius:10px;}
+ html:root[data-theme] .conversation-shortcut-menu>summary::-webkit-details-marker{display:none;}
+ html:root[data-theme] .conversation-shortcut-menu[open]>summary{background:var(--ac-hover);}
+ html:root[data-theme] .conversation-shortcut-menu>div{position:absolute;right:0;top:calc(100% + 8px);width:180px;max-width:calc(100vw - 24px);padding:6px;border:1px solid var(--t-border);border-radius:12px;background:var(--t-panel);box-shadow:var(--ac-shadow-popover);z-index:30;}
+ html:root[data-theme] .conversation-shortcut-menu>div>button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:var(--t-text);font:13px/1.4 var(--t-sans);text-align:left;}
+ html:root[data-theme] .conversation-shortcut-menu>div>button:hover{background:var(--ac-hover);}
+ html:root[data-theme] .conversation-shortcut-menu>div>button>span{flex:1;}
+ html:root[data-theme] .conversation-header-actions{gap:2px;}
+ html:root[data-theme] .prototype-sidebar .side-section-title .sidebar-icon-button{min-height:44px;}
+ html:root[data-theme] .workspace-account-controls>.prototype-rail-account{min-height:44px;}
+ html:root[data-theme] .workspace-account-controls :is(.app-settings-btn,.app-agent-center-btn){width:44px;height:44px;min-width:44px;min-height:44px;}
 }

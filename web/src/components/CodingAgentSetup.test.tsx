@@ -25,31 +25,30 @@ for(const origin of ['http://localhost:4177','http://example.test'])test(`insecu
  stub('location',{origin});await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client="codebuddy" slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});const root=renderer!.root;expect(text(root)).toContain('HTTPS');expect(calls).toHaveLength(0);expect(root.findAllByProps({type:'password'})).toHaveLength(0);
 });
 
-test('direct MCP stays the default with optional installation in advanced disclosure and no implicit credentials',async()=>{await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client="codebuddy" slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});const root=renderer!.root;expect(calls).toHaveLength(0);expect(text(root)).toContain('直接连接本群 MCP');expect(text(root)).toContain('--transport http');expect(text(root)).toContain('/cli/install.sh');expect(text(root)).toContain('安装 / 升级 agentcommons');expect(text(root)).toContain('直接 MCP 无需安装');expect(text(root)).not.toContain('原项目');expect(root.findAllByProps({type:'password'})).toHaveLength(0);});
-
-for(const client of ['codex','codebuddy','claude','generic'] as const)test(`${client}: optional install remains available under advanced before credential creation`,async()=>{
- await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client={client} slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});
- const root=renderer!.root,install=root.findByProps({className:'coding-install'});
+test('direct MCP is the default, with other methods collapsed and no implicit credentials',async()=>{
+ await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client="codebuddy" slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});
+ const root=renderer!.root;expect(calls).toHaveLength(0);expect(text(root)).toContain('--transport http');
  expect(root.findByProps({className:'coding-local-advanced'}).props.open).toBeUndefined();
- expect(text(root.findByProps({className:'coding-local-advanced'}))).toContain('高级：本地连接器');
- expect(text(install)).toContain('https://commons.test/cli/install.sh');expect(text(install)).toContain('agentcommons --version');
- expect(root.findAllByProps({className:'coding-agent-name'})).toHaveLength(0);expect(calls).toHaveLength(0);
+ expect(root.findAllByProps({className:'coding-install'})).toHaveLength(0);expect(root.findAllByProps({type:'password'})).toHaveLength(0);
+});
+for(const client of ['codex','codebuddy','claude','generic'] as const)test(`${client}: local setup offers installation before credential creation`,async()=>{
+ await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client={client} slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});
+ const root=renderer!.root;await act(async()=>root.findByProps({className:'d-btn coding-local-mode'}).props.onClick());
+ expect(text(root.findByProps({className:'coding-install'}))).toContain('https://commons.test/cli/install.sh');
+ expect(text(root.findByProps({className:'coding-install'}))).toContain('agentcommons --version');expect(calls).toHaveLength(0);
  await act(async()=>root.findAllByType('button').find(x=>text(x)==='Windows')!.props.onClick());
  expect(text(root.findByProps({className:'coding-install'}))).toContain('/cli/install.ps1');expect(calls).toHaveLength(0);
- await act(async()=>root.findByProps({className:'d-btn coding-local-mode'}).props.onClick());
- expect(text(root.findByProps({className:'coding-install'}))).toContain('/cli/install.ps1');expect(calls).toHaveLength(0);
 });
-test('English shows installation and upgrade without development-history copy',async()=>{
- locale='en';await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client="codex" slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}}/></LocaleProvider>);});
- expect(text(renderer!.root)).toContain('Install / update agentcommons');expect(text(renderer!.root)).toContain('Copy installation command');expect(text(renderer!.root)).not.toContain('upstream');expect(calls).toHaveLength(0);
+test('resident setup can open directly without walking through the local installer',async()=>{
+ let resident=0;await act(async()=>{renderer=create(<LocaleProvider><CodingAgentSetup client="codex" slug="test-group" token="human-fixture" namePrefix="test" onBack={()=>{}} onLegacy={()=>{resident++;}}/></LocaleProvider>);});
+ await act(async()=>renderer!.root.findByProps({className:'d-btn coding-resident-mode'}).props.onClick());
+ expect(resident).toBe(1);expect(calls).toHaveLength(0);
 });
-
-test('local credential issuance is distinct from client login and a running agent',async()=>{
- locale='en';const root=await mount();
- expect(text(root)).toContain('does not sign in to your coding client or bring an agent online');
- expect(text(root)).toContain('installs only the connector');
- expect(text(root)).toContain('commands below are not read-only checks');
- expect(calls).toHaveLength(0);
+test('local setup keeps event commands optional and does not issue credentials on view',async()=>{
+ locale='en';const root=await mount();expect(text(root)).toContain('Install / update agentcommons');
+ expect(root.findByProps({className:'coding-step coding-channel-start'}).type).toBe('details');
+ expect(root.findByProps({className:'coding-step coding-channel-start'}).props.open).toBeUndefined();
+ expect(text(root)).toContain('events enable');expect(calls).toHaveLength(0);
 });
 
 test('local conflict permits renamed retry; unknown network outcome locks reissue',async()=>{

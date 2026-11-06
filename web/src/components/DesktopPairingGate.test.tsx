@@ -70,7 +70,7 @@ describe("DesktopPairingGate", () => {
     expect(html).not.toContain("ap-token");
     expect(html).not.toContain("Sign in with");
     expect(html).toContain("AgentCommons");
-    expect(html).toContain("does not connect Muse");
+    expect(html).toContain("Approve this desktop app in your signed-in browser");
   });
 
   test("shows the fixed-format code and cancellation while polling", () => {
