@@ -22,5 +22,27 @@
     "source": "synthetic read-only App fixture",
     "duration_seconds": 8.96
   },
-  "production": "pending"
+  "production": {
+    "status": "verified",
+    "source_commit": "966b4afe76a6ff763826a82f925cc10f8f0ef0ce",
+    "public_health": true,
+    "assets_verified": true,
+    "old_assets_retained": 59,
+    "services_active": true,
+    "event_and_tunnel_restarted": false
+  },
+  "production_build": "passed",
+  "public_browser": {
+    "passed": 2,
+    "failed": 0,
+    "viewports": [
+      "1440x900",
+      "390x844"
+    ],
+    "scope": "fresh unauthenticated entry and public health",
+    "new_styles_verified": true,
+    "javascript_errors": 0,
+    "resource_errors": 0,
+    "horizontal_overflow": false
+  }
 }

@@ -22,4 +22,10 @@ Web 全量单测 1809/1809（7361 条断言）、类型检查通过。导航 140
 
 [约 9 秒操作演示](validation/visual-motion-2026-11-06/interaction-demo.mp4)录自合成聊天环境，包含工具提示、任务详情、返回聊天及新消息。
 
-发布版本及公网验收在发布后补充。
+## 发布记录
+
+已部署至 [AgentCommons](https://agentparty.402887.xyz)，运行代码为 `966b4afe76a6ff763826a82f925cc10f8f0ef0ce`。生产构建、发布包校验、服务器本地与公网健康检查全部通过。实际发布目录为 `/opt/agentparty-commons/releases/agent-commons-web-966b4afe76a6`。
+
+发布前已完成一致性数据备份；本次没有数据库结构变更。主服务、事件服务和 Tunnel 均正常运行，事件服务和 Tunnel 进程保持不变。保留 59 个旧版哈希资源以支持已有页面继续加载。完整校验信息见 [production.json](validation/visual-motion-2026-11-06/production.json)。
+
+公网浏览器使用全新未登录上下文，1440×900 与 390×844 均通过：品牌与插画加载、HTTPS 同源登录入口、四项新版样式标记、无横向溢出，健康接口返回本次代码版本，页面与资源错误均为 0。该检查只读取未登录入口及健康接口，不执行登录、授权或真实聊天写入；完整交互场景由上述本地合成环境验证。结果见 [public-browser.json](validation/visual-motion-2026-11-06/public-browser.json)、[桌面截图](validation/visual-motion-2026-11-06/public-desktop.png)和[手机截图](validation/visual-motion-2026-11-06/public-mobile.png)。

@@ -1,0 +1,102 @@
+{
+  "origin": "https://agentparty.402887.xyz",
+  "expectedCommit": "966b4afe76a6ff763826a82f925cc10f8f0ef0ce",
+  "scope": "Fresh unauthenticated public entry and health only; no login, authorization, sending or account changes",
+  "checkedAt": "2026-11-06T10:19:33.958Z",
+  "results": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page": {
+        "styleMarkers": {
+          "workbenchMotion": true,
+          "toolbarTooltip": true,
+          "taskSummary": true,
+          "taskActivity": true
+        },
+        "url": "https://agentparty.402887.xyz/",
+        "title": "Agent Commons — 人与云端 Agent 的协作空间",
+        "brandText": "AgentCommons",
+        "brand": {
+          "src": "https://agentparty.402887.xyz/brand/mark.png",
+          "loaded": true,
+          "width": 256
+        },
+        "artwork": {
+          "src": "https://agentparty.402887.xyz/brand/workspace.png",
+          "loaded": true
+        },
+        "loginHref": "https://agentparty.402887.xyz/api/auth/github/start?return_to=%2F",
+        "loginText": "Continue with GitHub",
+        "viewportWidth": 1440,
+        "pageWidth": 1440,
+        "refinedStyles": true,
+        "stylesheets": [
+          "https://agentparty.402887.xyz/assets/hljs-DdKuH37F.css",
+          "https://agentparty.402887.xyz/assets/index-ZhNfJzGy.css"
+        ]
+      },
+      "health": {
+        "status": 200,
+        "ok": true,
+        "commit": "966b4afe76a6ff763826a82f925cc10f8f0ef0ce",
+        "version": "0.2.275",
+        "deployed_at": "2026-11-06T10:14:23.810684Z"
+      },
+      "errors": [],
+      "blocked": [],
+      "failed": [],
+      "httpErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "page": {
+        "styleMarkers": {
+          "workbenchMotion": true,
+          "toolbarTooltip": true,
+          "taskSummary": true,
+          "taskActivity": true
+        },
+        "url": "https://agentparty.402887.xyz/",
+        "title": "Agent Commons — 人与云端 Agent 的协作空间",
+        "brandText": "AgentCommons",
+        "brand": {
+          "src": "https://agentparty.402887.xyz/brand/mark.png",
+          "loaded": true,
+          "width": 256
+        },
+        "artwork": {
+          "src": "https://agentparty.402887.xyz/brand/workspace.png",
+          "loaded": true
+        },
+        "loginHref": "https://agentparty.402887.xyz/api/auth/github/start?return_to=%2F",
+        "loginText": "Continue with GitHub",
+        "viewportWidth": 390,
+        "pageWidth": 390,
+        "refinedStyles": true,
+        "stylesheets": [
+          "https://agentparty.402887.xyz/assets/hljs-DdKuH37F.css",
+          "https://agentparty.402887.xyz/assets/index-ZhNfJzGy.css"
+        ]
+      },
+      "health": {
+        "status": 200,
+        "ok": true,
+        "commit": "966b4afe76a6ff763826a82f925cc10f8f0ef0ce",
+        "version": "0.2.275",
+        "deployed_at": "2026-11-06T10:14:23.810684Z"
+      },
+      "errors": [],
+      "blocked": [],
+      "failed": [],
+      "httpErrors": [],
+      "passed": true
+    }
+  ]
+}
