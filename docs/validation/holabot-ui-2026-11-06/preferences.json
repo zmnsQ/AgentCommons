@@ -1,0 +1,32 @@
+[
+  {
+    "theme": "midnight",
+    "reduced": {
+      "matches": true,
+      "blur": "none",
+      "chrome": "none",
+      "animation": "none",
+      "background": "rgb(36, 38, 43)"
+    },
+    "forced": {
+      "blur": "none",
+      "shadow": "none"
+    },
+    "passed": true
+  },
+  {
+    "theme": "doodle",
+    "reduced": {
+      "matches": true,
+      "blur": "none",
+      "chrome": "none",
+      "animation": "none",
+      "background": "rgb(252, 252, 253)"
+    },
+    "forced": {
+      "blur": "none",
+      "shadow": "none"
+    },
+    "passed": true
+  }
+]

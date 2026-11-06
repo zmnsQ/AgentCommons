@@ -1,0 +1,48 @@
+{
+  "source_commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+  "archive_sha256": "85d860a6b437000d1cf2479fd8f5b7ec0707944ab8d7161247fbe82ab33fc318",
+  "previous_release": "/opt/agentparty-commons/releases/agent-commons-web-9a37de3ced13",
+  "new_release": "/opt/agentparty-commons/releases/agent-commons-web-ca123cbb7ea9",
+  "backup": "/var/backups/agentparty-commons/release-ca123cbb7ea9-21xqo74a/state-before.tgz",
+  "backup_sha256": "fe72c19e6a2cf82954494f84ca0f1f599af41f6e49ec7a0d921e8259698c3265",
+  "schema_changed": false,
+  "status": "verified",
+  "event_pid": "3853815",
+  "tunnel_pid": "3421442",
+  "retained_asset_count": 52,
+  "active_release": "/opt/agentparty-commons/releases/agent-commons-web-ca123cbb7ea9",
+  "services": {
+    "agentparty-commons.service": {
+      "MainPID": "1102701",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "agentparty-commons-events.service": {
+      "MainPID": "3853815",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "agentparty-commons-tunnel.service": {
+      "MainPID": "3421442",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running"
+    }
+  },
+  "local": {
+    "ok": true,
+    "version": "0.2.275",
+    "commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+    "deployed_at": "2026-11-06T08:24:29.069317Z",
+    "author": "zmnsQ"
+  },
+  "public": {
+    "ok": true,
+    "version": "0.2.275",
+    "commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+    "deployed_at": "2026-11-06T08:24:29.069317Z",
+    "author": "zmnsQ"
+  }
+}

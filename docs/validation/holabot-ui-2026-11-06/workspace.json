@@ -1,0 +1,266 @@
+[
+  {
+    "name": "doodle-1440x960",
+    "passed": true,
+    "geometry": {
+      "width": 1440,
+      "height": 960,
+      "overflow": false,
+      "header": {
+        "x": 260,
+        "y": 0,
+        "width": 1180,
+        "height": 76,
+        "right": 1440,
+        "bottom": 76
+      },
+      "composer": {
+        "x": 460,
+        "y": 859.5,
+        "width": 780,
+        "height": 60,
+        "right": 1240,
+        "bottom": 919.5
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "doodle-1024x768",
+    "passed": true,
+    "geometry": {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "header": {
+        "x": 260,
+        "y": 0,
+        "width": 764,
+        "height": 76,
+        "right": 1024,
+        "bottom": 76
+      },
+      "composer": {
+        "x": 292,
+        "y": 667.5,
+        "width": 700,
+        "height": 60,
+        "right": 992,
+        "bottom": 727.5
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "doodle-390x844",
+    "passed": true,
+    "geometry": {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 70,
+        "right": 390,
+        "bottom": 70
+      },
+      "composer": {
+        "x": 12,
+        "y": 753,
+        "width": 366,
+        "height": 60,
+        "right": 378,
+        "bottom": 813
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "doodle-320x640",
+    "passed": true,
+    "geometry": {
+      "width": 320,
+      "height": 640,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 70,
+        "right": 320,
+        "bottom": 70
+      },
+      "composer": {
+        "x": 12,
+        "y": 549,
+        "width": 296,
+        "height": 60,
+        "right": 308,
+        "bottom": 609
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "doodle-844x390",
+    "passed": true,
+    "geometry": {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 52,
+        "right": 844,
+        "bottom": 52
+      },
+      "composer": {
+        "x": 12,
+        "y": 336,
+        "width": 820,
+        "height": 50,
+        "right": 832,
+        "bottom": 386
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "midnight-1440x960",
+    "passed": true,
+    "geometry": {
+      "width": 1440,
+      "height": 960,
+      "overflow": false,
+      "header": {
+        "x": 260,
+        "y": 0,
+        "width": 1180,
+        "height": 76,
+        "right": 1440,
+        "bottom": 76
+      },
+      "composer": {
+        "x": 460,
+        "y": 859.5,
+        "width": 780,
+        "height": 60,
+        "right": 1240,
+        "bottom": 919.5
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "midnight-1024x768",
+    "passed": true,
+    "geometry": {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "header": {
+        "x": 260,
+        "y": 0,
+        "width": 764,
+        "height": 76,
+        "right": 1024,
+        "bottom": 76
+      },
+      "composer": {
+        "x": 292,
+        "y": 667.5,
+        "width": 700,
+        "height": 60,
+        "right": 992,
+        "bottom": 727.5
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "midnight-390x844",
+    "passed": true,
+    "geometry": {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 70,
+        "right": 390,
+        "bottom": 70
+      },
+      "composer": {
+        "x": 12,
+        "y": 753,
+        "width": 366,
+        "height": 60,
+        "right": 378,
+        "bottom": 813
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "midnight-320x640",
+    "passed": true,
+    "geometry": {
+      "width": 320,
+      "height": 640,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 70,
+        "right": 320,
+        "bottom": 70
+      },
+      "composer": {
+        "x": 12,
+        "y": 549,
+        "width": 296,
+        "height": 60,
+        "right": 308,
+        "bottom": 609
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "midnight-844x390",
+    "passed": true,
+    "geometry": {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 52,
+        "right": 844,
+        "bottom": 52
+      },
+      "composer": {
+        "x": 12,
+        "y": 336,
+        "width": 820,
+        "height": 50,
+        "right": 832,
+        "bottom": 386
+      },
+      "textSize": "15px"
+    }
+  },
+  {
+    "name": "history-anchor-width-and-live-updates",
+    "passed": true
+  }
+]

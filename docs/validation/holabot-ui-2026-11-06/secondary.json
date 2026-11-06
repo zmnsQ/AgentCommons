@@ -1,0 +1,454 @@
+[
+  {
+    "name": "midnight-1440",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "theme": "midnight",
+    "checks": {
+      "settings": {
+        "x": 200,
+        "y": 64,
+        "right": 1240,
+        "bottom": 580.328125,
+        "width": 1040,
+        "height": 516.328125,
+        "scrollWidth": 1038,
+        "clientWidth": 1038,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "tasks": {
+        "x": 230,
+        "y": 188.046875,
+        "right": 1210,
+        "bottom": 711.9375,
+        "width": 980,
+        "height": 523.890625,
+        "scrollWidth": 978,
+        "clientWidth": 978,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "collaboration": {
+        "x": 180,
+        "y": 119.015625,
+        "right": 1260,
+        "bottom": 780.96875,
+        "width": 1080,
+        "height": 661.953125,
+        "scrollWidth": 1078,
+        "clientWidth": 1078,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "tabs": {
+        "bridges": {
+          "x": 181,
+          "y": 188.015625,
+          "right": 1259,
+          "bottom": 779.96875,
+          "width": 1078,
+          "height": 591.953125,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        },
+        "files": {
+          "x": 181,
+          "y": 186.734375,
+          "right": 1259,
+          "bottom": 781.265625,
+          "width": 1078,
+          "height": 594.53125,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        },
+        "repositories": {
+          "x": 181,
+          "y": 123,
+          "right": 1259,
+          "bottom": 845,
+          "width": 1078,
+          "height": 722,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        }
+      }
+    },
+    "taskHeaderButtons": [
+      "← 群组详情",
+      "关闭"
+    ],
+    "passed": true
+  },
+  {
+    "name": "midnight-390",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "theme": "midnight",
+    "checks": {
+      "settings": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "tasks": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "collaboration": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(36, 38, 43, 0.95)",
+        "color": "rgb(238, 239, 242)",
+        "blur": "blur(18px)"
+      },
+      "tabs": {
+        "bridges": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        },
+        "files": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        },
+        "repositories": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(238, 239, 242)",
+          "blur": "none"
+        }
+      }
+    },
+    "taskHeaderButtons": [
+      "← 群组详情",
+      "关闭"
+    ],
+    "passed": true
+  },
+  {
+    "name": "doodle-1440",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "theme": "doodle",
+    "checks": {
+      "settings": {
+        "x": 200,
+        "y": 64,
+        "right": 1240,
+        "bottom": 580.328125,
+        "width": 1040,
+        "height": 516.328125,
+        "scrollWidth": 1038,
+        "clientWidth": 1038,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "tasks": {
+        "x": 230,
+        "y": 188.046875,
+        "right": 1210,
+        "bottom": 711.9375,
+        "width": 980,
+        "height": 523.890625,
+        "scrollWidth": 978,
+        "clientWidth": 978,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "collaboration": {
+        "x": 180,
+        "y": 119.015625,
+        "right": 1260,
+        "bottom": 780.96875,
+        "width": 1080,
+        "height": 661.953125,
+        "scrollWidth": 1078,
+        "clientWidth": 1078,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageWidth": 1440,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "tabs": {
+        "bridges": {
+          "x": 181,
+          "y": 188.015625,
+          "right": 1259,
+          "bottom": 779.96875,
+          "width": 1078,
+          "height": 591.953125,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        },
+        "files": {
+          "x": 181,
+          "y": 186.734375,
+          "right": 1259,
+          "bottom": 781.265625,
+          "width": 1078,
+          "height": 594.53125,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        },
+        "repositories": {
+          "x": 181,
+          "y": 123,
+          "right": 1259,
+          "bottom": 845,
+          "width": 1078,
+          "height": 722,
+          "scrollWidth": 1067,
+          "clientWidth": 1067,
+          "viewportWidth": 1440,
+          "viewportHeight": 900,
+          "pageWidth": 1440,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        }
+      }
+    },
+    "taskHeaderButtons": [
+      "← 群组详情",
+      "关闭"
+    ],
+    "passed": true
+  },
+  {
+    "name": "doodle-390",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "theme": "doodle",
+    "checks": {
+      "settings": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "tasks": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "collaboration": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "pageWidth": 390,
+        "bg": "rgba(252, 252, 253, 0.96)",
+        "color": "rgb(37, 39, 46)",
+        "blur": "blur(18px)"
+      },
+      "tabs": {
+        "bridges": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        },
+        "files": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        },
+        "repositories": {
+          "x": 0,
+          "y": 73,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 771,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "viewportWidth": 390,
+          "viewportHeight": 844,
+          "pageWidth": 390,
+          "bg": "rgba(0, 0, 0, 0)",
+          "color": "rgb(37, 39, 46)",
+          "blur": "none"
+        }
+      }
+    },
+    "taskHeaderButtons": [
+      "← 群组详情",
+      "关闭"
+    ],
+    "passed": true
+  }
+]

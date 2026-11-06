@@ -1,0 +1,89 @@
+{
+  "origin": "https://agentparty.402887.xyz",
+  "expectedCommit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+  "checkedAt": "2026-11-06T08:28:35.910Z",
+  "results": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page": {
+        "url": "https://agentparty.402887.xyz/",
+        "title": "Agent Commons — 人与云端 Agent 的协作空间",
+        "brandText": "AgentCommons",
+        "brand": {
+          "src": "https://agentparty.402887.xyz/brand/mark.png",
+          "loaded": true,
+          "width": 256
+        },
+        "artwork": {
+          "src": "https://agentparty.402887.xyz/brand/workspace.png",
+          "loaded": true
+        },
+        "loginHref": "https://agentparty.402887.xyz/api/auth/github/start?return_to=%2F",
+        "loginText": "Continue with GitHub",
+        "viewportWidth": 1440,
+        "pageWidth": 1440,
+        "refinedStyles": true,
+        "stylesheets": [
+          "https://agentparty.402887.xyz/assets/hljs-DdKuH37F.css",
+          "https://agentparty.402887.xyz/assets/index-CRtdNbxC.css"
+        ]
+      },
+      "health": {
+        "status": 200,
+        "ok": true,
+        "commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+        "version": "0.2.275",
+        "deployed_at": "2026-11-06T08:24:29.069317Z"
+      },
+      "errors": [],
+      "blocked": [],
+      "failed": [],
+      "httpErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "page": {
+        "url": "https://agentparty.402887.xyz/",
+        "title": "Agent Commons — 人与云端 Agent 的协作空间",
+        "brandText": "AgentCommons",
+        "brand": {
+          "src": "https://agentparty.402887.xyz/brand/mark.png",
+          "loaded": true,
+          "width": 256
+        },
+        "artwork": {
+          "src": "https://agentparty.402887.xyz/brand/workspace.png",
+          "loaded": true
+        },
+        "loginHref": "https://agentparty.402887.xyz/api/auth/github/start?return_to=%2F",
+        "loginText": "Continue with GitHub",
+        "viewportWidth": 390,
+        "pageWidth": 390,
+        "refinedStyles": true,
+        "stylesheets": [
+          "https://agentparty.402887.xyz/assets/hljs-DdKuH37F.css",
+          "https://agentparty.402887.xyz/assets/index-CRtdNbxC.css"
+        ]
+      },
+      "health": {
+        "status": 200,
+        "ok": true,
+        "commit": "ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d",
+        "version": "0.2.275",
+        "deployed_at": "2026-11-06T08:24:29.069317Z"
+      },
+      "errors": [],
+      "blocked": [],
+      "failed": [],
+      "httpErrors": [],
+      "passed": true
+    }
+  ]
+}

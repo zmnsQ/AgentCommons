@@ -26,3 +26,15 @@
 可重跑浏览器检查：先在 `web` 启动 Vite，再设置 `PLAYWRIGHT_MODULE`、`PLAYWRIGHT_CHROMIUM_EXECUTABLE`（使用已有浏览器时）、`QA_ORIGIN` 和 `QA_OUTPUT_DIR`，运行 `node test/workspace-design.browser.mjs`。
 
 服务端产物通过项目已有 Wrangler 仅构建模式生成，参数依据[官方部署命令文档](https://developers.cloudflare.com/workers/wrangler/commands/workers/#deploy)和本地版本帮助核对；发布使用现有 VPS 流程。
+
+## 已发布
+
+[线上站点](https://agentparty.402887.xyz)运行提交 `ca123cbb7ea919f7ce1d494bf3c3bce79ee66f2d`，版本 `0.2.275`。维护分支为 `codex/holabot-ui-refinement`，已推送到现名 `zmnsQ/AgentCommons` 的仓库。
+
+发布基线与线上原版本均为 `9a37de3ced1316e93853100d997af600d81c54e2`。临时发布脚本只更新既有发布器的三项旧版本常量，保留版本锁、逐文件校验、备份、原子切换和失败回退。包 SHA-256 为 `85d860a6b437000d1cf2479fd8f5b7ec0707944ab8d7161247fbe82ab33fc318`。
+
+当前目录为 `/opt/agentparty-commons/releases/agent-commons-web-ca123cbb7ea9`。一致性数据备份位于 `/var/backups/agentparty-commons/release-ca123cbb7ea9-21xqo74a/state-before.tgz`；部署记录为 `verified`，保留 52 个旧哈希资源。三项服务均 active/running，事件服务和 Tunnel 的 PID 保持不变。没有数据库迁移或凭据调整。
+
+公网和本机健康检查返回同一新提交，部署器已逐项验证关键资源。补充使用全新无登录浏览器验证 1440px／390px 公网入口、品牌图、HTTPS 登录地址和新样式资源：无横向溢出、页面异常或资源失败。真实个人登录与聊天未执行。
+
+本地模拟聊天预览和脱敏检查结果见 [`docs/validation/holabot-ui-2026-11-06`](validation/holabot-ui-2026-11-06)：`desktop-dark.png`、`mobile-light.png`、`details-light.png` 来自只读模拟数据；`public-1440.png`、`public-390.png` 来自实际公网未登录入口。`production.json` 记录发布版本、备份校验及服务状态。
