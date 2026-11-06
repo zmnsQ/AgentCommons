@@ -8,10 +8,24 @@ test("only explicit platform keys map, never nickname fragments", () => {
   expect(declaredAgentPlatform("chatgpt")).toBe("chatgpt");
   expect(declaredAgentPlatform("codex-sdk")).toBe("codex-sdk");
   expect(declaredAgentPlatform("manus")).toBe("manus");
-  expect(PlatformIcon({ platform: "manus" }).props.children.props.name).toBe("agent");
+  expect(PlatformIcon({ platform: "manus" }).props.children.props.children).toBe("M");
   expect(declaredAgentPlatform("My ChatGPT agent")).toBe(null);
   expect(declaredAgentPlatform("ac-oauth-muse")).toBe(null);
   expect(declaredAgentPlatform(undefined)).toBe(null);
+});
+test("declared platforms without artwork use neutral initials and retain accessible names", () => {
+  for (const [platform, initials, label] of [["muse","M","Muse"],["manus","M","Manus"],["cue","C","Cue"],["grok","G","Grok"],["hermes","H","Hermes"],["codebuddy","CB","CodeBuddy"]]) {
+    const icon = PlatformIcon({platform,size:24});
+    expect(icon.props["aria-label"]).toBe(label);
+    expect(icon.props.children.props.className).toBe("platform-icon-initials");
+    expect(icon.props.children.props.children).toBe(initials);
+    expect(icon.props.children.props.style).toBeUndefined();
+    expect(icon.props.style["--platform-icon-size"]).toBe("24px");
+    const decorative = PlatformIcon({platform,decorative:true});
+    expect(decorative.props["aria-hidden"]).toBe(true);
+    expect(decorative.props["aria-label"]).toBeUndefined();
+  }
+  expect(PlatformIcon({platform:"my-muse"}).props.children.props.name).toBe("agent");
 });
 test("known OpenAI service uses local mark and unknown remains neutral", () => {
   const icon = PlatformIcon({ platform: "chatgpt" });

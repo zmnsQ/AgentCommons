@@ -1,0 +1,544 @@
+[
+  {
+    "name": "midnight-no-preference-1440x900",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 344,
+        "height": 21.6875,
+        "scrollWidth": 344,
+        "clientWidth": 344,
+        "textBottom": 617.0625,
+        "bottom": 619.75
+      },
+      "panelMotion": "ac-workbench-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-no-preference-1024x768",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 887,
+        "height": 21.6875,
+        "scrollWidth": 887,
+        "clientWidth": 887,
+        "textBottom": 629.609375,
+        "bottom": 632.296875
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-no-preference-390x844",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 318,
+        "height": 21.6875,
+        "scrollWidth": 318,
+        "clientWidth": 318,
+        "textBottom": 576.875,
+        "bottom": 579.5625
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-no-preference-320x740",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 248,
+        "height": 43.375,
+        "scrollWidth": 248,
+        "clientWidth": 248,
+        "textBottom": 598.5625,
+        "bottom": 601.25
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-no-preference-844x390",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 772,
+        "height": 21.6875,
+        "scrollWidth": 772,
+        "clientWidth": 772,
+        "textBottom": 550.78125,
+        "bottom": 553.46875
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-reduce-1440x900",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 344,
+        "height": 21.6875,
+        "scrollWidth": 344,
+        "clientWidth": 344,
+        "textBottom": 617.0625,
+        "bottom": 619.75
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-reduce-1024x768",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 887,
+        "height": 21.6875,
+        "scrollWidth": 887,
+        "clientWidth": 887,
+        "textBottom": 629.609375,
+        "bottom": 632.296875
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-reduce-390x844",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 318,
+        "height": 21.6875,
+        "scrollWidth": 318,
+        "clientWidth": 318,
+        "textBottom": 576.875,
+        "bottom": 579.5625
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-reduce-320x740",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 248,
+        "height": 43.375,
+        "scrollWidth": 248,
+        "clientWidth": 248,
+        "textBottom": 598.5625,
+        "bottom": 601.25
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "midnight-reduce-844x390",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 772,
+        "height": 21.6875,
+        "scrollWidth": 772,
+        "clientWidth": 772,
+        "textBottom": 550.78125,
+        "bottom": 553.46875
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-no-preference-1440x900",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 344,
+        "height": 21.6875,
+        "scrollWidth": 344,
+        "clientWidth": 344,
+        "textBottom": 617.0625,
+        "bottom": 619.75
+      },
+      "panelMotion": "ac-workbench-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-no-preference-1024x768",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 887,
+        "height": 21.6875,
+        "scrollWidth": 887,
+        "clientWidth": 887,
+        "textBottom": 629.609375,
+        "bottom": 632.296875
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-no-preference-390x844",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 318,
+        "height": 21.6875,
+        "scrollWidth": 318,
+        "clientWidth": 318,
+        "textBottom": 576.875,
+        "bottom": 579.5625
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-no-preference-320x740",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 248,
+        "height": 43.375,
+        "scrollWidth": 248,
+        "clientWidth": 248,
+        "textBottom": 598.5625,
+        "bottom": 601.25
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-no-preference-844x390",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 772,
+        "height": 21.6875,
+        "scrollWidth": 772,
+        "clientWidth": 772,
+        "textBottom": 550.78125,
+        "bottom": 553.46875
+      },
+      "panelMotion": "ac-surface-arrive",
+      "arrival": {
+        "article": "none",
+        "body": "ac-content-arrive"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-reduce-1440x900",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 344,
+        "height": 21.6875,
+        "scrollWidth": 344,
+        "clientWidth": 344,
+        "textBottom": 617.0625,
+        "bottom": 619.75
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-reduce-1024x768",
+    "passed": true,
+    "metrics": {
+      "icons": 27,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 887,
+        "height": 21.6875,
+        "scrollWidth": 887,
+        "clientWidth": 887,
+        "textBottom": 629.609375,
+        "bottom": 632.296875
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-reduce-390x844",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 318,
+        "height": 21.6875,
+        "scrollWidth": 318,
+        "clientWidth": 318,
+        "textBottom": 576.875,
+        "bottom": 579.5625
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-reduce-320x740",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 248,
+        "height": 43.375,
+        "scrollWidth": 248,
+        "clientWidth": 248,
+        "textBottom": 598.5625,
+        "bottom": 601.25
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "doodle-reduce-844x390",
+    "passed": true,
+    "metrics": {
+      "icons": 14,
+      "title": {
+        "text": "【TEST FIXTURE】Muse 视觉方案评审",
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "width": 772,
+        "height": 21.6875,
+        "scrollWidth": 772,
+        "clientWidth": 772,
+        "textBottom": 550.78125,
+        "bottom": 553.46875
+      },
+      "panelMotion": "none",
+      "arrival": {
+        "article": "none",
+        "body": "none"
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "history-no-preference",
+    "passed": true,
+    "metrics": {
+      "anchor": {
+        "id": "msg-158",
+        "offset": -69.3125,
+        "gap": 5620
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "history-reduce",
+    "passed": true,
+    "metrics": {
+      "anchor": {
+        "id": "msg-158",
+        "offset": -69.3125,
+        "gap": 5620
+      }
+    },
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "integrated-toolbar-tooltip",
+    "passed": true,
+    "evidence_source": "polish/results.json"
+  },
+  {
+    "name": "dock-state-midnight",
+    "passed": true,
+    "evidence_source": "final-expand-regression/results.json"
+  },
+  {
+    "name": "dock-state-doodle",
+    "passed": true,
+    "evidence_source": "final-expand-regression/results.json"
+  },
+  {
+    "name": "synthetic-video",
+    "passed": true,
+    "source": "fixture",
+    "file": "fixture-walkthrough.mp4",
+    "duration": 8.96,
+    "evidence_source": "final-regression/results.json"
+  },
+  {
+    "name": "dock-detail-escape-scope",
+    "passed": true,
+    "evidence_source": "final-regression/results.json"
+  },
+  {
+    "name": "connection-draft-midnight",
+    "passed": true,
+    "evidence_source": "final-regression/results.json"
+  },
+  {
+    "name": "connection-draft-doodle",
+    "passed": true,
+    "evidence_source": "final-regression/results.json"
+  }
+]

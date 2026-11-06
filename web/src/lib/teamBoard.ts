@@ -29,9 +29,8 @@ export const TEAM_LANES: readonly TeamLane[] = ["blocked", "working", "waiting",
 const LANE_ORDER: Record<TeamLane, number> = { blocked: 0, working: 1, waiting: 2, idle: 3, offline: 4 };
 
 export interface TeamCardDoing {
-  /** 正在处理的任务 id（presence.current_task），没有则 null。 */
-  taskId: number | null;
-  taskTitle: string | null;
+  /** 当前 wake 来源消息的 seq（presence.current_task），并非任务台账 id。 */
+  messageSeq: number | null;
   taskStartedAt: number | null;
   heartbeatAt: number | null;
   /** hook 上报的活动（#602）。 */
@@ -226,9 +225,7 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
   const identityByName = new Map((identities ?? []).map((identity) => [identity.name, identity]));
 
   const tasksByName = new Map<string, TaskRecord[]>();
-  const tasksById = new Map<number, TaskRecord>();
   for (const task of tasks) {
-    tasksById.set(task.id, task);
     const name = task.assignee?.name;
     if (!name || task.assignee?.kind === "squad" || !ACTIVE_TASK_STATES.has(task.state)) continue;
     const list = tasksByName.get(name) ?? [];
@@ -295,8 +292,6 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
     const lane = teamLaneOf(entry, memberDeliveries, memberTasks, online);
     const host = hostByName.get(name);
     const lineage = lineageByName.get(name) ?? null;
-    const currentTaskId = entry?.current_task ?? null;
-    const currentTask = currentTaskId !== null ? tasksById.get(currentTaskId) ?? null : null;
 
     cards.push({
       name,
@@ -328,8 +323,7 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
       teamId: lineage?.teamId ?? entry?.lineage?.team_id ?? participant?.lineage?.team_id ?? null,
       squads: squadsByName.get(name) ?? [],
       doing: {
-        taskId: currentTaskId,
-        taskTitle: currentTask?.title ?? null,
+        messageSeq: entry?.current_task ?? null,
         taskStartedAt: entry?.task_started_at ?? null,
         heartbeatAt: entry?.heartbeat_at ?? null,
         activity: entry?.activity ?? null,

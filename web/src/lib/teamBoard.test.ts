@@ -51,6 +51,21 @@ describe("teamLaneOf：泳道判定顺序", () => {
 });
 
 describe("team board connection and activity stay consistent", () => {
+  test("wake message sequence never resolves to a ledger task with the same number", () => {
+    const model = buildTeamBoard({
+      participants: [sender("agent"), sender("other")],
+      presence: [presence("agent", { state: "working", current_task: 7 })],
+      roles: [],
+      tasks: [task(7, "other", "in_progress", { title: "Other agent's task" }), task(8, "agent", "assigned")],
+      now: NOW,
+    });
+    const agent = model.cards.find(card => card.name === "agent")!;
+    expect(agent.doing.messageSeq).toBe(7);
+    expect(agent.doing).not.toHaveProperty("taskId");
+    expect(agent.doing).not.toHaveProperty("taskTitle");
+    expect(agent.work.tasks.map(task => task.id)).toEqual([8]);
+  });
+
   test("connected participants without presence remain online without fabricated activity", () => {
     const model = buildTeamBoard({
       participants: [sender("human", "human"), sender("agent")],
@@ -63,7 +78,7 @@ describe("team board connection and activity stay consistent", () => {
     expect(model.counts).toMatchObject({ idle: 2, offline: 0, working: 0, people: 1, agents: 1 });
     for (const card of model.cards) {
       expect(card).toMatchObject({ online: true, lane: "idle", state: "online", presence: null, busy: false, lastSeen: null });
-      expect(card.doing).toMatchObject({ heartbeatAt: null, taskId: null, taskStartedAt: null, activity: null });
+      expect(card.doing).toMatchObject({ heartbeatAt: null, messageSeq: null, taskStartedAt: null, activity: null });
     }
     const agent = model.cards.find(card => card.name === "agent")!;
     expect(agent.work.inProgress).toBe(1);
@@ -158,7 +173,8 @@ describe("buildTeamBoard：一张卡一份事实", () => {
     const lead = model.cards.find((c) => c.name === "lead")!;
     expect(lead.role).toMatchObject({ confirmation: "confirmed", role: "host" });
     expect(lead.host).toEqual({ lease: "active", staleReason: null });
-    expect(lead.doing).toMatchObject({ taskId: 7, taskTitle: "发版" });
+    expect(lead.doing.messageSeq).toBe(7);
+    expect(lead.work.tasks[0]).toMatchObject({ id: 7, title: "发版" });
     expect(lead.work.inProgress).toBe(1);
     expect(lead.squads).toEqual(["fe"]);
 

@@ -4,7 +4,7 @@ import {useLocale} from '../i18n/locale';
 import {apiBase} from '../lib/base';
 import {copyText} from '../lib/agentTokenVault';
 import {cloudBridgesApi,type MuseConnectorState} from '../lib/cloudBridgesApi';
-import {StudioIcon,type StudioIconName} from './StudioIcon';
+import {StudioIcon} from './StudioIcon';
 import {PersonalMusePanel} from './PersonalMusePanel';
 import {ProviderMark} from './ProviderMark';
 import '../i18n/strings/MuseCloud';
@@ -12,6 +12,7 @@ import '../styles/muse-cloud.css';
 export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;canManage:boolean}){
  const t=useT(),{locale}=useLocale();const [state,setState]=useState<MuseConnectorState|null>(null);
  const [method,setMethod]=useState<'mcp'|'gadget'|'personal'|null>(null);
+ const methodBackRef=useRef<HTMLButtonElement>(null);
  const [revision,update]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [callback,setCallback]=useState(''),[created,setCreated]=useState<{client_id:string;client_secret:string}|null>(null);
  const epoch=useRef(0),base=apiBase();
@@ -33,6 +34,7 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
   return()=>{abort.abort();++epoch.current;};
  },[token,slug,canManage,revision,base,locale]);
  useEffect(()=>{setMethod(null);},[token,slug,base]);
+ useEffect(()=>{if(method)methodBackRef.current?.focus({preventScroll:true});},[method]);
  const copy=async(value:string)=>{const n=epoch.current;try{if(await copyText(value)&&epoch.current===n&&currentScope.current===scope&&base===apiBase())setNotice(t('Muse.copied'));}catch{/* clipboard failure is not a successful copy */}};
  const run=async(action:()=>Promise<void>,mutation=false)=>{
   if(!canManage||currentScope.current!==scope||base!==apiBase()||inFlight.current.has(scope)||(mutation&&uncertain.current.has(scope)))return;
@@ -56,11 +58,10 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
   oauthState==='reauthorization_required'?(locale==='zh'?'授权已过期或不可用 · 需重新授权':'Authorization expired or unusable · reauthorization required'):
   authorized?(locale==='zh'?'已授权 · 待检查连接':'Authorized · check the connection'):
   t(clients.length?'Muse.configured':'Muse.unconfigured');
- const status=(icon:StudioIconName,label:string,text:string)=><div><StudioIcon name={icon}/><div><dt>{label}</dt><dd>{text}</dd></div></div>;
  if(!canManage)return <p className="commons-note">{t('Muse.noManage')}</p>;
  return <section className="muse-connect" aria-label={t('Muse.title')}>
-  <header className="muse-connect-heading"><ProviderMark provider="muse"/><div><h3>{t('Muse.title')}</h3><p>{locale==='zh'?'选择适合你的接入方式。':'Choose a connection method.'}</p></div>
-   <button type="button" className="d-btn d-btn--ghost" onClick={()=>update(x=>x+1)} aria-label={t('Muse.refresh')} disabled={busy}><StudioIcon name="refresh"/></button></header>
+  <header className="muse-connect-heading"><ProviderMark provider="muse"/><div className="muse-heading-title"><h3>{method==='mcp'?(locale==='zh'?'Muse MCP 连接器':'Muse MCP connector'):t('Muse.title')}</h3>{!method&&<p>{locale==='zh'?'选择适合你的接入方式。':'Choose a connection method.'}</p>}</div>
+   <div className="muse-heading-actions">{method&&<button ref={methodBackRef} className="d-btn muse-method-back" type="button" onClick={()=>setMethod(null)}>{locale==='zh'?'更换方式':'Change method'}</button>}<button type="button" className="d-btn d-btn--ghost muse-refresh" onClick={()=>update(x=>x+1)} aria-label={t('Muse.refresh')} disabled={busy}><StudioIcon name="refresh"/></button></div></header>
   {!state&&!error&&<p role="status">{t('Muse.loading')}</p>}{error&&<p role="alert" className="commons-error">{error}</p>}
   {blocked&&<p role="alert" className="commons-error">{uncertainText}</p>}
   {notice&&<p role="status" className="muse-notice">{notice}</p>}
@@ -69,7 +70,6 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
    <button type="button" className="muse-method" onClick={()=>setMethod('gadget')}><strong>{locale==='zh'?'Gadget 设备桥接':'Gadget device bridge'}</strong><span>{locale==='zh'?'通过已配对的 Linux / BLE 设备转发群任务。':'Relay group tasks through a paired Linux / BLE device.'}</span></button>
    <button type="button" className="muse-method" onClick={()=>setMethod('personal')}><strong>{t('Muse.personalTitle')}</strong><span>{t('Muse.personalCard')}</span></button>
   </div>}
-  {method&&<button className="d-btn muse-method-back" type="button" onClick={()=>setMethod(null)}>{locale==='zh'?'← 更换接入方式':'← Change connection method'}</button>}
   {method==='personal'&&<PersonalMusePanel token={token} slug={slug} canManage={canManage}/>}
   {method==='gadget'&&<section className="muse-gadget-primary" aria-label={locale==='zh'?'Gadget 设备桥接指南':'Gadget device bridge guide'}>
    <h4>{locale==='zh'?'配对设备并连接本群':'Pair a device and connect this group'}</h4>
@@ -77,19 +77,21 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
    <ol className="muse-simple-steps"><li><strong>{locale==='zh'?'准备桥接设备':'Prepare the bridge device'}</strong><p>{locale==='zh'?'请管理员准备隔离宿主和本群桥接服务。':'Ask an administrator to prepare an isolated host and the group bridge service.'}</p></li><li><strong>{locale==='zh'?'在 Muse App 配对':'Pair in Muse App'}</strong><p>{locale==='zh'?'打开“设置 → 设备 → Developer mode / 添加设备”，确认设备。凭据保存在设备上。':'Open Settings → Devices → Developer mode / Add Device and confirm the device. Keep credentials on the device.'}</p></li><li><strong>{locale==='zh'?'绑定当前群':'Bind this group'}</strong><p>{locale==='zh'?'由管理员授权本群专用 Agent，并选择哪些消息触发任务。':'Have an administrator authorize this group’s agent and select the messages that trigger tasks.'}</p></li><li><strong>{locale==='zh'?'检查任务与回复':'Check a task and its reply'}</strong><p>{locale==='zh'?'发送一条测试任务，确认 Muse 收到并回复到本群。':'Send a test task and confirm Muse receives it and replies to this group.'}</p></li></ol>
    <details className="muse-technical"><summary>{locale==='zh'?'设备安装与开发者资料':'Device setup and developer documentation'}</summary><p>{t('Muse.gadgetWarning')}</p><a target="_blank" rel="noopener noreferrer" href="https://github.com/facebookincubator/muse-gadget-sdk/tree/main/linux">{locale==='zh'?'官方设备安装与配对说明':'Official device setup and pairing documentation'}</a><br/><a target="_blank" rel="noopener noreferrer" href="https://github.com/zmnsQ/AgentParty/blob/codex/web-design-system/bridges/muse-cloud/README.md">{t('Muse.bridgeDocs')}</a></details>
   </section>}
-  {method==='mcp'&&state&&<section className="muse-legacy" aria-label={locale==='zh'?'MCP 工具访问指南':'MCP tool access guide'}><h4>{locale==='zh'?'在 Muse 中添加本群工具':'Add this group’s tools inside Muse'}</h4><p>{locale==='zh'?'将本群添加为 Muse 的自定义 MCP 连接器。实时通知需要 Muse 客户端支持事件订阅。':'Add this group as a custom MCP connector in Muse. Realtime notifications require event subscription support in the Muse client.'}</p>
-   <dl className="muse-state-grid">
-    {status(authorized?'check':'link',t('Muse.oauth'),oauthText)}
-
-   </dl>
-   {state.native_oauth&&<small>{locale==='zh'?'更新于：':'Updated: '}{new Date(state.native_oauth.checked_at).toLocaleString()}</small>}
-   <p className="commons-note">{locale==="zh"?"复制本群地址，在 Muse 中添加连接器。":"Copy this group’s address and add a connector in Muse."}</p><div className="muse-endpoint"><label>{t('Muse.endpoint')}<input readOnly value={state.mcp_endpoint} onFocus={e=>e.currentTarget.select()}/></label><button className="d-btn" onClick={()=>void copy(state.mcp_endpoint)}><StudioIcon name="copy"/>{t('Muse.copy')}</button></div>
-   <ol className="muse-native-steps"><li>{locale==="zh"?"在 Muse 的自定义连接器设置中填入上方 MCP 地址。":"Enter the MCP address above in Muse’s custom connector settings."}</li><li>{locale==="zh"?"从 Muse 打开授权页，核对群组与权限后允许访问，再返回 Muse。":"Open authorization from Muse, review this group and its permissions, approve access, then return to Muse."}</li></ol>
+  {method==='mcp'&&state&&<section className="muse-legacy" aria-label={locale==='zh'?'MCP 工具访问指南':'MCP tool access guide'}>
+   <section className="muse-primary-step"><h4>{locale==='zh'?'1 · 添加连接器':'1 · Add the connector'}</h4>
+    <div className="muse-endpoint muse-endpoint-primary"><label>{t('Muse.endpoint')}<input readOnly value={state.mcp_endpoint} onFocus={e=>e.currentTarget.select()}/></label><button type="button" className="d-btn d-btn--primary" aria-label={locale==='zh'?'复制本群 MCP 地址':'Copy group MCP address'} onClick={()=>void copy(state.mcp_endpoint)}><StudioIcon name="copy"/>{t('Muse.copy')}</button></div>
+    <p>{locale==='zh'?'将本群添加为 Muse 的自定义 MCP 连接器。':'Add this group as a custom MCP connector in Muse.'}</p>
+   </section>
+   <section className="muse-authorization-step"><h4>{locale==='zh'?'2 · 登录并授权':'2 · Sign in and authorize'}</h4>
+    <div className="muse-connection-status"><StudioIcon name={authorized?'check':'link'}/><span>{oauthText}</span>{state.native_oauth&&<small>{locale==='zh'?'更新于：':'Updated: '}{new Date(state.native_oauth.checked_at).toLocaleString()}</small>}</div>
+    <ol className="muse-native-steps"><li>{locale==="zh"?"在 Muse 的自定义连接器设置中填入上方 MCP 地址。":"Enter the MCP address above in Muse’s custom connector settings."}</li><li>{locale==="zh"?"从 Muse 打开授权页，核对群组与权限后允许访问，再返回 Muse。":"Open authorization from Muse, review this group and its permissions, approve access, then return to Muse."}</li></ol>
+   </section>
+   <details className="muse-native-check" open><summary>{locale==="zh"?"3 · 检查读取（只读）":"3 · Check message access (read-only)"}</summary><textarea readOnly value={prompt} rows={4} aria-label={t('Muse.testPrompt')}/><button className="d-btn" onClick={()=>void copy(prompt)}>{locale==='zh'?'复制验证指令':'Copy verification prompt'}</button></details>
    <details className="muse-native-client"><summary>{locale==="zh"?"Muse 要求填写 Client ID？":"Does Muse ask for a Client ID?"}</summary><p>{locale==="zh"?"生成本群 Client ID，填入 Muse 后完成登录与授权。":"Generate this group’s Client ID, enter it in Muse, then complete sign-in and authorization."}</p>
    {!state.can_configure?<p>{t('Muse.mfa')} <a href="/auth/security">{t('Muse.security')}</a></p>:state.native_client_id?<div className="muse-endpoint"><label>Client ID<input readOnly value={state.native_client_id} onFocus={e=>e.currentTarget.select()}/></label><button className="d-btn" onClick={()=>void copy(state.native_client_id!)}>{t('Muse.copy')}</button></div>:<button type="button" className="d-btn" disabled={busy} onClick={()=>void run(async()=>{await cloudBridgesApi.createMuseNativeClient(token,slug);update(x=>x+1);})}>{locale==="zh"?"准备 Muse Client ID":"Prepare Muse Client ID"}</button>}
    </details>
    <details className="muse-recovery"><summary>{locale==='zh'?'凭证过期 / Muse 显示「已添加凭证」？':'Credential expired / Muse says “already added”?'}</summary><p>{locale==='zh'?'访问凭证需要由 Muse 续期。遇到过期提示，请先刷新上方状态，再在 Muse 中重新打开授权。':'Access credentials need renewal in Muse. If an expiry message appears, refresh the status above, then reopen authorization in Muse.'}</p><p>{locale==='zh'?'若授权卡打不开，请保留现有连接并联系 Muse 支持；群管理员可检查 OAuth 续期记录。':'If the authorization card will not open, keep the existing connection and contact Muse support. A group administrator can check OAuth renewal records.'}</p></details>
-   <details className="muse-native-check" open><summary>{locale==="zh"?"连接后验证（只读）":"Verify the connection (read-only)"}</summary><textarea readOnly value={prompt} rows={4} aria-label={t('Muse.testPrompt')}/><button className="d-btn" onClick={()=>void copy(prompt)}>{t('Muse.copy')}</button></details>
+   <details className="muse-event-help"><summary>{locale==='zh'?'实时通知支持':'Realtime notification support'}</summary><p>{locale==='zh'?'实时通知需要 Muse 客户端支持事件订阅。':'Realtime notifications require event subscription support in the Muse client.'}</p></details>
    <details className="muse-technical"><summary>{locale==="zh"?"高级：OAuth 客户端注册与调试":"Advanced OAuth client registration"}</summary><ol className="muse-steps">
     <li><span className="muse-step-index">1</span><div><h4>{t('Muse.step1')}</h4><p>{t('Muse.step1Help')}</p>
      {!state.can_configure?<p className="commons-note">{t('Muse.mfa')} <a href="/auth/security">{t('Muse.security')}</a></p>:

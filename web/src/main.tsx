@@ -16,6 +16,7 @@ import "./styles/prototype-shell.css";
 import "./styles/prototype-sidebar.css";
 import "./styles/prototype-chat.css";
 import "./styles/workspace-surfaces.css";
+import "./styles/workspace-polish.css";
 import {installMobileViewport} from "./lib/mobileViewport";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

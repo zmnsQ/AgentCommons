@@ -2,6 +2,7 @@ import {createGrokSubmissionSafety,notifyGrokSubmissionSafety,type GrokSubmissio
 import {connectionFailure,automationDeliveryLabel} from "../lib/connectionGuidance";
 import {MuseCloudPanel} from "./MuseCloudPanel";
 import {ProviderMark} from "./ProviderMark";
+import {StudioIcon} from "./StudioIcon";
 import "../i18n/strings/Studio";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale } from "../i18n/locale";
@@ -157,9 +158,6 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
     </div>
     {selected==="dot"&&<details className="cloud-bridge-card" open={!authorizedAgents?.some(agent=>agent.oauth?.provider==="chatgpt"&&agent.oauth.status==="authorized")}><summary>{t("ConnectorUsage.firstConnection")}</summary><ol className="agent-connect-steps">{[1,2,3,4].map(n=><li key={n}>{t(`AgentConnect.dotStep${n}`).replace(/^\d\. /,"")}</li>)}</ol><a href="https://developers.openai.com/plugins/build/plugins" target="_blank" rel="noopener noreferrer">{t("AgentConnect.dotDocs")}</a></details>}
     {selected==="dot"&&<ChatGptQuickStart key={`${slug}:${token}`} token={token} slug={slug} canManage={canManage} />}
-    {(selected==="dot"||selected==="muse")&&<details className="cloud-bridge-card"><summary>{t("AgentConnect.security")}</summary>
-      <McpSecurityPanel token={token} slug={slug} canManage={canManage} />
-    </details>}
     {showAuthorizationManagement&&(selected==="dot"||selected==="muse")&&<details className="studio-grants-details"><summary>{zh?"已授权连接 · 管理与撤销":"Authorized connections · manage and revoke"}</summary><ConnectorGrants slug={slug} /></details>}
     {selected==="dot"&&<details className="cloud-bridge-card studio-diagnostics">
       <summary>{zh?"事件投递诊断":"Event delivery diagnostics"}</summary>
@@ -209,5 +207,8 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
       })}>{zh?"断开连接":"Disconnect"}</button>}
     </article>}
     {selected==="muse"&&<MuseCloudPanel key={`${slug}:${token}`} token={token} slug={slug} canManage={canManage}/>}
+    {(selected==="dot"||selected==="muse")&&<details className="cloud-bridge-card cloud-bridge-security"><summary><StudioIcon name="chevron-right"/>{t("AgentConnect.security")}</summary>
+      <McpSecurityPanel token={token} slug={slug} canManage={canManage} />
+    </details>}
   </section>;
 }

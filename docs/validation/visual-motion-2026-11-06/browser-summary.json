@@ -1,0 +1,42 @@
+{
+  "scope": "Local real App with synthetic read-only transport; no production login, authorization, or message sending",
+  "navigation": {
+    "passed": 140,
+    "failed": 0,
+    "themes": 2,
+    "viewports": 5,
+    "source": "navigation/results.json"
+  },
+  "visual": {
+    "passed": 29,
+    "failed": 0,
+    "motion_preferences": 2,
+    "themes": 2,
+    "viewports": 5,
+    "source": "visual-results.json"
+  },
+  "resolved_regressions": [
+    "Return focus follows the last selected header tool",
+    "Task detail scroll position survives dock/modal round trips",
+    "Expand opens a wider modal and collapse restores the dock without losing drafts"
+  ],
+  "video": {
+    "source": "Local real-App synthetic fixture; no production account or test messages sent",
+    "entry": "/test/app-workspace-preview.html",
+    "actions": [
+      "hover task tooltip",
+      "open task dock",
+      "view task detail",
+      "return to chat",
+      "fixture controls.append"
+    ],
+    "duration_seconds": 8.96,
+    "real_writes": 0,
+    "mp4": "final-regression/fixture-walkthrough.mp4",
+    "webm": "final-regression/fixture-walkthrough.webm"
+  },
+  "limitations": [
+    "Authenticated production workflows were not exercised",
+    "Video messages are fixture events; no real messages were posted"
+  ]
+}

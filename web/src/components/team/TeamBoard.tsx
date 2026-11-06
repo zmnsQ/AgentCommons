@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { CollaborationRole } from "@agentparty/shared";
 import { useT, type TFunc } from "../../i18n/useT";
 import "../../i18n/strings/TeamBoard";
+import "../../i18n/strings/TaskVisuals";
 import { presenceStateLabel } from "../../lib/presenceLabels";
 import { TEAM_LANES, type TeamBoardModel, type TeamCard, type TeamLane, type TeamUnassignedRole } from "../../lib/teamBoard";
 import { TeamSquads, type TeamSquadDraft } from "./TeamSquads";
@@ -272,17 +273,9 @@ function Card({
         {lastSeen !== null && <span className="team-card-muted">{t("TeamBoard.status.lastSeen", { time: lastSeen })}</span>}
       </div>
 
-      {(card.doing.taskId !== null || card.doing.activity !== null || card.doing.repo !== null) && (
+      {(card.doing.messageSeq !== null || card.doing.activity !== null || card.doing.repo !== null) && (
         <div className="team-card-doing">
-          {card.doing.taskId !== null && (
-            onOpenTask ? (
-              <button type="button" className="team-card-task" onClick={() => onOpenTask(card.doing.taskId!)} title={t("TeamBoard.work.openTask", { id: card.doing.taskId })}>
-                ▶ {card.doing.taskTitle !== null ? t("TeamBoard.doing.task", { id: card.doing.taskId, title: card.doing.taskTitle }) : t("TeamBoard.doing.taskNoTitle", { id: card.doing.taskId })}
-              </button>
-            ) : (
-              <span className="team-card-task">▶ {card.doing.taskTitle !== null ? t("TeamBoard.doing.task", { id: card.doing.taskId, title: card.doing.taskTitle }) : t("TeamBoard.doing.taskNoTitle", { id: card.doing.taskId })}</span>
-            )
-          )}
+          {card.doing.messageSeq !== null && <span className="team-card-message">{t("TaskVisuals.processingMessage", { seq: card.doing.messageSeq })}</span>}
           {card.doing.heartbeatAt !== null && card.lane === "working" && (
             <span className="team-card-muted"><StudioIcon name="activity" /> {t("TeamBoard.doing.heartbeat", { age: teamAge(card.doing.heartbeatAt, now, t) })}</span>
           )}
@@ -301,11 +294,11 @@ function Card({
           {card.work.inProgress > 0 && <span className="team-card-chip">{t("TeamBoard.work.inProgress", { count: card.work.inProgress })}</span>}
           {card.work.review > 0 && <span className="team-card-chip">{t("TeamBoard.work.review", { count: card.work.review })}</span>}
           {card.work.queued > 0 && <span className="team-card-chip">{t("TeamBoard.work.queued", { count: card.work.queued })}</span>}
-          {onOpenTask && card.work.tasks.slice(0, 3).map((task) => (
+          {card.work.tasks.slice(0, 3).map((task) => onOpenTask ? (
             <button key={task.id} type="button" className="team-card-linkbtn" onClick={() => onOpenTask(task.id)} title={t("TeamBoard.work.openTask", { id: task.id })}>
-              #{task.id}
+              {t("TeamBoard.doing.task", { id: task.id, title: task.title })}
             </button>
-          ))}
+          ) : <span key={task.id} className="team-card-task-title">{t("TeamBoard.doing.task", { id: task.id, title: task.title })}</span>)}
         </div>
       )}
 

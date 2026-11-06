@@ -1,5 +1,5 @@
 import { PlatformIcon } from './PlatformIcon';
-/** Known platform branding; unavailable marks use the same neutral Agent glyph. */
+/** Declared platforms use available artwork or neutral initials. */
 export function ProviderMark({provider}:{provider:string}){
- return <span className="provider-mark" data-provider-mark={provider}><PlatformIcon platform={provider} size={21} decorative /></span>;
+ return <span className="provider-mark" data-provider-mark={provider}><PlatformIcon platform={provider} size={20} decorative /></span>;
 }

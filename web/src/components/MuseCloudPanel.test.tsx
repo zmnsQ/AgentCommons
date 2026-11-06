@@ -133,10 +133,27 @@ test('late clipboard completion cannot announce old-group copy success in the ne
  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator');let finish!:()=>void;
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{writeText:()=>new Promise<void>(r=>{finish=r;})}}});
  try{
-  const root=await render();const copy=root.findAllByType('button').find(button=>text(button)==='Copy')!;
+  const root=await render();const copy=root.findByProps({'aria-label':'Copy group MCP address'});
   await act(async()=>copy.props.onClick());
   await act(async()=>renderer!.update(<LocaleProvider><MuseCloudPanel token="new" slug="other" canManage/></LocaleProvider>));
   await act(async()=>finish());expect(root.findAllByProps({className:'muse-notice'})).toHaveLength(0);
+ }finally{if(descriptor)Object.defineProperty(globalThis,'navigator',descriptor);else Reflect.deleteProperty(globalThis,'navigator');}
+});
+
+test('MCP address is the first setup field and copying it only uses the clipboard',async()=>{
+ const descriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator');const copied:string[]=[];
+ Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{writeText:async(value:string)=>{copied.push(value);}}}});
+ try{
+  const root=await render(),guide=root.findByProps({className:'muse-legacy'});
+  expect(guide.findAllByType('input')[0]!.props.value).toBe('https://commons.test/api/channels/group/mcp');
+  expect(guide.findAllByType('input')[0]!.props.readOnly).toBe(true);
+  expect((guide.children[0] as ReactTestInstance).props.className).toBe('muse-primary-step');
+  expect(guide.findByProps({className:'muse-native-client'}).props.open).toBeUndefined();
+  expect(guide.findByProps({className:'muse-event-help'}).props.open).toBeUndefined();
+  await act(async()=>root.findByProps({'aria-label':'Copy group MCP address'}).props.onClick());
+  expect(copied).toEqual(['https://commons.test/api/channels/group/mcp']);
+  expect(calls.every(call=>call.method==='GET')).toBe(true);
+  expect(root.findByProps({className:'muse-notice'})).toBeTruthy();
  }finally{if(descriptor)Object.defineProperty(globalThis,'navigator',descriptor);else Reflect.deleteProperty(globalThis,'navigator');}
 });
 

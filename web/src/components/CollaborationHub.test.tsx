@@ -65,11 +65,13 @@ async function mount(node: ReactNode) {
   await act(async () => { renderer = create(<LocaleProvider>{node}</LocaleProvider>); });
   return renderer!.root;
 }
-function text(node: ReactTestInstance): string {
-  return node.children.map((child) => typeof child === "string" ? child : text(child)).join("");
+function text(node: ReactTestInstance, skipDecorative = false): string {
+  // Button labels exclude decorative provider glyphs; full-text assertions still inspect all rendered content.
+  if (skipDecorative && (node.props["aria-hidden"] === true || node.props["aria-hidden"] === "true")) return "";
+  return node.children.map((child) => typeof child === "string" ? child : text(child, skipDecorative)).join("");
 }
 function button(label: string) {
-  return renderer!.root.find((node) => node.type === "button" && text(node) === label);
+  return renderer!.root.find((node) => node.type === "button" && text(node, true) === label);
 }
 async function click(label: string) {
   await act(async () => { button(label).props.onClick(); });

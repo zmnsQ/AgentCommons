@@ -1,0 +1,13 @@
+{
+  "source": "Local real-App synthetic fixture; no production account or test messages sent",
+  "entry": "/test/app-workspace-preview.html",
+  "actions": [
+    "hover task tooltip",
+    "open task dock",
+    "view task detail",
+    "return to chat",
+    "fixture controls.append"
+  ],
+  "duration_seconds": 8.96,
+  "real_writes": 0
+}

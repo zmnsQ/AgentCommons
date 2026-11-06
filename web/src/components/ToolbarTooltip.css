@@ -1,0 +1,25 @@
+.toolbar-tooltip {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--t-text, #242629);
+  color: var(--t-bg, #fafafa);
+  box-shadow: 0 4px 14px #0002;
+  font: 500 12px/1.45 var(--t-sans, sans-serif);
+  text-align: center;
+  pointer-events: none;
+  animation: toolbar-tooltip-appear 100ms ease-out;
+}
+@keyframes toolbar-tooltip-appear { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .toolbar-tooltip { animation: none; } }
+@media (forced-colors: active) {
+  .toolbar-tooltip { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
+}

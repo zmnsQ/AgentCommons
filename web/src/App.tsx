@@ -1,3 +1,4 @@
+import {ToolbarTooltip,ToolbarTooltipGroup} from "./components/ToolbarTooltip";
 import { preferredMeDisplay } from "./lib/meDisplay";
 import {Brand} from "./components/Brand";
 import "./styles/prototype-native-frame.css";
@@ -1271,12 +1272,12 @@ export function App() {
         {me?.avatar_thumb || me?.avatar_url ? <img src={me.avatar_thumb || me.avatar_url || ""} alt=""/> : <StudioIcon name="human"/>}
         <span className="workspace-account-name">{me ? preferredMeDisplay(me) : t("App.settings.section.account")}</span>
       </button>
-      <div className="prototype-rail-footer">
-        <button ref={settingsButtonRef} type="button" className="app-settings-btn" aria-label={t("App.settings.title")} title={t("App.settings.title")} onClick={openSettings}><StudioIcon name="settings"/></button>
-        <button type="button" className="prototype-rail-button" aria-label={t("App.settings.section.help")} title={t("App.settings.section.help")} onClick={event=>openSettings(event,"help")}><StudioIcon name="help"/></button>
-        {desktop&&<button ref={localAgentCenterButtonRef} type="button" className="app-agent-center-btn" aria-label={t("App.localAgentCenter.open")} title={t("App.localAgentCenter.open")} onClick={openLocalAgentCenter}><StudioIcon name="agent"/></button>}
+      <ToolbarTooltipGroup><div className="prototype-rail-footer">
+        <ToolbarTooltip label={t("App.settings.title")}><button ref={settingsButtonRef} type="button" className="app-settings-btn" aria-label={t("App.settings.title")} title={t("App.settings.title")} onClick={openSettings}><StudioIcon name="settings"/></button></ToolbarTooltip>
+        <ToolbarTooltip label={t("App.settings.section.help")}><button type="button" className="prototype-rail-button" aria-label={t("App.settings.section.help")} title={t("App.settings.section.help")} onClick={event=>openSettings(event,"help")}><StudioIcon name="help"/></button></ToolbarTooltip>
+        {desktop&&<ToolbarTooltip label={t("App.localAgentCenter.open")}><button ref={localAgentCenterButtonRef} type="button" className="app-agent-center-btn" aria-label={t("App.localAgentCenter.open")} title={t("App.localAgentCenter.open")} onClick={openLocalAgentCenter}><StudioIcon name="agent"/></button></ToolbarTooltip>}
         <DesktopUpdater />
-      </div>
+      </div></ToolbarTooltipGroup>
     </header>
   );
 

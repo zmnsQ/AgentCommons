@@ -1,0 +1,15 @@
+.task-activity-timeline { min-width: 0; padding-top: 4px; }
+.task-activity-timeline h3 { margin: 0 0 15px; color: var(--t-muted); font: 500 12px/1.5 var(--t-sans); }
+.task-activity-timeline ol { display: grid; padding: 0; margin: 0; list-style: none; }
+.task-activity-event { position: relative; display: grid; grid-template-columns: 14px minmax(0, 1fr); align-items: baseline; gap: 3px 10px; padding: 0 0 18px; font: 12px/1.5 var(--t-sans); animation: task-event-enter 180ms var(--ac-ease-out, ease-out) both; }
+.task-activity-event:last-child { padding-bottom: 0; }
+.task-activity-event:not(:last-child)::after { content: ""; position: absolute; top: 11px; bottom: 0; left: 4px; width: 1px; background: var(--t-border); }
+.task-activity-node { align-self: center; position: relative; z-index: 1; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--t-panel); background: var(--t-muted); box-shadow: 0 0 0 1px var(--t-border); }
+.task-activity-event--updated .task-activity-node { background: var(--t-blue); }
+.task-activity-event--completed .task-activity-node { background: var(--t-green); }
+.task-activity-label { color: var(--t-text); font-weight: 500; }
+.task-activity-event time { grid-column: 2; color: var(--t-muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+@keyframes task-event-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .task-activity-event { animation: none; }
+}

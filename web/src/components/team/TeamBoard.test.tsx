@@ -116,6 +116,42 @@ describe("TeamBoard（#1060 PR B）", () => {
     expect(onDeleteRole).toHaveBeenCalledWith("ghost");
   });
 
+  test("当前处理消息明确标为消息，只有实际分配的台账任务打开任务详情", () => {
+    const onOpenTask = mock(() => undefined);
+    const r = render({
+      onOpenTask,
+      model: buildTeamBoard({
+        participants: [sender("lead"), sender("other")],
+        presence: [presence("lead", { state: "working", current_task: 7 })],
+        roles: [],
+        tasks: [task(7, "other", "in_progress", "别人的任务"), task(8, "lead", "assigned", "准备发布")],
+        now: NOW,
+      }),
+    });
+    const card = r.root.findByProps({ "data-name": "lead" });
+    const message = card.findByProps({ className: "team-card-message" });
+    expect(message.type).toBe("span");
+    expect(message.children.join("")).toBe("处理消息 #7");
+    expect(message.props.onClick).toBeUndefined();
+    const tasks = card.findAllByProps({ className: "team-card-linkbtn" });
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0]!.children.join("")).toBe("#8 准备发布");
+    expect(onOpenTask).not.toHaveBeenCalled();
+    act(() => tasks[0]!.props.onClick());
+    expect(onOpenTask).toHaveBeenCalledTimes(1);
+    expect(onOpenTask).toHaveBeenCalledWith(8);
+    expect(card.findAll(n => n.type === "button" && n.children.join("").includes("别人的任务"))).toHaveLength(0);
+  });
+
+  test("没有任务跳转回调时，真实台账任务仍显示标题而非虚假链接", () => {
+    const r = render();
+    const card = r.root.findByProps({ "data-name": "lead" });
+    const task = card.findByProps({ className: "team-card-task-title" });
+    expect(task.type).toBe("span");
+    expect(task.children.join("")).toBe("#7 发版");
+    expect(task.props.onClick).toBeUndefined();
+  });
+
   test("版主点「改角色」出表单，保存时把 role/职责/汇报对象交给 onSaveRole", async () => {
     const onSaveRole = mock(async () => true);
     const r = render({ onSaveRole });

@@ -1,2 +1,3 @@
-.platform-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:var(--platform-icon-size,20px);height:var(--platform-icon-size,20px);color:var(--t-text);vertical-align:middle}
+.platform-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:var(--platform-icon-size,20px);height:var(--platform-icon-size,20px);aspect-ratio:1;color:var(--t-text);vertical-align:middle;font-size:var(--platform-icon-size,20px);line-height:1}
 .platform-icon-mask{display:block;width:100%;height:100%;background:currentColor;mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center}
+.platform-icon-initials{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:var(--t-sans,sans-serif);font-size:.58em;font-style:normal;font-weight:650;line-height:1;letter-spacing:0}

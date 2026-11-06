@@ -12,6 +12,10 @@ const ASSETS: Partial<Record<AgentPlatform, string>> = {
   chatgpt: "openai", openai: "openai", dot: "openai", codex: "openai", "codex-sdk": "openai",
   claude: "anthropic", anthropic: "anthropic",
 };
+// Neutral initials identify declared platforms without imitating brand artwork.
+const INITIALS: Partial<Record<AgentPlatform, string>> = {
+  muse: "M", manus: "M", cue: "C", grok: "G", hermes: "H", codebuddy: "CB",
+};
 const LABELS: Record<AgentPlatform, string> = {
   chatgpt: "ChatGPT · OpenAI", openai: "OpenAI", dot: "ChatGPT / dot · OpenAI", codex: "Codex · OpenAI", "codex-sdk": "Codex SDK · OpenAI",
   claude: "Claude · Anthropic", anthropic: "Anthropic", muse: "Muse", manus: "Manus", cue: "Cue", grok: "Grok", hermes: "Hermes", codebuddy: "CodeBuddy", other: "Agent",
@@ -22,12 +26,14 @@ export function PlatformIcon({ platform, size = 20, decorative = false, classNam
 }) {
   const known = declaredAgentPlatform(platform);
   const asset = known ? ASSETS[known] : undefined;
+  const initials = known ? INITIALS[known] : undefined;
   const label = known ? LABELS[known] : "Agent";
   return <span className={`platform-icon ${className}`} data-platform={known ?? "unknown"}
     role={decorative ? undefined : "img"} aria-label={decorative ? undefined : label}
     aria-hidden={decorative ? true : undefined} title={decorative ? undefined : label}
     style={{ "--platform-icon-size": `${size}px` } as CSSProperties}>
     {asset ? <span className="platform-icon-mask" style={{ maskImage: `url(/brand/platforms/${asset}.svg)`, WebkitMaskImage: `url(/brand/platforms/${asset}.svg)` }} />
+      : initials ? <span className="platform-icon-initials">{initials}</span>
       : <StudioIcon name="agent" size={size} />}
   </span>;
 }

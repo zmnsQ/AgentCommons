@@ -1,0 +1,26 @@
+{
+  "web_tests": {
+    "passed": 1809,
+    "failed": 0,
+    "assertions": 7361,
+    "files": 210
+  },
+  "typecheck": "passed",
+  "navigation_browser": {
+    "passed": 140,
+    "failed": 0
+  },
+  "visual_browser": {
+    "passed": 29,
+    "failed": 0
+  },
+  "icons": {
+    "paths_checked": 63,
+    "stroke_overflow": 0
+  },
+  "video": {
+    "source": "synthetic read-only App fixture",
+    "duration_seconds": 8.96
+  },
+  "production": "pending"
+}

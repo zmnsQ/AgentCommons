@@ -502,7 +502,9 @@ test('channel modal keeps Back distinct from Close, including headerless nested 
  expect(renderer!.root.findAll(n=>n.props.role==='dialog')).toHaveLength(1);
  expect(renderer!.root.findAll(n=>n.type==='header'&&n.props.className==='channel-panel-head')).toHaveLength(1);
  expect(renderer!.root.findAll(n=>n.type==='button'&&n.props.className==='d-btn channel-panel-close')).toHaveLength(1);
- const back=renderer!.root.find(n=>n.type==='button'&&n.props.className==='d-btn');
+ const back=renderer!.root.find(n=>n.type==='button'&&n.props.className==='d-btn channel-panel-back');
+ expect(back.findAllByType('svg')).toHaveLength(1);
+ expect(back.findByType('span').children.join('')).toBe('团队');
  act(()=>back.props.onClick());expect(backs).toBe(1);expect(closes).toBe(0);
  const scrim=renderer!.root.find(n=>n.type==='button'&&n.props.className==='channel-panel-scrim');
  act(()=>scrim.props.onClick());expect(closes).toBe(1);

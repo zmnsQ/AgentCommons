@@ -53,10 +53,11 @@ test('header uses declared platform metadata with neutral unknown, not nickname 
 });
 
 test('frequent actions and member roster open directly with their own callbacks',()=>{
- let details=0,members=0,tasks=0;
+ let details=0,members=0,tasks=0,focused=0;
  act(()=>{r=create(<LocaleProvider><ConversationHeader title="Group" members={[]} onDetails={()=>details++} onMembers={()=>members++} shortcuts={[{key:'tasks',label:'Tasks',icon:'tasks',onClick:()=>tasks++}]}/></LocaleProvider>);});
  act(()=>r!.root.findByProps({className:'avatar-stack'}).props.onClick());
- act(()=>r!.root.findByProps({className:'conversation-shortcut-actions'}).findByType('button').props.onClick());
+ act(()=>r!.root.findByProps({className:'conversation-shortcut-actions'}).findByType('button').props.onClick({currentTarget:{focus:()=>focused++}}));
+ expect(focused).toBe(1);
  expect([details,members,tasks]).toEqual([0,1,1]);
  act(()=>r!.root.findByProps({className:'conversation-shortcut-menu'}).findByType('button').props.onClick());
  expect(tasks).toBe(2);

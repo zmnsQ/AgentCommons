@@ -146,6 +146,9 @@ import type { RoleDraft } from "../lib/channelRoles";
 import { ChannelSocket } from "../lib/ws";
 import { channelReducer, initialChannelState } from "../state";
 import { useT } from "../i18n/useT";
+import {TaskVisualSummary} from "../components/TaskVisualSummary";
+import {TaskActivityTimeline} from "../components/TaskActivityTimeline";
+import {useWideWorkbench} from "../lib/useWideWorkbench";
 import {ConversationHeader} from "../components/ConversationHeader";
 import {useConversationWidth} from "../lib/conversationWidth";
 import {ConversationDetails,ConversationTools} from "../components/ConversationDetails";
@@ -552,10 +555,12 @@ export function ChannelPanelModal({
   onEscape,
   children,
   hideHeader = false,
+  docked = false,
   onBack,
   backLabel,
   closeDisabled = false,
   shouldRestoreFocus,
+  getReturnFocus,
 }: {
   title: string;
   subtitle?: string;
@@ -564,14 +569,39 @@ export function ChannelPanelModal({
   children: ReactNode;
   // #504：内容自带头部（如团队面板博客风头）时隐藏 modal 默认头，避免双 header。
   hideHeader?: boolean;
+  docked?: boolean;
   onBack?: () => void;
   backLabel?: string;
   closeDisabled?: boolean;
   /** A successful message jump deliberately leaves focus on the destination. */
   shouldRestoreFocus?: () => boolean;
+  getReturnFocus?: () => HTMLElement | null;
 }) {
   const t = useT();
   const cardRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement|null>(null);
+  const scrollByMode = useRef({dock:0,modal:0});
+  const getReturnFocusRef = useRef(getReturnFocus);
+  getReturnFocusRef.current = getReturnFocus;
+  useLayoutEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = scrollByMode.current[docked ? "dock" : "modal"];
+  }, [docked]);
+  const [dockBounds, setDockBounds] = useState<{top:number;right:number;bottom:number}|null>(null);
+  useLayoutEffect(() => {
+    if (!docked || typeof document === "undefined") return;
+    const channel = document.querySelector<HTMLElement>(".chan");
+    if (!channel) return;
+    const measure = () => {
+      const rect = channel.getBoundingClientRect();
+      const header = channel.querySelector(".conversation-header")?.getBoundingClientRect();
+      const next = {top:header?.bottom ?? rect.top + 76,right:Math.max(0,window.innerWidth-rect.right),bottom:Math.max(0,window.innerHeight-rect.bottom)};
+      setDockBounds(previous => previous?.top===next.top&&previous.right===next.right&&previous.bottom===next.bottom ? previous : next);
+    };
+    measure();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    observer?.observe(channel);window.addEventListener("resize",measure);
+    return () => {observer?.disconnect();window.removeEventListener("resize",measure);};
+  }, [docked]);
   const shouldRestoreFocusRef = useRef(shouldRestoreFocus);
   shouldRestoreFocusRef.current = shouldRestoreFocus;
   const requestClose = useCallback(() => {
@@ -598,13 +628,14 @@ export function ChannelPanelModal({
   }, []);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (docked && !cardRef.current?.contains(document.activeElement)) return;
       if (event.key === "Escape") {
         if (event.defaultPrevented) return;
         if (onEscape !== undefined) onEscape();
         else requestClose();
         return;
       }
-      if (event.key !== "Tab") return;
+      if (docked || event.key !== "Tab") return;
       if (typeof document === "undefined") return;
       const card = cardRef.current;
       if (card === null) return;
@@ -637,7 +668,7 @@ export function ChannelPanelModal({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [focusableElements, onEscape, requestClose]);
+  }, [docked, focusableElements, onEscape, requestClose]);
   useEffect(() => {
     if (typeof document === "undefined") return;
     const card = cardRef.current;
@@ -649,37 +680,44 @@ export function ChannelPanelModal({
     }
     return () => {
       if (shouldRestoreFocusRef.current?.() === false) return;
-      const previous = restoreFocusRef.current;
+      const explicit = getReturnFocusRef.current?.();
+      const previous = explicit?.isConnected ? explicit : restoreFocusRef.current;
       if (previous?.isConnected) previous.focus();
     };
   }, [focusableElements]);
 
-  return (
-    <ModalPortal><div className="channel-panel-overlay" role="dialog" aria-modal="true" aria-label={title}>
-      <button
+  useEffect(() => {
+    // When a desktop tool becomes a modal, keyboard focus enters that modal.
+    if (!docked && cardRef.current && !cardRef.current.contains(document.activeElement)) (focusableElements()[0] ?? cardRef.current).focus();
+  }, [docked, focusableElements]);
+  const panel = (
+    <div className="channel-panel-overlay" style={docked && dockBounds ? dockBounds : undefined} data-docked={docked || undefined} role={docked ? "region" : "dialog"} aria-modal={docked ? undefined : true} aria-label={title}>
+      {!docked && <button
         className="channel-panel-scrim"
         type="button"
         aria-label={t("Channel.tools.close")}
         disabled={closeDisabled}
         onClick={requestClose}
-      />
+      />}
       <section ref={cardRef} className="channel-panel-card" tabIndex={-1}>
         {(!hideHeader || onBack) && (
           <header className="channel-panel-head">
-            {onBack && <button type="button" className="d-btn" disabled={closeDisabled} onClick={onBack}>← {backLabel}</button>}
+            {onBack && <button type="button" className="d-btn channel-panel-back" disabled={closeDisabled} onClick={onBack}><StudioIcon name="arrow-left"/><span>{backLabel}</span></button>}
             <div className="channel-panel-titlebox">
               <h2>{title}</h2>
               {subtitle !== undefined && subtitle !== "" && <p className="t-mono">{subtitle}</p>}
             </div>
-            <button className="d-btn channel-panel-close" type="button" disabled={closeDisabled} onClick={requestClose}>
-              {t("Channel.tools.close")}
+            <button className="d-btn channel-panel-close" type="button" aria-label={t("Channel.tools.close")} title={t("Channel.tools.close")} disabled={closeDisabled} onClick={requestClose}>
+              <StudioIcon name="close"/>
             </button>
           </header>
         )}
-        <div className="channel-panel-body">{children}</div>
+        <div ref={bodyRef} className="channel-panel-body" onScroll={event=>{scrollByMode.current[docked?"dock":"modal"]=event.currentTarget.scrollTop;}}>{children}</div>
       </section>
-    </div></ModalPortal>
+    </div>
   );
+  // Keep the same portal mounted across viewport changes so drafts survive.
+  return <ModalPortal>{panel}</ModalPortal>;
 }
 
 function AgentFilterPanel({
@@ -1066,6 +1104,9 @@ interface TaskLedgerView {assignee:string;state:"active"|"all"|TaskState;query:s
 
 export function TaskLedgerPanel({
   tasks,
+  summary,
+  condensed=false,
+  onExpandedChange,
   loading,
   error,
   canWrite,
@@ -1088,6 +1129,9 @@ export function TaskLedgerPanel({
   viewMemory,
 }: {
   tasks: TaskRecord[];
+  summary?: TaskSummary | null;
+  condensed?: boolean;
+  onExpandedChange?: (expanded:boolean) => void;
   loading: boolean;
   error: string | null;
   canWrite: boolean;
@@ -1119,7 +1163,8 @@ export function TaskLedgerPanel({
   onSelectedTaskDismiss?:()=>void;
   viewMemory?: {current:TaskLedgerView|null};
 }) {
-  const t = useT(), compact = useCompactViewport();
+  const t = useT(), compact = useCompactViewport() || condensed;
+  const ledgerRef = useRef<HTMLElement|null>(null);
   const [assignDrafts, setAssignDrafts] = useState<Record<number, string>>({});
   const [assignKinds, setAssignKinds] = useState<Record<number, TaskAssigneeKind>>({});
   const [dragTaskId, setDragTaskId] = useState<number | null>(null);
@@ -1154,6 +1199,7 @@ export function TaskLedgerPanel({
   const [doneLimit, setDoneLimit] = useState(viewMemory?.current?.doneLimit??6);
   // #271(d)：展开放大——CSS class 切宽度，外层 channel-panel-card 用 :has() 跟随。
   const [expandedView, setExpandedView] = useState(viewMemory?.current?.expanded??false);
+  useLayoutEffect(()=>{onExpandedChange?.(expandedView);},[expandedView,onExpandedChange]);
   // #271(c)：任务详情作为台账内路由。存 id 不存快照，刷新后始终显示最新记录。
   const [detailTaskId, setDetailTaskId] = useState<number | null>(viewMemory?.current?.detail??null);
   useLayoutEffect(()=>{if(viewMemory)viewMemory.current={assignee:assigneeFilter,state:stateFilter,query:taskQuery,priority:prioFilter,doneLimit,expanded:expandedView,detail:detailTaskId};},[viewMemory,assigneeFilter,stateFilter,taskQuery,prioFilter,doneLimit,expandedView,detailTaskId]);
@@ -1192,6 +1238,7 @@ export function TaskLedgerPanel({
   useEffect(() => {
     if (detailTask === null || typeof window === "undefined") return;
     const onKey = (event: KeyboardEvent) => {
+      if (condensed && ledgerRef.current && !ledgerRef.current.contains(document.activeElement)) return;
       if (event.key !== "Escape") return;
       event.preventDefault();
       event.stopPropagation();
@@ -1199,7 +1246,7 @@ export function TaskLedgerPanel({
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [closeTaskDetail, detailTask]);
+  }, [closeTaskDetail, detailTask, condensed]);
   const counts = tasks.reduce<Record<string, number>>((acc, task) => {
     acc[task.state] = (acc[task.state] ?? 0) + 1;
     return acc;
@@ -1489,7 +1536,7 @@ export function TaskLedgerPanel({
     );
   };
   return (
-    <section
+    <section ref={ledgerRef}
       className={"task-ledger-panel" + (expandedView ? " task-ledger-panel--expanded" : "")}
       aria-label={t("Channel.tasks.panelAria")}
       onKeyDownCapture={(event) => {
@@ -1550,6 +1597,7 @@ export function TaskLedgerPanel({
               )}
             </div>
           </header>
+          <TaskVisualSummary tasks={tasks} summary={summary} loading={loading}/>
           <div className="task-blog-filter">
             <div className="task-blog-filter-row" role="group" aria-label={t("Channel.tasks.stateFilterAria")}>
               {stateChipDefs.map((chip) => (
@@ -1820,6 +1868,7 @@ export function TaskLedgerPanel({
           <div className="task-detail-layout">
             <main className="task-detail-main">
               <h2 className="task-detail-title">{detailTask.title}</h2>
+              <TaskActivityTimeline task={detailTask}/>
               {detailTask.blocked_reason !== null && (
                 <section className="task-detail-blocker" role="status">
                   <strong>{t("Channel.tasks.detail.blockedReason")}</strong>
@@ -2169,6 +2218,10 @@ export function ChannelPage({
   const [seenCharterRev, setSeenCharterRev] = useState(() => readSeenCharterRev(slug));
   const channelAdminViewMemory = useRef<ChannelAdminViewMemory | null>(null);
   const [activePanel, setActivePanel] = useState<ChannelPanel | null>(null);
+  const toolbarReturnFocusRef = useRef<HTMLElement|null>(null);
+  const wideWorkbench = useWideWorkbench();
+  const [taskExpanded,setTaskExpanded] = useState(false);
+  const dockedPanel = wideWorkbench && !(activePanel === "tasks" && taskExpanded) && (activePanel === "tasks" || activePanel === "search" || activePanel === "collaboration");
   const [cloudConnectTarget,setCloudConnectTarget]=useState<CloudAgentChoice|null>(null);
   const [activeAdminSurface, setActiveAdminSurface] = useState<AdminSurface | null>(null);
   const [agentManagerTarget, setAgentManagerTarget] = useState<string | null>(null);
@@ -2180,6 +2233,8 @@ export function ChannelPage({
   const panelLocationRef=useRef<PanelLocation|null>(null);
   panelLocationRef.current=activePanel||activeAdminSurface||detailsOpen?{key:activePanel??activeAdminSurface??"details",details:detailsOpen,panel:activePanel,admin:activeAdminSurface,member:memberDetailRoute,task:selectedTaskId,files:workspaceFiles,provider:cloudConnectTarget,manager:agentManagerTarget,scroll:0}:null;
   const rememberPanelOrigin=useCallback((target:string)=>{
+    const focus = typeof document === "undefined" ? null : document.activeElement;
+    toolbarReturnFocusRef.current = typeof HTMLElement !== "undefined" && focus instanceof HTMLElement && focus.closest(".conversation-shortcut-actions, .conversation-shortcut-menu") ? focus : null;
     const current=panelLocationRef.current;
     // An explicit navigation invalidates an older restoration even within the
     // same panel (for example connections -> files while content is loading).
@@ -4693,8 +4748,8 @@ export function ChannelPage({
   );
 
   return (
-    <div className="chan" data-reading-width={readingWidth}>
-      <ConversationHeader detailsButtonRef={detailsButtonRef} title={title?.trim()||slug} members={displayedChannelIdentities}
+    <div className="chan" data-reading-width={readingWidth} data-workbench={dockedPanel ? activePanel : undefined}>
+      <ConversationHeader activeShortcut={activePanel === "tasks" ? "tasks" : activePanel === "search" ? "search" : activePanel === "collaboration" && workspaceFiles ? "files" : undefined} detailsButtonRef={detailsButtonRef} title={title?.trim()||slug} members={displayedChannelIdentities}
         readingWidth={readingWidth} onReadingWidthChange={setReadingWidth}
         onMembers={()=>openPanel("team")}
         shortcuts={[
@@ -4936,7 +4991,7 @@ export function ChannelPage({
         />
       )}
       {activePanel !== null && (
-        <ChannelPanelModal
+        <ChannelPanelModal docked={dockedPanel} getReturnFocus={()=>toolbarReturnFocusRef.current}
           title={
             activePanel === "charter" ? t("Channel.tools.charter") :
             activePanel === "team" ? t("Channel.tools.team") :
@@ -5070,6 +5125,9 @@ export function ChannelPage({
           {activePanel === "tasks" && (
             <TaskLedgerPanel
               embeddedHeader
+              condensed={dockedPanel}
+              onExpandedChange={setTaskExpanded}
+              summary={taskSummary}
               tasks={tasks}
               loading={tasksLoading}
               error={tasksError}

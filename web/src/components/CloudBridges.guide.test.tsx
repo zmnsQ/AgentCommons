@@ -2,6 +2,7 @@
 import {test,expect,beforeEach,afterEach} from "bun:test";
 import {act,create,type ReactTestRenderer,type ReactTestInstance} from "react-test-renderer";
 import {CloudBridges} from "./CloudBridges";
+import {MuseCloudPanel} from "./MuseCloudPanel";
 import {LocaleProvider} from "../i18n/locale";
 const fetchOriginal=globalThis.fetch,storage=Object.getOwnPropertyDescriptor(globalThis,"localStorage");
 let renderer:ReactTestRenderer|null=null;const calls:string[]=[];
@@ -10,7 +11,17 @@ beforeEach(()=>{
  calls.length=0;
  Object.defineProperty(globalThis,"IS_REACT_ACT_ENVIRONMENT",{configurable:true,value:true});
  Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{getItem:()=>"en",setItem:()=>{}}});
- globalThis.fetch=(async(_input:unknown,init?:RequestInit)=>{calls.push(init?.method??"GET");return Response.json({connection:null,deliveries:[],active_subscriptions:0,pending_deliveries:0,agents:[]});}) as typeof fetch;
+ globalThis.fetch=(async(_input:unknown,init?:RequestInit)=>{calls.push(init?.method??"GET");return Response.json({connection:null,deliveries:[],active_subscriptions:0,pending_deliveries:0,agents:[],clients:[],can_manage:true,policy:{enabled:false,owner_mfa_enabled:true,allow_write:false,allow_events:false}});}) as typeof fetch;
+});
+
+test("Muse setup comes before collapsed permission settings without writing configuration",async()=>{
+ await act(async()=>{renderer=create(<LocaleProvider><CloudBridges token="fixture" slug="group" canManage canRun initialProvider="muse"/></LocaleProvider>);});
+ const surface=renderer!.root.findByProps({className:'cloud-bridges'}),children=surface.children as ReactTestInstance[];
+ const guideIndex=children.findIndex(child=>child.type===MuseCloudPanel);
+ const settingsIndex=children.findIndex(child=>child.props?.className==='cloud-bridge-card cloud-bridge-security');
+ expect(guideIndex).toBeGreaterThanOrEqual(0);expect(settingsIndex).toBeGreaterThan(guideIndex);
+ expect(children[settingsIndex]!.props.open).toBeUndefined();
+ expect(calls.every(method=>method==='GET')).toBe(true);
 });
 afterEach(async()=>{if(renderer)await act(async()=>renderer?.unmount());renderer=null;globalThis.fetch=fetchOriginal;if(storage)Object.defineProperty(globalThis,"localStorage",storage);else Reflect.deleteProperty(globalThis,"localStorage");});
 test("Hermes choice has a real next step and does not mutate configuration",async()=>{
