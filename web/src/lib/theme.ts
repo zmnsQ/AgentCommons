@@ -57,7 +57,7 @@ export function applyTheme(theme: Theme): void {
   try {
     // guard：测试/SSR 里 document 可能是精简替身；缺 documentElement 时静默跳过。
     document?.documentElement?.setAttribute?.("data-theme", theme);
-    document?.querySelector?.('meta[name="theme-color"]')?.setAttribute("content", theme === "midnight" ? "#191a1b" : "#f5f4ef");
+    document?.querySelector?.('meta[name="theme-color"]')?.setAttribute("content", theme === "midnight" ? "#181a1e" : "#f5f6f8");
   } catch {
     // 无 document 时不炸——本次仅持久化，下次带 document 的环境再落地。
   }

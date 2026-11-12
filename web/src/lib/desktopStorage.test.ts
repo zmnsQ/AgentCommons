@@ -25,6 +25,7 @@ describe("desktop origin storage migration", () => {
   test("collects only bounded non-secret desktop preferences", () => {
     const value = storage({
       ap_theme: "midnight",
+      ap_palette: "iris",
       ap_locale: "zh",
       ap_server_profiles_v1: '[{"label":"Private","origin":"https://private.example"}]',
       ap_active_server_origin_v1: "https://private.example",
@@ -49,6 +50,7 @@ describe("desktop origin storage migration", () => {
 
     expect(collectDesktopStorage(value)).toEqual({
       ap_theme: "midnight",
+      ap_palette: "iris",
       ap_locale: "zh",
       ap_server_profiles_v1: '[{"label":"Private","origin":"https://private.example"}]',
       ap_active_server_origin_v1: "https://private.example",
@@ -69,6 +71,7 @@ describe("desktop origin storage migration", () => {
   test("rejects secret-looking and malformed values under allowed keys", () => {
     const value = storage({
       ap_theme: "ghp_secret_access_token",
+      ap_palette: "unsupported",
       ap_locale: "en\nsecret",
       ap_notify_optin: "Bearer secret-token",
       ap_onboarded: "true",

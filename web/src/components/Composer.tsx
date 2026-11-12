@@ -514,7 +514,7 @@ export function Composer({
           })}
         </ul>
       )}
-      {<button type="button" className="composer-more" aria-label={locale==="zh"?"添加内容":"Add content"} aria-expanded={extrasOpen} onClick={()=>setExtrasOpen(value=>!value)}><StudioIcon name={extrasOpen?"close":"plus"}/></button>}
+      {compact && <button type="button" className="composer-more" aria-label={locale==="zh"?"添加内容":"Add content"} aria-expanded={extrasOpen} onClick={()=>setExtrasOpen(value=>!value)}><StudioIcon name={extrasOpen?"close":"plus"}/></button>}
       <textarea
         ref={taRef}
         className="composer-input t-mono"
@@ -604,7 +604,24 @@ export function Composer({
       )}
       </div>}
       <div className="composer-actions">
-        <div className="composer-secondary-actions" hidden={!extrasOpen}>
+        <div className="composer-secondary-actions" hidden={compact && !extrasOpen}>
+        {!compact && candidates.length > 0 && (
+          <button type="button" className="d-btn composer-mention"
+            aria-label={locale === "zh" ? "提及成员" : "Mention a member"}
+            title={locale === "zh" ? "提及成员" : "Mention a member"}
+            onClick={() => {
+              const input = taRef.current;
+              if (!input) return;
+              const before = draft.slice(0, input.selectionStart);
+              const prefix = before && !/\s$/.test(before) ? " @" : "@";
+              const next = before + prefix + draft.slice(input.selectionEnd);
+              const caret = before.length + prefix.length;
+              setDraft(next);
+              input.focus();
+              recompute(next, caret);
+              requestAnimationFrame(() => input.setSelectionRange(caret, caret));
+            }}>@</button>
+        )}
         {canAttach && (
           <>
             <input
@@ -621,6 +638,7 @@ export function Composer({
             <button
               type="button"
               className="d-btn composer-attach"
+              aria-label={t("Composer.attach.label")}
               onClick={() => {fileRef.current?.click();setExtrasOpen(false);}}
               disabled={uploading}
               title={t("Composer.attach.title")}
@@ -632,6 +650,7 @@ export function Composer({
         <button
           type="button"
           className={"d-btn composer-paste" + (canReadClipboard ? "" : " composer-paste--insecure")}
+          aria-label={t("Composer.paste.label")}
           aria-disabled={canReadClipboard ? undefined : true}
           onClick={() => {void onPasteClick();setExtrasOpen(false);}}
           title={canReadClipboard ? t("Composer.paste.title") : t("Composer.paste.insecureTitle")}

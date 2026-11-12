@@ -118,7 +118,8 @@ describe("SettingsPanel (#273)", () => {
     const txt = allText(render({ me, canSetHandle: false, onClose: () => {}, onLogout: () => {} }));
     expect(txt).toContain("Settings");
     expect(txt).toContain("Language");
-    expect(txt).toContain("Theme");
+    expect(txt).toContain("Appearance");
+    expect(txt).toContain("Color palette");
     expect(txt).toContain("@-mention notifications");
     expect(txt).toContain("Account");
     expect(txt).toContain("alice");

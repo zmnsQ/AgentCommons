@@ -17,6 +17,8 @@ import "./styles/prototype-sidebar.css";
 import "./styles/prototype-chat.css";
 import "./styles/workspace-surfaces.css";
 import "./styles/workspace-polish.css";
+import "./styles/studio-workspace.css";
+import { applyPalette, readPalette } from "./lib/palette";
 import {installMobileViewport} from "./lib/mobileViewport";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -30,6 +32,7 @@ async function startApplication() {
   await synchronizeDesktopStorage();
   // 主题在首帧前就落到 <html data-theme>，避免刷新时先闪一下默认主题再切（#273）。
   applyStoredTheme();
+  applyPalette(readPalette());
 
   createRoot(document.getElementById("root")!).render(
     <StrictMode>

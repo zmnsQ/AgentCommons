@@ -1,5 +1,6 @@
 // @ts-expect-error Bun executes this test; the web tsconfig only loads Vite globals.
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { applyPalette, readPalette } from "./palette";
 import { applyStoredTheme, applyTheme, DEFAULT_THEME, readStoredTheme, SUPPORTED_THEMES, THEME_UI_VERSION, THEME_UI_VERSION_KEY, PREVIOUS_THEME_KEY, readPreviousTheme, restorePreviousTheme } from "./theme";
 
 function memoryStorage(): Storage {
@@ -105,4 +106,14 @@ test('existing migration backup is never overwritten by later theme choices', ()
 test('unavailable preference storage still applies safe default without throwing', () => {
   Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem(){throw Error('unavailable');},setItem(){throw Error('unavailable');}}});
   expect(readStoredTheme()).toBe('midnight');applyTheme('doodle');expect(attribute).toBe('doodle');expect(readPreviousTheme()).toBeNull();
+});
+
+test("color preference survives mode changes and unknown stored colors use jade", () => {
+  localStorage.setItem("ap_palette", "legacy-value");
+  expect(readPalette()).toBe("jade");
+  applyPalette("iris");
+  applyTheme("doodle");
+  expect(readPalette()).toBe("iris");
+  applyTheme("midnight");
+  expect(readPalette()).toBe("iris");
 });

@@ -5,6 +5,8 @@ import { isTauriEnvironment } from "../lib/desktopUpdater";
 // 全局设置只承载个人与设备设置。跨频道的本机 Agent 监控、启停、常驻和日志
 // 已移到独立 LocalAgentCenter，避免打开偏好设置就启动多套本机 IPC/轮询。
 import { useCallback, useState, type ReactNode } from "react";
+import { PALETTES, readPalette, applyPalette } from "../lib/palette";
+import { useLocale } from "../i18n/locale";
 import { useT } from "../i18n/useT";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { HandleSetup } from "./HandleSetup";
@@ -65,6 +67,8 @@ export function SettingsPanel({
   restoreFocusOnUnmount?: boolean;
 }) {
   const t = useT();
+  const { locale } = useLocale();
+  const [palette, setPalette] = useState(readPalette);
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
 
   const pickTheme = useCallback((next: Theme) => {
@@ -84,7 +88,6 @@ export function SettingsPanel({
       label: t("App.settings.section.preferences"),
       content: (
         <>
-          <h3 className="settings-module-title">{t("App.settings.section.preferences")}</h3>
           <section className="settings-section">
             <div className="settings-label">{t("App.settings.language")}</div>
             <LanguageSwitcher />
@@ -110,6 +113,20 @@ export function SettingsPanel({
             </div>
           </section>
 
+          <section className="settings-section">
+            <div className="settings-label">{t("App.settings.palette")}</div>
+            <div className="palette-grid" role="group" aria-label={t("App.settings.palette")}>
+              {PALETTES.map(option => (
+                <button key={option.id} type="button" className="palette-choice" data-palette={option.id}
+                  aria-pressed={option.id === palette}
+                  onClick={() => { applyPalette(option.id); setPalette(option.id); }}>
+                  <span className="palette-sample" aria-hidden="true"><i /><b /><b /></span>
+                  <span>{option[locale === "zh" ? "zh" : "en"]}</span>
+                  {option.id === palette && <StudioIcon name="check" size={14} />}
+                </button>
+              ))}
+            </div>
+          </section>
           <section className="settings-section">
             <div className="settings-label">{t("App.settings.notifications")}</div>
             <button

@@ -90,6 +90,77 @@ async function pageBounds(page) {
 }
 
 try {
+  await run('switch-conversations-and-agents', {width:1440,height:900}, 'no-preference', async ({page}) => {
+    await load(page, 'doodle');
+    const input = page.locator('textarea.composer-input');
+    await input.fill('first channel draft');
+    await page.keyboard.press('Control+k');
+    const search = page.getByRole('searchbox', {name:'快速切换会话'});
+    await search.fill('产品');
+    await search.press('Enter');
+    await page.waitForURL('**/c/fixture-1');
+    assert.equal(await input.inputValue(), '');
+    await input.fill('second channel draft');
+    const tabs = page.getByRole('navigation', {name:'已打开的会话'});
+    await tabs.getByRole('button', {name:'品牌灵感实验室 · 测试',exact:true}).click();
+    assert.equal(await input.inputValue(), 'first channel draft');
+    await tabs.getByRole('button', {name:'关闭标签 品牌灵感实验室 · 测试'}).click();
+    await page.waitForURL('**/c/fixture-1');
+    assert.equal(await input.inputValue(), 'second channel draft');
+    await page.locator('[data-sidebar-view="agents"]').click();
+    await page.getByRole('searchbox', {name:'搜索本群 Agent'}).fill('Muse');
+    assert.equal(await page.locator('.agent-list button:visible').count(), 1);
+    await page.locator('[data-sidebar-view="conversations"]').click();
+    await page.locator('.group-list button').first().click();
+    assert.equal(await input.inputValue(), 'first channel draft');
+    await input.fill('');
+    await page.getByRole('button', {name:'提及成员'}).click();
+    await page.getByRole('listbox').waitFor();
+    await page.keyboard.press('Escape');
+    await input.fill('');
+    await input.evaluate(element => element.blur());
+    await settle(page);
+    const rail = await page.locator('.studio-rail').boundingBox();
+    for (const button of await page.locator('.studio-rail button:visible').all()) {
+      const rect = await button.boundingBox();
+      assert.ok(rect.x >= rail.x && rect.x + rect.width <= rail.x + rail.width + 1);
+    }
+    await page.screenshot({path: output + '/studio-conversations.png'});
+  });
+
+  for (const viewport of [{width:1440,height:900}, {width:390,height:844}]) {
+    await run('color-palettes-' + viewport.width, viewport, 'reduce', async ({page, mobile}) => {
+      await load(page, 'doodle');
+      if (mobile) await page.locator('.mobile-group-toggle').click();
+      await page.locator('.app-settings-btn:visible').click();
+      for (const mode of ['doodle', 'midnight']) {
+        await page.locator('[data-theme-code="' + mode + '"]').click();
+        const colors = new Set();
+        for (const id of ['jade', 'lake', 'iris', 'rose', 'amber', 'slate']) {
+          const choice = page.locator('.palette-choice[data-palette="' + id + '"]');
+          await choice.click();
+          assert.equal(await choice.getAttribute('aria-pressed'), 'true');
+          const state = await page.evaluate(() => ({
+            mode: document.documentElement.dataset.theme,
+            palette: document.documentElement.dataset.palette,
+            stored: localStorage.getItem('ap_palette'),
+            accent: getComputedStyle(document.documentElement).getPropertyValue('--t-accent').trim()
+          }));
+          assert.equal(state.mode, mode);
+          assert.equal(state.palette, id);
+          assert.equal(state.stored, id);
+          colors.add(state.accent);
+          await pageBounds(page);
+        }
+        assert.equal(colors.size, 6);
+      }
+      await page.locator('.palette-choice[data-palette="iris"]').click();
+      await page.screenshot({path: output + '/studio-palettes-' + viewport.width + '.png'});
+      await page.locator('.settings-close').click();
+      await page.screenshot({path: output + '/studio-iris-' + viewport.width + '.png'});
+    });
+  }
+
   // Both motion preferences exercise the same production components at all sizes.
   for (const theme of ['midnight', 'doodle']) for (const motion of ['no-preference', 'reduce']) for (const viewport of [{width:1440,height:900}, {width:1024,height:768}, {width:390,height:844}, {width:320,height:740}, {width:844,height:390}]) {
     const name = `${theme}-${motion}-${viewport.width}x${viewport.height}`;

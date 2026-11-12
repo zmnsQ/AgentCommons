@@ -172,6 +172,7 @@ const SCREEN_READER_ONLY_STYLE: CSSProperties = {
 };
 
 interface Props {
+  conversationDrafts?: Map<string, string>;
   identityRevision?: number;
   title?: string;
   workspaceAction?:{id:number;panel:"search"|"files"|"charter"|"team"|"connect";agent?:string};
@@ -2098,6 +2099,7 @@ function TeamThread({
 }
 
 export function ChannelPage({
+  conversationDrafts,
   identityRevision = 0,
   title,
   workspaceAction,
@@ -2139,7 +2141,11 @@ export function ChannelPage({
   const [detailsRosterOpen,setDetailsRosterOpen]=useState(false);
   const [workspaceFiles,setWorkspaceFiles]=useState(false);
   const lastWorkspaceAction=useRef(0);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(() => conversationDrafts?.get(slug) ?? "");
+  useEffect(() => {
+    if (draft) conversationDrafts?.set(slug, draft);
+    else conversationDrafts?.delete(slug);
+  }, [conversationDrafts, slug, draft]);
   // 附件（#176）：已上传待随下一条消息发出的引用（attachments）+ 在途/失败的每文件上传态（uploads）。
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploads, setUploads] = useState<UploadItem[]>([]);

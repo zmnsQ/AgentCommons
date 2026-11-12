@@ -198,6 +198,7 @@ fn valid_value(key: &str, value: &str) -> bool {
         }
         "ap_locale" => matches!(value, "en" | "zh"),
         "ap_server_profiles_v1" => valid_server_profiles(value),
+        "ap_palette" => matches!(value, "jade" | "lake" | "iris" | "rose" | "amber" | "slate"),
         "ap_theme" => matches!(value, "doodle" | "midnight"),
         _ => false,
     }

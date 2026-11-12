@@ -7,17 +7,14 @@ import {Composer} from './Composer';
 import {LocaleProvider} from '../i18n/locale';
 let renderer:ReactTestRenderer|null=null;
 afterEach(()=>{act(()=>renderer?.unmount());renderer=null;});
-test('desktop capsule keeps tools available behind an explicit accessible toggle',()=>{
+test('desktop composer exposes its tools directly while retaining the draft',()=>{
  const original=Object.getOwnPropertyDescriptor(globalThis,'IS_REACT_ACT_ENVIRONMENT');
  Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{configurable:true,value:true});
  try {
   act(()=>{renderer=create(<LocaleProvider><Composer draft="Keep my draft" setDraft={()=>{}} onSend={()=>{}} ready candidates={[]} mentionStatuses={[]}/></LocaleProvider>);});
   const root=renderer!.root;
   expect(root.findByProps({'data-prototype-composer':'true'})).toBeTruthy();
-  const more=root.findByProps({className:'composer-more'});
-  expect(more.props['aria-expanded']).toBe(false);
-  expect(root.findByProps({className:'composer-secondary-actions'}).props.hidden).toBe(true);
-  act(()=>more.props.onClick());
+  expect(root.findAllByProps({className:'composer-more'})).toHaveLength(0);
   expect(root.findByProps({className:'composer-secondary-actions'}).props.hidden).toBe(false);
   expect(root.findByType('textarea').props.value).toBe('Keep my draft');
   expect(root.findByType('textarea').props.rows).toBe(1);

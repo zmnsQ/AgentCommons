@@ -1,3 +1,4 @@
+import { isPalette } from "./palette";
 import { isDesktopRuntime } from "./desktopRuntime";
 
 const MAX_ENTRIES = 512;
@@ -115,6 +116,7 @@ function validValue(key: string, value: string): boolean {
     case "ap_desktop_updater_shown_version": return SAFE_VERSION_PATTERN.test(value);
     case "ap_locale": return value === "en" || value === "zh";
     case "ap_server_profiles_v1": return validServerProfiles(value);
+    case "ap_palette": return isPalette(value);
     case "ap_theme": return value === "doodle" || value === "midnight";
     default: return false;
   }

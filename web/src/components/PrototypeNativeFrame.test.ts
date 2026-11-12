@@ -5,12 +5,12 @@ const app=readFileSync(new URL('../App.tsx',import.meta.url),'utf8');
 const css=readFileSync(new URL('../styles/workspace-surfaces.css',import.meta.url),'utf8');
 const frame=readFileSync(new URL('../styles/prototype-native-frame.css',import.meta.url),'utf8');
 const shell=readFileSync(new URL('./WorkspaceShell.tsx',import.meta.url),'utf8');
-test('account and advanced controls live in the sidebar footer, not a standalone rail',()=>{
+test('desktop rail and mobile drawer expose the same account and settings actions',()=>{
  expect(app).not.toContain('<header className="app-head prototype-rail">');
  expect(app).toContain('const accountControls =');expect(app).toContain('className="workspace-account-controls"');
  expect(app).toContain('mobileActions={accountControls} navigationFooter={accountControls}');
  expect(app).toContain('ref={settingsButtonRef}');expect(app).toContain('onClick={openSettings}');expect(app).toContain('App.settings.section.help');
- expect(shell).toContain('workspace-navigation-footer');expect(app).toContain('workspace-account-name');
+ expect(shell).toContain('className="studio-rail"');expect(shell).toContain('{navigationFooter}');expect(app).toContain('workspace-account-name');
 });
 test('current surface layer fills viewport and removes the framed rail layout',()=>{
  expect(css).toMatch(/#root:has\(>\.prototype-native-workspace\)\s*\{padding:0;height:var\(--ac-viewport-height,100dvh\)/);

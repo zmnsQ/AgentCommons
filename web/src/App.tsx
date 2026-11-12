@@ -1,3 +1,4 @@
+import { ConversationTabs } from "./components/ConversationTabs";
 import {ToolbarTooltip,ToolbarTooltipGroup} from "./components/ToolbarTooltip";
 import { preferredMeDisplay } from "./lib/meDisplay";
 import {Brand} from "./components/Brand";
@@ -191,6 +192,8 @@ export function App() {
   const channelReloadGeneration = useRef(0);
   const channelReloadInFlight = useRef<{ key: string; promise: Promise<void> } | null>(null);
   const [me, setMe] = useState<MeInfo | null>(null);
+  const workspaceIdentity = JSON.stringify([activeOrigin, me?.provider, me?.kind, me?.name, me?.owner, isShareMode()]);
+  const conversationDrafts = useMemo(() => new Map<string, string>(), [workspaceIdentity]);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideFromSettings, setGuideFromSettings] = useState(false);
   const [identityRevision, setIdentityRevision] = useState(0);
@@ -1347,8 +1350,9 @@ export function App() {
         </p>
       )}
       <WorkspaceShell route={slug} navigationError={listError} requestOpen={createGroupRequest} title={currentChannel?.title}
+        topBar={<ConversationTabs key={workspaceIdentity} channels={channels} active={slug} onOpen={openChannel} />}
         mobileActions={accountControls} navigationFooter={accountControls}
-        navigation={<>
+        navigation={view => <>
           {desktop && <div className="sidebar-server-switcher"><ServerSwitcher profiles={serverProfiles} activeOrigin={activeOrigin} onSwitch={switchDesktopOrigin}
             onAddPair={() => setServerPairingFlow(beginDesktopServerAdd(initialDesktopServerPairingFlow(activeOrigin)))}
             onPair={origin => setServerPairingFlow(beginDesktopServerPairing(initialDesktopServerPairingFlow(activeOrigin),origin))}/></div>}
@@ -1366,6 +1370,7 @@ export function App() {
             />
           )}
           <ChannelList
+            view={view}
             scopeKey={activeOrigin}
             onCreate={canCreate&&token!==null?()=>setCreateGroupRequest(v=>v+1):undefined}
             onConnect={slug&&!isShareMode()&&me?.role==="human"&&currentChannel?.archived_at===null?()=>setWorkspaceAction(previous=>({id:(previous?.id??0)+1,slug,panel:"connect"})):undefined}
@@ -1400,7 +1405,8 @@ export function App() {
             </p>
           ) : slug !== null ? (
             <ChannelPage
-              key={`${activeOrigin}:${slug}`}
+              key={`${workspaceIdentity}:${slug}`}
+              conversationDrafts={conversationDrafts}
               slug={slug}
               title={currentChannel?.title ?? slug}
               onAgentRoster={receiveAgentRoster}
