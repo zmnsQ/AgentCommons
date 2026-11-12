@@ -5,8 +5,8 @@ import {renderOAuthConsent,renderOAuthGroupChoice,renderOAuthProblem} from '../.
 const css=readFileSync(new URL('../public/commons-consent.css',import.meta.url),'utf8');
 function palette(theme:'light'|'dark'){
  const tokens=readFileSync(new URL('../src/styles/tokens.css',import.meta.url),'utf8');
- const block=[...tokens.matchAll(/:root(?:\[data-theme="midnight"\])? \{\n  --signin-bg:[^}]+/g)]
-   .find(([rule])=>rule.startsWith(theme==='light'?':root {':':root[data-theme="midnight"]'))![0];
+ const block=[...tokens.matchAll(/:root(?:\[data-ac-theme="midnight"\])? \{\n  --signin-bg:[^}]+/g)]
+   .find(([rule])=>rule.startsWith(theme==='light'?':root {':':root[data-ac-theme="midnight"]'))![0];
  const values=Object.fromEntries([...block.matchAll(/--signin-([\w-]+): #(\w+);/g)]
    .map(([,key,hex])=>[key,hex!.length===3 ? hex!.split('').map(c=>c+c).join('') : hex]));
  return Object.fromEntries([...css.matchAll(/--oc-([\w-]+):var\(--signin-([\w-]+)\)/g)]
@@ -27,7 +27,7 @@ test('standalone stylesheet has complete native form, keyboard, motion and compa
 });
 for(const theme of ['doodle','midnight'] as const)test(`${theme} server HTML retains explicit consent and truthful error/scope content`,async()=>{
  const html=await renderOAuthConsent({id:'synthetic-request',nonce:'synthetic-nonce',clientName:'Synthetic connector',group:'synthetic-group',groupTitle:'Synthetic group',account:'synthetic-owner',login:'fixture',scopes:['group.read','group.events'],redirectUri:'https://example.test/callback'},{locale:'en',theme}).text();
- expect(html).toContain(`data-theme="${theme}"`);expect(html).toContain('name="decision" value="approve"');expect(html).toContain('name="decision" value="deny"');expect(html).toContain('<code>group.events</code>');expect(html).not.toContain('<code>group.write</code>');expect(html).not.toContain('<script');expect(html).toContain('/brand/mark.png');
+ expect(html).toContain(`data-ac-theme="${theme}"`);expect(html).toContain('name="decision" value="approve"');expect(html).toContain('name="decision" value="deny"');expect(html).toContain('<code>group.events</code>');expect(html).not.toContain('<code>group.write</code>');expect(html).not.toContain('<script');expect(html).toContain('/brand/mark.png');
  const error=await renderOAuthProblem(new Request('https://example.test',{headers:{accept:'text/html',cookie:`ap_theme=${theme}; ap_locale=en`}}),'group_owner_required',403).text();expect(error).toContain('role="alert"');expect(error).toContain('has not granted any new access');
  const choice=await renderOAuthGroupChoice({clientName:'Synthetic',groups:[{slug:'one',title:'One',resource:'https://example.test/one'}],params:{}},{locale:'en',theme}).text();expect(choice).toContain('method="GET"');expect(choice).toContain('name="resource" required');
 });

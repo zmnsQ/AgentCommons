@@ -18,11 +18,16 @@ export function installWorkspaceFixture(theme:'doodle'|'midnight') {
  Object.defineProperty(window,'sessionStorage',{configurable:true,value:memoryStorage()});
  let fixtureCookie='';
  Object.defineProperty(document,'cookie',{configurable:true,get:()=>fixtureCookie,set:(value:string)=>{fixtureCookie=value;}});
- document.documentElement.dataset.theme=theme;
+ document.documentElement.dataset.acTheme=theme;
  const requests:string[]=[];
  const currentIdentities=identities.map(identity=>({...identity}));
  const scrolling = new URLSearchParams(location.search).get('scroll') === '1';
- const historyMessages = scrolling ? Array.from({length:200},(_,i)=>({...messages[1]!,seq:i+1,body:`【TEST FIXTURE】历史消息 ${i+1}\n\n用于滚动位置验收，不是真实消息。`,ts:Date.UTC(2026,9,28)+i*1000})) : [...messages];
+ const thread = new URLSearchParams(location.search).get('thread') === '1';
+ const exampleMessages = thread ? messages.map((message, i) => i === 2 ? {
+   ...message, reply_to: 1, body: '**排版方案**\n\n- 保留原文段落\n- 在手机上检查可读性\n\n```txt\npreview --theme light\n```',
+   attachments: [{key:'fixture-0/demo/设计稿.txt',filename:'设计稿.txt',size:1600,content_type:'text/plain',url:'/api/channels/fixture-0/demo'}],
+ } : message) : messages;
+ const historyMessages = scrolling ? Array.from({length:200},(_,i)=>({...messages[1]!,seq:i+1,body:`【TEST FIXTURE】历史消息 ${i+1}\n\n用于滚动位置验收，不是真实消息。`,ts:Date.UTC(2026,9,28)+i*1000})) : [...exampleMessages];
  const sockets=new Set<FixtureSocket>();
  let nextSeq=historyMessages.at(-1)!.seq+1;
  const emit=(frame:unknown)=>{for(const socket of sockets)if(socket.readyState===1)socket.emit(frame);};

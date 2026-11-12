@@ -18,6 +18,7 @@ import "./styles/prototype-chat.css";
 import "./styles/workspace-surfaces.css";
 import "./styles/workspace-polish.css";
 import "./styles/studio-workspace.css";
+import "./styles/conversation.css";
 import { applyPalette, readPalette } from "./lib/palette";
 import {installMobileViewport} from "./lib/mobileViewport";
 import { StrictMode } from "react";
@@ -30,7 +31,7 @@ import { applyStoredTheme } from "./lib/theme";
 async function startApplication() {
   // custom protocol 会切换 WebView origin；先恢复非敏感偏好，再读取主题和服务器配置。
   await synchronizeDesktopStorage();
-  // 主题在首帧前就落到 <html data-theme>，避免刷新时先闪一下默认主题再切（#273）。
+  // 主题在首帧前就落到 <html data-ac-theme>，避免刷新时先闪一下默认主题再切（#273）。
   applyStoredTheme();
   applyPalette(readPalette());
 

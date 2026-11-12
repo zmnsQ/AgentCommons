@@ -50,7 +50,7 @@ beforeEach(() => {
     configurable: true,
     value: {
       documentElement: {
-        setAttribute: (name: string, value: string) => { if (name === "data-theme") themeAttribute = value; },
+        setAttribute: (name: string, value: string) => { if (name === "data-ac-theme") themeAttribute = value; },
       },
     },
   });
@@ -249,7 +249,7 @@ describe("SettingsPanel (#273)", () => {
     expect(r.root.findByProps({ id: "global-settings-panel-account" }).props.hidden).toBe(false);
   });
 
-  test("theme buttons flip data-theme and persist to localStorage", () => {
+  test("theme buttons flip data-ac-theme and persist to localStorage", () => {
     const r = render({ me, canSetHandle: false, onClose: () => {}, onLogout: () => {} });
     const midnight = findByProp(r.toJSON(), "data-theme-code", "midnight");
     expect(midnight).not.toBeNull();

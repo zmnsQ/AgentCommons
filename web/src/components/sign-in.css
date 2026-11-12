@@ -14,7 +14,7 @@ html:root #root:has(> .signin-page) { padding: 0; }
   background: var(--signin-bg);
   font-family: var(--t-sans, system-ui, sans-serif);
 }
-[data-theme="midnight"] .signin-page {
+[data-ac-theme="midnight"] .signin-page {
   color-scheme: dark;
 }
 .signin-shell { width: min(100%, 402px); min-width: 0; margin: auto; }

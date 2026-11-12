@@ -4,7 +4,7 @@ const view:ConsentView={id:"request_"+"a".repeat(64),nonce:"b".repeat(64),client
 describe("OAuth site-consistent presentation",()=>{
   it.each(["en","zh"] as const)("uses the brand, group name, account and all granted scopes in %s",async locale=>{
     const result=renderOAuthConsent(view,{locale,theme:"doodle"}),html=await result.text();
-    expect(html).toContain('class="oauth-brand"');expect(html).toContain('data-theme="doodle"');
+    expect(html).toContain('class="oauth-brand"');expect(html).toContain('data-ac-theme="doodle"');
     expect(html).toContain('aria-current="step"');expect(html).toContain(view.groupTitle);
     expect(html).toContain("test-owner");expect(html).toContain("#"+view.group);
     for(const scope of view.scopes)expect(html).toContain(`<code>${scope}</code>`);
@@ -20,7 +20,7 @@ describe("OAuth site-consistent presentation",()=>{
   });
   it("shows only approved scopes, not permissions removed by group policy",async()=>{
     const html=await renderOAuthConsent({...view,scopes:["group.read"]},{locale:"en",theme:"midnight"}).text();
-    expect(html).toContain('data-theme="midnight"');expect(html).toContain("group.read");
+    expect(html).toContain('data-ac-theme="midnight"');expect(html).toContain("group.read");
     expect(html).not.toContain("group.write");expect(html).not.toContain("group.events");
   });
   it("escapes all untrusted display fields without granting more navigation",async()=>{
@@ -46,7 +46,7 @@ describe("OAuth site-consistent presentation",()=>{
     const browser=new Request("https://commons.test/oauth/authorize",{headers:{accept:"text/html",cookie:"ap_locale=zh; ap_theme=midnight"}});
     const r=renderOAuthProblem(browser,code,403),html=await r.text();
     expect(r.status).toBe(403);expect(r.headers.get("content-type")).toContain("text/html");
-    expect(html).toContain('class="oauth-brand"');expect(html).toContain('data-theme="midnight"');
+    expect(html).toContain('class="oauth-brand"');expect(html).toContain('data-ac-theme="midnight"');
     expect(html).toContain("本页面没有授予任何新的访问权限");expect(html).toContain("AgentParty");
     expect(html).not.toContain('<form');expect(html).not.toContain(view.nonce);
     expect(r.headers.get("referrer-policy")).toBe("no-referrer");

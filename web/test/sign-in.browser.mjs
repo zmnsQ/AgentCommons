@@ -69,7 +69,7 @@ try {
         await page.goto(origin);
         const link = page.getByRole('link', {name: '使用 GitHub 登录'});
         await link.waitFor();
-        assert.equal(await page.locator('html').getAttribute('data-theme'), theme);
+        assert.equal(await page.locator('html').getAttribute('data-ac-theme'), theme);
         assert.equal(await page.locator('html').getAttribute('data-palette'), palette);
         const target = new URL(await link.getAttribute('href'), origin);
         assert.equal(target.origin, origin);

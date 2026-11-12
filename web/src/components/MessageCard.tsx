@@ -873,30 +873,6 @@ function MessageCardImpl({
           </time>
         </div>
       </header>
-      {msg.reply_to !== null && quotedMessage !== null && (
-        <button
-          type="button"
-          className="msg-quote"
-          onClick={jumpToQuoted}
-          title={quotedMessage.retracted ? undefined : quotedMessage.body}
-          aria-label={t("MessageCard.reply.jump", { seq: msg.reply_to })}
-        >
-          <span className="msg-quote-icon" aria-hidden="true">↩</span>
-          <span className="msg-quote-sender">{quotedSenderLabel}</span>
-          <IdentityDisambiguator code={quotedSenderDisambiguator} />
-          <span className="msg-quote-text">{quotedPreviewText}</span>
-        </button>
-      )}
-      <MessageStatus
-        receipts={receipts ?? []}
-        deliveries={deliveries ?? []}
-        inboxReceipts={msg.inbox_receipts}
-        readers={read.readers}
-        unread={read.unread}
-        display={(name) => identityLabel(name)}
-        onOpenAgentDetail={onOpenAgentDetail}
-        canOpenAgentDetail={canOpenAgentDetail}
-      />
       {menu !== null && (
         <div ref={menuRef} className="msg-menu" style={{ left: menu.x, top: menu.y }}>
           <button type="button" className="msg-menu-item" onClick={copyText}>
@@ -1062,45 +1038,71 @@ function MessageCardImpl({
           )}
         </div>
       )}
-      {editing ? (
-        <div className="msg-edit">
-          <textarea
-            ref={editInputRef}
-            className="msg-edit-input t-mono"
-            rows={4}
-            value={editDraft}
-            onChange={(event) => onEditDraftChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.nativeEvent.isComposing) return;
-              if (event.key === "Escape") {
-                event.preventDefault();
-                if (!editSaving) onEditCancel();
-                return;
-              }
-              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault();
-                if (!saveDisabled) onEditSave();
-              }
-            }}
-          />
-          <div className="msg-edit-actions">
-            <button type="button" className="d-btn d-btn--primary" disabled={saveDisabled} onClick={onEditSave}>
-              {editSaving ? t("MessageCard.edit.saving") : t("MessageCard.edit.save")}
-            </button>
-            <button type="button" className="d-btn" disabled={editSaving} onClick={onEditCancel}>
-              {t("MessageCard.edit.cancel")}
-            </button>
+      <div className="message-bubble">
+        {msg.reply_to !== null && quotedMessage !== null && (
+          <button
+            type="button"
+            className="msg-quote"
+            onClick={jumpToQuoted}
+            title={quotedMessage.retracted ? undefined : quotedMessage.body}
+            aria-label={t("MessageCard.reply.jump", { seq: msg.reply_to })}
+          >
+            <StudioIcon name="reply" className="msg-quote-icon" size={14} />
+            <span className="msg-quote-sender">{quotedSenderLabel}</span>
+            <IdentityDisambiguator code={quotedSenderDisambiguator} />
+            <span className="msg-quote-text">{quotedPreviewText}</span>
+          </button>
+        )}
+        {editing ? (
+          <div className="msg-edit">
+            <textarea
+              ref={editInputRef}
+              className="msg-edit-input t-mono"
+              rows={4}
+              value={editDraft}
+              onChange={(event) => onEditDraftChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.nativeEvent.isComposing) return;
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  if (!editSaving) onEditCancel();
+                  return;
+                }
+                if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  if (!saveDisabled) onEditSave();
+                }
+              }}
+            />
+            <div className="msg-edit-actions">
+              <button type="button" className="d-btn d-btn--primary" disabled={saveDisabled} onClick={onEditSave}>
+                {editSaving ? t("MessageCard.edit.saving") : t("MessageCard.edit.save")}
+              </button>
+              <button type="button" className="d-btn" disabled={editSaving} onClick={onEditCancel}>
+                {t("MessageCard.edit.cancel")}
+              </button>
+            </div>
+            {actionError !== null && <p className="banner banner--red msg-action-error">{actionError}</p>}
           </div>
-          {actionError !== null && <p className="banner banner--red msg-action-error">{actionError}</p>}
-        </div>
-      ) : msg.retracted ? (
-        <p className="msg-retracted">{t("MessageCard.retracted")}</p>
-      ) : (
-        <Markdown source={msg.body} identities={identityDisplay} display={inlineMentionLabel} />
-      )}
-      {!editing && !msg.retracted && msg.attachments !== undefined && msg.attachments.length > 0 && (
-        <AttachmentList attachments={msg.attachments} />
-      )}
+        ) : msg.retracted ? (
+          <p className="msg-retracted">{t("MessageCard.retracted")}</p>
+        ) : (
+          <Markdown source={msg.body} identities={identityDisplay} display={inlineMentionLabel} />
+        )}
+        {!editing && !msg.retracted && msg.attachments !== undefined && msg.attachments.length > 0 && (
+          <AttachmentList attachments={msg.attachments} />
+        )}
+      </div>
+      <MessageStatus
+        receipts={receipts ?? []}
+        deliveries={deliveries ?? []}
+        inboxReceipts={msg.inbox_receipts}
+        readers={read.readers}
+        unread={read.unread}
+        display={(name) => identityLabel(name)}
+        onOpenAgentDetail={onOpenAgentDetail}
+        canOpenAgentDetail={canOpenAgentDetail}
+      />
       {!editing && actionError !== null && <p className="banner banner--red msg-action-error">{actionError}</p>}
     </article>
   );

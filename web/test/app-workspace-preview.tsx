@@ -5,7 +5,7 @@ const params=new URLSearchParams(location.search);
 // Read scroll mode inside installation before replacing the entry URL.
 const controls=installWorkspaceFixture(params.get('theme')==='doodle'?'doodle':'midnight');
 // Do not pre-seed the DOM theme as the earlier preview did: exercise bootstrap.
-document.documentElement.removeAttribute('data-theme');
+document.documentElement.removeAttribute('data-ac-theme');
 history.replaceState(null,'','/');
 await import('../src/main');
 

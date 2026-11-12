@@ -22,7 +22,7 @@
 :root .chan-pill.is-active .chan-name{color:var(--t-accent)}
 :root .home-hero{position:relative;isolation:isolate;padding:24px 44% 30px 0;min-height:270px;margin-bottom:30px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
 .workspace-hero-art{position:absolute;z-index:-1;width:43%;height:auto;max-height:300px;object-fit:contain;right:-12px;top:50%;transform:translateY(-50%);border-radius:24px;mix-blend-mode:multiply;pointer-events:none}
-:root[data-theme=midnight] .workspace-hero-art{mix-blend-mode:normal;opacity:.85}
+:root[data-ac-theme=midnight] .workspace-hero-art{mix-blend-mode:normal;opacity:.85}
 :root .home-title{font-family:var(--t-sans);font-size:clamp(28px,3vw,40px);font-weight:650;letter-spacing:-1.1px;line-height:1.3}
 :root .home-sub{font-size:14px;line-height:1.9;max-width:430px}
 :root .studio-eyebrow{font-size:11px;letter-spacing:.1em}
@@ -40,7 +40,7 @@
 :root .composer-actions .d-btn--primary{border-radius:12px;min-height:38px;padding-inline:16px}
 :root .gate{position:relative;justify-content:center;padding:54px 24px;background:var(--ac-surface-0)}
 .gate-art{width:300px;max-width:75vw;height:auto;mix-blend-mode:multiply;margin-bottom:8px;border-radius:24px}
-:root[data-theme=midnight] .gate-art{mix-blend-mode:normal;opacity:.9}
+:root[data-ac-theme=midnight] .gate-art{mix-blend-mode:normal;opacity:.9}
 :root .gate-title{margin-top:8px;margin-bottom:10px}
 :root .gate-title .commons-brand{font-size:28px;gap:12px;letter-spacing:-.8px}
 :root .gate-title .commons-brand img{width:44px;height:44px;border-radius:13px}
@@ -48,7 +48,7 @@
 :root .gate>.original-project-credit{font-size:10px;line-height:1.7;max-width:400px;margin-bottom:20px}
 :root .gate-sub{margin-top:0;max-width:400px;text-align:center;line-height:1.8}
 .onboarding-art{display:block;width:220px;max-width:65%;height:auto;margin:-8px auto 16px;border-radius:18px;mix-blend-mode:multiply}
-:root[data-theme=midnight] .onboarding-art{mix-blend-mode:normal}
+:root[data-ac-theme=midnight] .onboarding-art{mix-blend-mode:normal}
 :root .channel-panel-card{border-radius:22px;box-shadow:var(--ac-shadow-modal)}
 :root .channel-panel-head{padding:22px 28px;background:var(--ac-surface-2)}
 :root .channel-panel-body{padding:28px}

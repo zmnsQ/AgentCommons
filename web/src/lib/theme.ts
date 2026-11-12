@@ -1,6 +1,6 @@
 import {writePresentationCookie} from "./presentationCookie";
 // 主题：浅色（doodle）↔ 原型深色（midnight）。两套主题的 CSS 变量早已在
-// styles/tokens.css 里按 :root[data-theme] 备好——这里只做「选哪套 + 记住选择」的纯客户端开关，
+// styles/tokens.css 里按 :root[data-ac-theme] 备好——这里只做「选哪套 + 记住选择」的纯客户端开关，
 // 本地持久化，并用非敏感首方 cookie 将主题传给无脚本 OAuth 页面。
 export type Theme = "doodle" | "midnight";
 
@@ -56,7 +56,7 @@ export function applyTheme(theme: Theme): void {
   writePresentationCookie("ap_theme",theme);
   try {
     // guard：测试/SSR 里 document 可能是精简替身；缺 documentElement 时静默跳过。
-    document?.documentElement?.setAttribute?.("data-theme", theme);
+    document?.documentElement?.setAttribute?.("data-ac-theme", theme);
     document?.querySelector?.('meta[name="theme-color"]')?.setAttribute("content", theme === "midnight" ? "#181a1e" : "#f5f6f8");
   } catch {
     // 无 document 时不炸——本次仅持久化，下次带 document 的环境再落地。

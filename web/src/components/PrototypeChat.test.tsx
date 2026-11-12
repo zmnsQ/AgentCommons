@@ -34,7 +34,7 @@ test('prototype chat styles retain mobile sizing, low-height budgets and scoped 
  expect(css).toContain('(max-height:500px)');
  expect(css).toContain('env(safe-area-inset-bottom)');
  expect(css).toContain('.composer-secondary-actions[hidden]');
- expect(css).toContain(':root[data-theme="doodle"]');
+ expect(css).toContain(':root[data-ac-theme="doodle"]');
  expect(css).toContain('background:#bba396');
  expect(css).not.toContain('zoom:');
 });

@@ -141,7 +141,7 @@ try {
           await choice.click();
           assert.equal(await choice.getAttribute('aria-pressed'), 'true');
           const state = await page.evaluate(() => ({
-            mode: document.documentElement.dataset.theme,
+            mode: document.documentElement.dataset.acTheme,
             palette: document.documentElement.dataset.palette,
             stored: localStorage.getItem('ap_palette'),
             accent: getComputedStyle(document.documentElement).getPropertyValue('--t-accent').trim()
@@ -183,12 +183,12 @@ try {
       await page.locator('.channel-panel-close').click(); await panel.waitFor({state: 'hidden'}); await settle(page);
       const seq = await page.evaluate(() => window.__APP_WORKSPACE_FIXTURE__.controls.append('【TEST FIXTURE】新的协作消息，仅用于本地动画验收。'));
       const message = page.locator(`#msg-${seq}`); await message.waitFor();
-      const arrival = await message.evaluate(element => ({article: getComputedStyle(element).animationName, body: getComputedStyle(element.querySelector('.msg-body')).animationName}));
+      const arrival = await message.evaluate(element => ({article: getComputedStyle(element).animationName, body: getComputedStyle(element.querySelector('.message-bubble')).animationName}));
       assert.equal(arrival.article, 'none', 'Arrival never animates the transcript layout container');
       assert.equal(arrival.body === 'none', motion === 'reduce', 'New content honors reduced motion');
       await settle(page);
       await page.evaluate(() => {window.__APP_WORKSPACE_FIXTURE__.controls.status(); window.__APP_WORKSPACE_FIXTURE__.controls.presence();});
-      assert.equal(await page.locator('#msg-2>.msg-body').evaluate(element => element.getAnimations().length), 0, 'Presence updates do not replay old content animations');
+      assert.equal(await page.locator('#msg-2>.message-bubble').evaluate(element => element.getAnimations().length), 0, 'Presence updates do not replay old content animations');
       await pageBounds(page); return {icons: count, title, panelMotion, arrival};
     });
   }

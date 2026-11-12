@@ -11,8 +11,8 @@ test('sidebar exposes settings directly without a second utility menu or permane
  expect(app).toContain('App.settings.section.help');expect(app).toContain('navigationFooter={accountControls}');
 });
 test('default root is dark and explicit doodle supplies the full shared light palette',()=>{
- const dark=tokens.match(/:root,:root\[data-theme="midnight"\]\s*\{([^}]+)\}/)![1]!;
- const light=tokens.match(/:root\[data-theme="doodle"\]\s*\{([^}]+)\}/)![1]!;
+ const dark=tokens.match(/:root,:root\[data-ac-theme="midnight"\]\s*\{([^}]+)\}/)![1]!;
+ const light=tokens.match(/:root\[data-ac-theme="doodle"\]\s*\{([^}]+)\}/)![1]!;
  expect(dark).toContain('--ac-surface-0:#191a1b');expect(light).toContain('--ac-surface-0:#f5f4ef');
  for(const name of ['t-bg','t-panel','t-panel2','t-text','t-body','t-muted','t-accent','t-accent-ink','ac-border','ac-backdrop']){
   expect(dark).toContain(`--${name}:`);expect(light).toContain(`--${name}:`);

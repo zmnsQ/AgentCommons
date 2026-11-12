@@ -24,7 +24,7 @@ beforeEach(() => {
     configurable: true,
     value: {
       documentElement: {
-        setAttribute: (name: string, value: string) => { if (name === "data-theme") attribute = value; },
+        setAttribute: (name: string, value: string) => { if (name === "data-ac-theme") attribute = value; },
       },
     },
   });
@@ -76,7 +76,7 @@ describe("theme persistence + application", () => {
     expect(readStoredTheme()).toBe("midnight");
   });
 
-  test("applyTheme sets the data-theme attribute and persists", () => {
+  test("applyTheme sets the data-ac-theme attribute and persists", () => {
     applyTheme("midnight");
     expect(attribute).toBe("midnight");
     expect(localStorage.getItem("ap_theme")).toBe("midnight");

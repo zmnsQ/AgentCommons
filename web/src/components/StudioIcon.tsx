@@ -8,6 +8,7 @@ export const STUDIO_ICON_PATHS = {
   "search": "M21 21l-5.2-5.2M10.8 18.6a7.8 7.8 0 1 0 0-15.6 7.8 7.8 0 0 0 0 15.6Z",
   "arrow-up": "M12 20V4m-6 6 6-6 6 6",
   "arrow": "M4 12h16m-6-6 6 6-6 6",
+  "reply": "M10 5 4 11l6 6M4 11h10a6 6 0 0 1 6 6v2",
   "arrow-left": "M20 12H4m6-6-6 6 6 6",
   "files": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0v6h6M8 13h8M8 17h5",
   "check": "m5 12 4 4L19 6",

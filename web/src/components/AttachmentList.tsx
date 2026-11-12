@@ -1,3 +1,4 @@
+import { StudioIcon } from "./StudioIcon";
 // 消息附件渲染（#176）：图片内联缩略图，其它文件给下载按钮。
 import { useEffect, useState } from "react";
 import type { Attachment } from "@agentparty/shared";
@@ -105,7 +106,7 @@ function FileLink({ att }: { att: Attachment }) {
       onClick={() => void onDownload()}
       title={`${att.filename} · ${formatSize(att.size)} · download`}
     >
-      <span className="msg-attachment-download-icon" aria-hidden="true">↓</span>
+      <StudioIcon name="download" className="msg-attachment-download-icon" size={16} />
       <span className="msg-attachment-fname">{att.filename}</span>
       <span className="msg-attachment-size">{formatSize(att.size)}</span>
     </button>

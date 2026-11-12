@@ -21,7 +21,7 @@ import "../../src/styles/mobile-shell.css";
 import "../../src/styles/chat-first.css";
 import "../../src/styles/progressive-blur.css";
 const lang=new URLSearchParams(location.search).get("lang")||"zh";
-localStorage.setItem("ap_locale",lang);document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||"doodle";
+localStorage.setItem("ap_locale",lang);document.documentElement.dataset.acTheme=new URLSearchParams(location.search).get("theme")||"doodle";
 installMobileViewport();
 function Fixture(){
  const [panel,setPanel]=useState(""),[draft,setDraft]=useState(""),[sent,setSent]=useState(0),[picked,setPicked]=useState(0),[slug,setSlug]=useState("qa-chat");

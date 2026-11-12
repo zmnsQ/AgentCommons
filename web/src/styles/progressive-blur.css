@@ -6,7 +6,7 @@
   --ac-frost-edge-height: 24px;
   --ac-frost-tint: color-mix(in srgb, var(--t-bg) 68%, transparent);
 }
-:root[data-theme="midnight"] {
+:root[data-ac-theme="midnight"] {
   --ac-frost-tint: color-mix(in srgb, var(--t-bg) 76%, transparent);
 }
 

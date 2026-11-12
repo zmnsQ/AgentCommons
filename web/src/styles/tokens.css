@@ -1,7 +1,7 @@
 /* Agent Commons Studio · zmnsQ. Original application: AgentParty (BUSL-1.1).
  * Design reference: Caho1/open-claude-ui (MIT), see THIRD_PARTY_NOTICES.md.
  * Stable doodle/midnight preference IDs are preserved for existing users. */
-:root,:root[data-theme="midnight"]{
+:root,:root[data-ac-theme="midnight"]{
  --ac-surface-0:#191a1b;--ac-surface-1:#2c2f30;--ac-surface-2:#232525;--ac-surface-3:#292c2c;
  --t-bg:var(--ac-surface-0);--t-panel:var(--ac-surface-3);--t-panel2:var(--ac-surface-2);--t-border:var(--ac-border);--t-faint:var(--ac-border);--d-paper:var(--ac-surface-0);--scroll-track:transparent;
  --ac-border:#42433c;--ac-border-strong:#5a5b50;
@@ -19,7 +19,7 @@
  --ac-shadow-modal:0 32px 100px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,240,.08);
  --ac-backdrop:rgba(0,0,0,.50);--ac-accent-soft:#393532;
 }
-:root[data-theme="doodle"]{
+:root[data-ac-theme="doodle"]{
  --ac-surface-0:#f5f4ef;--ac-surface-1:#eeede9;--ac-surface-2:#faf9f6;--ac-surface-3:#faf9f4;
  --ac-border:#dedbd3;--ac-border-strong:#c8c3b8;
  --t-bg:var(--ac-surface-0);--t-panel:var(--ac-surface-3);--t-panel2:var(--ac-surface-2);--t-border:var(--ac-border);
@@ -64,7 +64,7 @@
   --signin-field-line: #777f88;
   --signin-disabled: #e2e4e7;
 }
-:root[data-theme="midnight"] {
+:root[data-ac-theme="midnight"] {
   --signin-bg: #17191d;
   --signin-panel: #202327;
   --signin-ink: #f4f5f6;

@@ -1,6 +1,6 @@
 /* User-provided Vercel prototype adapted to real Agent Commons routes.
    No demo identities, analytics, remote fonts, or generated business data. */
-:root[data-theme="midnight"] {
+:root[data-ac-theme="midnight"] {
  color-scheme:dark;
  --ac-surface-0:#191a1b;--ac-surface-1:#2c2f30;--ac-surface-2:#232525;--ac-surface-3:#292c2c;
  --ac-border:#3b3e3d;--ac-border-strong:#515553;
@@ -86,15 +86,15 @@
 }
 :root details.prototype-rail-more::details-content {height:auto;overflow:visible;transition:none;}
 :root details.prototype-rail-more:not([open])::details-content {display:none;}
-:root[data-theme=doodle] .side.prototype-sidebar {background:var(--ac-surface-1);color:var(--t-text);}
-:root[data-theme=doodle] .prototype-sidebar :is(.side-label,.chan-name,.chan-last,.chan-cat-btn,.side-note,.side-archived-toggle) {color:var(--t-body);}
-:root[data-theme=doodle] .prototype-sidebar-search {border-color:var(--t-border);color:var(--t-muted);}
-:root[data-theme=doodle] .prototype-sidebar-search input {color:var(--t-text);}
-:root[data-theme=doodle] .prototype-sidebar-search input::placeholder {color:var(--t-muted);}
-:root[data-theme=doodle] .prototype-sidebar .chan-pill {color:var(--t-text);}
-:root[data-theme=doodle] .prototype-sidebar .chan-pill.is-active,:root[data-theme=doodle] .prototype-sidebar .chan-cat-btn.is-active {background:var(--ac-accent-soft);color:var(--t-text);}
-:root[data-theme=doodle] .prototype-sidebar-agents h3 {color:var(--t-muted);}
-:root[data-theme=doodle] .prototype-sidebar :is(.public-badge,.party-badge,.chan-tag) {color:var(--t-body);background:var(--ac-accent-soft);}
+:root[data-ac-theme=doodle] .side.prototype-sidebar {background:var(--ac-surface-1);color:var(--t-text);}
+:root[data-ac-theme=doodle] .prototype-sidebar :is(.side-label,.chan-name,.chan-last,.chan-cat-btn,.side-note,.side-archived-toggle) {color:var(--t-body);}
+:root[data-ac-theme=doodle] .prototype-sidebar-search {border-color:var(--t-border);color:var(--t-muted);}
+:root[data-ac-theme=doodle] .prototype-sidebar-search input {color:var(--t-text);}
+:root[data-ac-theme=doodle] .prototype-sidebar-search input::placeholder {color:var(--t-muted);}
+:root[data-ac-theme=doodle] .prototype-sidebar .chan-pill {color:var(--t-text);}
+:root[data-ac-theme=doodle] .prototype-sidebar .chan-pill.is-active,:root[data-ac-theme=doodle] .prototype-sidebar .chan-cat-btn.is-active {background:var(--ac-accent-soft);color:var(--t-text);}
+:root[data-ac-theme=doodle] .prototype-sidebar-agents h3 {color:var(--t-muted);}
+:root[data-ac-theme=doodle] .prototype-sidebar :is(.public-badge,.party-badge,.chan-tag) {color:var(--t-body);background:var(--ac-accent-soft);}
 /* Prototype-native composition: conversation first, one header, one transcript.
    The dashboard and stacked channel bars are no longer the primary route. */
 :root .workspace-navigation {position:relative;padding-top:0;}

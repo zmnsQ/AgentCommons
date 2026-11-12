@@ -31,5 +31,5 @@ function Fixture(){
  </div>;
 }
 localStorage.setItem("ap_locale",new URLSearchParams(location.search).get("lang")||"zh");
-document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||"doodle";
+document.documentElement.dataset.acTheme=new URLSearchParams(location.search).get("theme")||"doodle";
 createRoot(document.getElementById("root")!).render(<LocaleProvider><Fixture/></LocaleProvider>);

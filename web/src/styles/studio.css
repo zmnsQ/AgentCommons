@@ -1,8 +1,8 @@
 /* Agent Commons Studio. Warm, readable, task-first. Local primitives retain their
    existing behavior; this design layer deliberately wins over legacy/lazy skins. */
 :root{color-scheme:dark}
-:root[data-theme=doodle]{color-scheme:light}
-:root[data-theme=midnight]{color-scheme:dark}
+:root[data-ac-theme=doodle]{color-scheme:light}
+:root[data-ac-theme=midnight]{color-scheme:dark}
 :root body{font-family:var(--t-sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
 :root button,:root input,:root textarea,:root select{font-family:var(--t-sans)}
 :root :is(button,a,input,textarea,select,summary):focus-visible{outline:2px solid var(--t-accent);outline-offset:3px}
