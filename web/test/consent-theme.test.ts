@@ -4,8 +4,13 @@ import {readFileSync} from 'node:fs';
 import {renderOAuthConsent,renderOAuthGroupChoice,renderOAuthProblem} from '../../worker/src/collaboration/oauth-pages';
 const css=readFileSync(new URL('../public/commons-consent.css',import.meta.url),'utf8');
 function palette(theme:'light'|'dark'){
- const body=css.match(theme==='light'?/:root\s*\{([^}]+)\}/:/:root\[data-theme=midnight\]\s*\{([^}]+)\}/)![1]!;
- return Object.fromEntries([...body.matchAll(/--oc-([\w-]+):#([0-9a-f]{6})(?=;)/g)].map(x=>[x[1],x[2]]));
+ const tokens=readFileSync(new URL('../src/styles/tokens.css',import.meta.url),'utf8');
+ const block=[...tokens.matchAll(/:root(?:\[data-theme="midnight"\])? \{\n  --signin-bg:[^}]+/g)]
+   .find(([rule])=>rule.startsWith(theme==='light'?':root {':':root[data-theme="midnight"]'))![0];
+ const values=Object.fromEntries([...block.matchAll(/--signin-([\w-]+): #(\w+);/g)]
+   .map(([,key,hex])=>[key,hex!.length===3 ? hex!.split('').map(c=>c+c).join('') : hex]));
+ return Object.fromEntries([...css.matchAll(/--oc-([\w-]+):var\(--signin-([\w-]+)\)/g)]
+   .map(([,key,reference])=>[key,values[reference!]]));
 }
 function luminance(hex:string){const c=hex.match(/../g)!.map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]!*.2126+c[1]!*.7152+c[2]!*.0722;}
 function contrast(a:string,b:string){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}

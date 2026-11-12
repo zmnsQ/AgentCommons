@@ -3,13 +3,10 @@ import { githubLoginUrl, securityError } from "../lib/browserAuth";
 import type { AuthProviderConfig } from "../lib/oidc";
 import { useT } from "../i18n/useT";
 import { useLocale } from "../i18n/locale";
-import { Brand } from "./Brand";
-import { LanguageSwitcher } from "./LanguageSwitcher";
-import { OriginalProjectCredit } from "./OriginalProjectCredit";
+import { AuthScreen } from "./AuthScreen";
 import { StudioIcon } from "./StudioIcon";
 import "../i18n/strings/App";
 import "../i18n/strings/TokenGate";
-import "./sign-in.css";
 
 interface Props {
   github?: { configured: boolean; loading: boolean; error: unknown };
@@ -42,45 +39,32 @@ export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) 
   );
 
   return (
-    <main className="signin-page">
-      <div className="signin-shell">
-        <section className="signin-panel" aria-labelledby="signin-title">
-          <Brand />
-          <h1 id="signin-title">{t("TokenGate.title")}</h1>
-          <div className="signin-methods">
-            {github?.configured && (
-              <a className="signin-action signin-primary github-login-primary" href={githubLoginUrl()}>
-                {t("TokenGate.github")}<StudioIcon name="arrow" size={18} />
-              </a>
-            )}
-            {github?.loading && !github.configured && <p role="status">{t("TokenGate.loading")}</p>}
-            {github?.error != null && <p className="signin-error" role="alert">{securityError(github.error, locale === "zh")}</p>}
-            {providers.map((provider, index) => (
-              <button key={provider.id} type="button" data-provider={provider.id}
-                className={index === 0 && !github?.configured ? "signin-action signin-primary" : "signin-action"}
-                onClick={() => onSso(provider)}>
-                {provider.label || (provider.type === "oidc"
-                  ? t("App.auth.oidcSignIn")
-                  : t("App.auth.providerSignIn", { id: provider.id }))}
-              </button>
-            ))}
-            {error !== null && <p id="ap-token-error" className="signin-error" role="alert">{error}</p>}
-            {tokenOnly ? tokenForm : (
-              <details className="signin-alternate">
-                <summary>{t("TokenGate.tokenSignIn")}</summary>
-                {tokenForm}
-              </details>
-            )}
-          </div>
-        </section>
-        <footer className="signin-footer">
-          <LanguageSwitcher />
-          <details className="signin-credit">
-            <summary>{t("TokenGate.credit")}</summary>
-            <OriginalProjectCredit compact />
+    <AuthScreen title={t("TokenGate.title")}>
+      <div className="signin-methods">
+        {github?.configured && (
+          <a className="signin-action signin-primary github-login-primary" href={githubLoginUrl()}>
+            {t("TokenGate.github")}<StudioIcon name="arrow" size={18} />
+          </a>
+        )}
+        {github?.loading && !github.configured && <p role="status">{t("TokenGate.loading")}</p>}
+        {github?.error != null && <p className="signin-error" role="alert">{securityError(github.error, locale === "zh")}</p>}
+        {providers.map((provider, index) => (
+          <button key={provider.id} type="button" data-provider={provider.id}
+            className={index === 0 && !github?.configured ? "signin-action signin-primary" : "signin-action"}
+            onClick={() => onSso(provider)}>
+            {provider.label || (provider.type === "oidc"
+              ? t("App.auth.oidcSignIn")
+              : t("App.auth.providerSignIn", { id: provider.id }))}
+          </button>
+        ))}
+        {error !== null && <p id="ap-token-error" className="signin-error" role="alert">{error}</p>}
+        {tokenOnly ? tokenForm : (
+          <details className="signin-alternate">
+            <summary>{t("TokenGate.tokenSignIn")}</summary>
+            {tokenForm}
           </details>
-        </footer>
+        )}
       </div>
-    </main>
+    </AuthScreen>
   );
 }

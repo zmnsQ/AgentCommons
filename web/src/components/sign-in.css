@@ -1,15 +1,6 @@
 /* Keep the entry screen independent of workspace button and card styles. */
 html:root #root:has(> .signin-page) { padding: 0; }
 .signin-page {
-  --signin-bg: #f5f5f3;
-  --signin-panel: #fff;
-  --signin-ink: #232529;
-  --signin-muted: #555b64;
-  --signin-line: #d8dadd;
-  --signin-button: #25272b;
-  --signin-button-ink: #fff;
-  --signin-button-hover: #3b3e44;
-  --signin-error: #a21e32;
   color-scheme: light;
   box-sizing: border-box;
   display: flex;
@@ -24,15 +15,6 @@ html:root #root:has(> .signin-page) { padding: 0; }
   font-family: var(--t-sans, system-ui, sans-serif);
 }
 [data-theme="midnight"] .signin-page {
-  --signin-bg: #17191d;
-  --signin-panel: #202327;
-  --signin-ink: #f4f5f6;
-  --signin-muted: #b7bdc5;
-  --signin-line: #41454d;
-  --signin-button: #f4f5f6;
-  --signin-button-ink: #1c2025;
-  --signin-button-hover: #dfe3e8;
-  --signin-error: #ffa6b0;
   color-scheme: dark;
 }
 .signin-shell { width: min(100%, 402px); min-width: 0; margin: auto; }
@@ -81,7 +63,7 @@ html:root #root:has(> .signin-page) { padding: 0; }
   background-color: var(--signin-button-hover);
   border-color: var(--signin-button-hover);
 }
-.signin-page .signin-action:disabled { opacity: .55; cursor: default; }
+.signin-page .signin-action:disabled { opacity: 1; color: var(--signin-muted); background: var(--signin-disabled); border-color: var(--signin-line); cursor: default; }
 .signin-page :is(a, summary, button, input):focus-visible {
   outline: 2px solid var(--studio-accent, currentColor);
   outline-offset: 3px;

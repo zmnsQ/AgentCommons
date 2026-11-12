@@ -55,9 +55,9 @@ describe("Agent Commons author credit and responsive layout", () => {
     const auth=css("../components/browser-auth.css");
     const connectors=css("cloud-bridges.css");
     const upstream=css("original-project-credit.css");
-    expect(auth).toContain("@media (max-width: 600px)");
-    expect(auth).toContain("safe-area-inset-bottom");
-    expect(auth).toMatch(/\.browser-auth-stack input:not\(\[type=checkbox\]\)[^{]*\{[^}]*font-size:\s*16px;[^}]*min-height:\s*44px;/s);
+    expect(css("../components/sign-in.css")).toContain("safe-area-inset-bottom");
+    expect(auth).toMatch(/\.auth-field input\s*\{[^}]*min-height:\s*52px;[^}]*16px/s);
+    expect(auth).toMatch(/\.signin-page \.auth-link\s*\{[^}]*min-height:\s*44px;/s);
     expect(connectors).toContain("@media (max-width: 720px)");
     expect(connectors).toMatch(/\.cloud-bridge-form input,[\s\S]*?\.cloud-bridge-form textarea\s*\{[^}]*font-size:\s*16px;/s);
     expect(connectors).toMatch(/\.cloud-bridge-form \.d-btn\s*\{[^}]*width:\s*100%;/s);

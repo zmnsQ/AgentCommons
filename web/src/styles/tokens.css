@@ -49,3 +49,31 @@
  --ac-space-1:4px;--ac-space-2:8px;--ac-space-3:12px;--ac-space-4:16px;--ac-space-6:24px;--ac-space-8:32px;
 }
 @media(prefers-reduced-motion:reduce){:root{--ac-duration-press:0ms;--ac-duration-fast:0ms;--ac-duration-panel:0ms}}
+
+/* Shared with the script-free authorization documents served by the worker. */
+:root {
+  --signin-bg: #f5f5f3;
+  --signin-panel: #fff;
+  --signin-ink: #232529;
+  --signin-muted: #555b64;
+  --signin-line: #d8dadd;
+  --signin-button: #25272b;
+  --signin-button-ink: #fff;
+  --signin-button-hover: #3b3e44;
+  --signin-error: #a21e32;
+  --signin-field-line: #777f88;
+  --signin-disabled: #e2e4e7;
+}
+:root[data-theme="midnight"] {
+  --signin-bg: #17191d;
+  --signin-panel: #202327;
+  --signin-ink: #f4f5f6;
+  --signin-muted: #b7bdc5;
+  --signin-line: #41454d;
+  --signin-button: #f4f5f6;
+  --signin-button-ink: #1c2025;
+  --signin-button-hover: #dfe3e8;
+  --signin-error: #ffa6b0;
+  --signin-field-line: #7c8693;
+  --signin-disabled: #383d45;
+}

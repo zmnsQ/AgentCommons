@@ -1,3 +1,4 @@
+import { renderGitHubProblem } from '../collaboration/oauth-pages';
 import type { Context, Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext, AppEnv } from '../index';
@@ -43,13 +44,20 @@ function returnPath(value: string | undefined): string {
   if (!value || value.length > 1000 || !/^\/(?!\/)/.test(value) || /[\\\x00-\x20\x7f]/.test(value) || value.startsWith('/api/')) return '/';
   return value;
 }
-function wrap(fn: (c: Ctx) => Promise<Response>) {
+function wrap(fn: (c: Ctx) => Promise<Response>, navigation?: 'login' | 'setup') {
   return async (c: Ctx): Promise<Response> => {
     c.header('cache-control', 'no-store'); c.header('pragma', 'no-cache'); c.header('referrer-policy', 'no-referrer');
     try { return await fn(c); }
     catch (e) {
       // Never return GitHub response bodies, SQL errors, codes, secrets or exception causes.
-      return c.json({ error: { code: e instanceof AuthFailure ? e.code : 'authentication_unavailable' } }, e instanceof AuthFailure ? e.status : 503);
+      const code = e instanceof AuthFailure ? e.code : 'authentication_unavailable';
+      const status = e instanceof AuthFailure ? e.status : 503;
+      if (navigation && c.req.header('accept')?.includes('text/html')) {
+        const page = renderGitHubProblem(c.req.raw, code, status, navigation === 'setup');
+        page.headers.forEach((value, name) => c.header(name, value));
+        return c.html(await page.text(), status);
+      }
+      return c.json({ error: { code } }, status);
     }
   };
 }
@@ -197,7 +205,7 @@ export function registerBrowserAuth(app: Hono<AppContext>, deps: { enroll(db: D1
       state: state.state, code_challenge: await pkceChallenge(state.verifier), code_challenge_method: 'S256', allow_signup: 'false' }).toString();
     if (config.kind === 'oauth-app') url.searchParams.set('scope', 'read:user');
     return c.redirect(url.toString(), 302);
-  }));
+  }, 'login'));
   app.get(`${PREFIX}/callback`, wrap(async c => {
     const state = await consumeState(c, 'login');
     const code = c.req.query('code') ?? ''; if (!/^[a-zA-Z0-9_\-]{10,256}$/.test(code)) return fail('github_authorization_cancelled');
@@ -231,7 +239,7 @@ export function registerBrowserAuth(app: Hono<AppContext>, deps: { enroll(db: D1
     c.header('set-cookie', setCookie(BROWSER_COOKIE, cookie, SESSION_MS / 1000), { append: true });
     // The return path contains no credentials; the browser restores via its HttpOnly cookie.
     return c.redirect(state.return_path, 303);
-  }));
+  }, 'login'));
   app.post(`${PREFIX}/logout`, wrap(async c => {
     csrf(c); const current = await readBrowserSession(c.env.DB, c.req.raw);
     if (current) await c.env.DB.prepare('UPDATE browser_sessions SET revoked_at=? WHERE id=?').bind(Date.now(), current.id).run();
@@ -329,5 +337,5 @@ export function registerBrowserAuth(app: Hono<AppContext>, deps: { enroll(db: D1
     const result = await c.env.DB.prepare("INSERT OR IGNORE INTO browser_auth_settings(id,ciphertext,created_at) VALUES('github',?,?)").bind(ciphertext, Date.now()).run();
     if (result.meta.changes !== 1) return fail('already_configured', 409);
     return c.redirect(`${origin(c.env)}${PREFIX}/start`, 303);
-  }));
+  }, 'setup'));
 }

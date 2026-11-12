@@ -22,6 +22,7 @@ import { DesktopInstallPrompt } from "./components/DesktopInstall";
 import { DesktopInvitePaste } from "./components/DesktopInvitePaste";
 import { DesktopPairingGate } from "./components/DesktopPairingGate";
 import { DesktopUpdater } from "./components/DesktopUpdater";
+import { AuthScreen } from "./components/AuthScreen";
 import { TokenGate } from "./components/TokenGate";
 import { SettingsPanel, type SettingsSectionId } from "./components/SettingsPanel";
 import { LocalAgentCenter } from "./components/LocalAgentCenter";
@@ -994,7 +995,7 @@ export function App() {
     return <SecondFactorGate onVerified={browserAuth.refresh} onCancel={browserAuth.logout} />;
   }
   if (!desktop && path === "/auth/security" && token !== null) return <BrowserSecurity />;
-  if (!desktop && browserAuth.loading && token === null) return <main className="gate"><p role="status">{t("App.status.signingIn")}</p></main>;
+  if (!desktop && browserAuth.loading && token === null) return <AuthScreen title={t("TokenGate.title")}><p role="status">{t("App.status.signingIn")}</p></AuthScreen>;
 
   if (desktop && token === null) {
     if (desktopBoot === "loading") {

@@ -26,6 +26,22 @@ async function call(e: AppEnv, path: string, cookie = '', data?: Record<string, 
       'cf-connecting-ip': e.AUTH_GITHUB_APP_OWNER_ID!, ...other.headers } }), e, ctx);
   await waitOnExecutionContext(ctx); return response;
 }
+it('shows a localized exit when a browser cancels GitHub sign-in, while the API keeps JSON', async () => {
+  const e = config();
+  const start = await begin(e);
+  const query = new URLSearchParams({ state: start.state, error: 'access_denied' });
+  const result = await call(e, P + '/callback?' + query, start.cookie + '; ap_locale=zh', undefined, { headers: { accept: 'text/html' } });
+  expect(result.status).toBe(400);
+  expect(result.headers.get('content-type')).toContain('text/html');
+  expect(result.headers.get('referrer-policy')).toBe('no-referrer');
+  const html = await result.text();
+  expect(html).toContain('已取消 GitHub 登录');
+  expect(html).toContain('href="/"');
+  expect(html).not.toContain(start.state);
+  const api = await call(e, P + '/callback');
+  expect(api.status).toBe(400);
+  expect(await api.json()).toEqual({error: {code: 'invalid_oauth_state'}});
+});
 function cookieOf(r: Response, name = '__Host-ap_oauth'): string {
   const values = r.headers.getSetCookie(); const v = values.find(x => x.startsWith(name + '='));
   expect(v).toBeDefined(); return v!.split(';')[0]!;

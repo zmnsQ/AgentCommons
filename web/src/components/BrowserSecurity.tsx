@@ -1,78 +1,214 @@
-import {Brand} from "./Brand";
-import { useEffect, useState } from 'react';
-import { useLocale } from '../i18n/locale';
-import { LanguageSwitcher } from './LanguageSwitcher';
-import { OriginalProjectCredit } from './OriginalProjectCredit';
-import { browserAuthRequest, githubLoginUrl, securityError } from '../lib/browserAuth';
-import './browser-auth.css';
+import { useEffect, useState } from "react";
+import { useLocale } from "../i18n/locale";
+import { browserAuthRequest, githubLoginUrl, securityError } from "../lib/browserAuth";
+import { AuthScreen } from "./AuthScreen";
+import { VerificationField, completeVerification } from "./VerificationField";
+import { StudioIcon } from "./StudioIcon";
+import "./browser-auth.css";
 
-/** Current author and original-project attribution, localized on every auth page. */
-function AuthPageFooter() {
-  return <footer className="browser-auth-attribution">
-    <LanguageSwitcher />
-    <OriginalProjectCredit compact />
-  </footer>;
+function AuthError({ error }: { error: unknown }) {
+  const zh = useLocale().locale === "zh";
+  if (error == null) return null;
+  return <p id="auth-error" className="auth-error" role="alert">{securityError(error, zh)}</p>;
 }
 
-export function SecondFactorGate({ onVerified, onCancel }: { onVerified(): Promise<unknown>; onCancel(): Promise<unknown> }) {
-  const { locale } = useLocale(); const zh = locale === 'zh';
-  const [code, setCode] = useState(''), [recovery, setRecovery] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null);
-  return <main className="gate"><Brand/><section className="d-card browser-security"><h1>{zh ? '二步验证' : 'Two-step verification'}</h1>
-    <p>{zh ? 'GitHub 身份已确认。请输入验证器中的 6 位验证码，完成本次登录。' : 'GitHub identity confirmed. Enter the six-digit authenticator code to finish signing in.'}</p>
-    <form className="browser-auth-stack" onSubmit={async e => { e.preventDefault(); if (busy) return; setBusy(true); setError(null); try { await browserAuthRequest('/verify', { code, recovery }); setCode(''); await onVerified(); } catch (err) { setError(err); } finally { setBusy(false); } }}>
-      <label>{recovery ? (zh ? '一次性恢复码' : 'One-time recovery code') : (zh ? '验证器验证码' : 'Authenticator code')}
-        <input className="gate-input" aria-label={recovery ? 'Recovery code' : 'Authenticator code'} type="text" inputMode={recovery ? 'text' : 'numeric'} autoComplete="one-time-code" maxLength={recovery ? 39 : 6} value={code} onChange={e=>setCode(e.target.value)} autoFocus required />
-      </label>
-      {error !== null && <p className="banner banner--red" role="alert">{securityError(error, zh)}</p>}
-      <button className="d-btn d-btn--primary" disabled={busy || !code.trim()}>{busy ? (zh ? '正在验证…' : 'Verifying…') : (zh ? '验证并登录' : 'Verify and sign in')}</button>
-      <button type="button" className="d-btn" disabled={busy} onClick={()=>{ setRecovery(!recovery);setCode('');setError(null); }}>{recovery ? (zh ? '改用验证器' : 'Use authenticator') : (zh ? '无法使用验证器？使用恢复码' : 'Use a recovery code instead')}</button>
-      <button type="button" className="d-btn" disabled={busy} onClick={async()=>{setBusy(true);try{await onCancel();}catch(e){setError(e);}finally{setBusy(false);}}}>{zh ? '取消登录' : 'Cancel sign-in'}</button>
-    </form><AuthPageFooter /></section></main>;
-}
-interface SecurityStatus { enabled: boolean; recovery_remaining: number; recent_login: boolean; login: string; }
-export function BrowserSecurity() {
-  const {locale}=useLocale();const zh=locale==='zh';
-  const [status,setStatus]=useState<SecurityStatus|null>(null),[setup,setSetup]=useState<{secret:string;otpauth_uri:string}|null>(null);
-  const [qr,setQr]=useState(''),[code,setCode]=useState(''),[recovery,setRecovery]=useState(false),[codes,setCodes]=useState<string[]>([]);
-  const [busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null),[action,setAction]=useState<'disable'|'recovery-codes'|null>(null);
-  async function reload() { const s=await browserAuthRequest<SecurityStatus>('/security');setStatus(s); }
-  useEffect(()=>{let alive=true;browserAuthRequest<SecurityStatus>('/security').then(s=>{if(alive)setStatus(s);}).catch(e=>{if(alive)setError(e);});return()=>{alive=false;};},[]);
-  useEffect(()=>{let alive=true;setQr('');if(setup)void import('qrcode').then(m=>m.default.toDataURL(setup.otpauth_uri,{width:240,margin:2,errorCorrectionLevel:'M'})).then(data=>{if(alive)setQr(data);}).catch(()=>{});return()=>{alive=false;};},[setup]);
-  async function perform(fn:()=>Promise<void>) {if(busy)return;setBusy(true);setError(null);try{await fn();}catch(e){setError(e);}finally{setBusy(false);}}
-  async function finish(path:string) {
-    const result=await browserAuthRequest<{recovery_codes?:string[]}>(path,{code,recovery});setCodes(result.recovery_codes??[]);setCode('');setSetup(null);setAction(null);
-    window.dispatchEvent(new Event('commons-auth-refresh'));await reload();
+export function SecondFactorGate({ onVerified, onCancel }: {
+  onVerified(): Promise<unknown>;
+  onCancel(): Promise<unknown>;
+}) {
+  const zh = useLocale().locale === "zh";
+  const [code, setCode] = useState("");
+  const [recovery, setRecovery] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  async function submit(cancel = false) {
+    if (busy || (!cancel && !completeVerification(code, recovery))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (cancel) await onCancel();
+      else {
+        await browserAuthRequest("/verify", { code, recovery });
+        setCode("");
+        await onVerified();
+      }
+    } catch (cause) { setError(cause); }
+    finally { setBusy(false); }
   }
-  function downloadCodes(){const blob=new Blob([`Agent Commons — ${status?.login??''}\nOne-time recovery codes. Keep offline and private.\n\n${codes.join('\n')}\n`],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='AgentCommons-recovery-codes.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-  return <main className="gate"><Brand/><section className="d-card browser-security"><a href="/">← {zh?'返回协作空间':'Back to workspace'}</a><h1>{zh?'账号安全':'Account security'}</h1>
-    <p>{zh?'GitHub 登录负责确认身份；本站验证器是独立的第二道验证。':'GitHub confirms your identity. This authenticator is an independent second verification step.'}</p>
-    {error!==null&&<p className="banner banner--red" role="alert">{securityError(error,zh)}</p>}
-    {!status&&error===null&&<p role="status">{zh?'正在读取设置…':'Loading settings…'}</p>}
-    {status&&<><p className="browser-auth-status">{status.enabled?'✓ ':''}{status.enabled?(zh?'已启用二步验证':'Two-step verification enabled'):(zh?'尚未启用二步验证':'Two-step verification is not enabled')}</p>
-      {codes.length>0&&<section className="browser-recovery" aria-label="Recovery codes"><h2>{zh?'保存恢复码':'Save your recovery codes'}</h2><p>{zh?'请保存恢复码：仅显示一次，每个可使用一次。':'Save these recovery codes. They are shown once, and each can be used once.'}</p><pre>{codes.join('\n')}</pre><button className="d-btn" onClick={downloadCodes}>{zh?'保存恢复码文件':'Save recovery-code file'}</button><button className="d-btn" onClick={()=>setCodes([])}>{zh?'我已妥善保存':'I have saved them securely'}</button></section>}
-      {!status.enabled&&!setup&&(status.recent_login?<button className="d-btn d-btn--primary" disabled={busy} onClick={()=>void perform(async()=>{setSetup(await browserAuthRequest('/security/setup',{}));setCodes([]);})}>{zh?'绑定验证器':'Set up authenticator'}</button>:<a className="d-btn" href={githubLoginUrl('/auth/security')}>{zh?'重新登录后设置':'Sign in again to continue'}</a>)}
-      {setup&&<section className="browser-auth-stack"><h2>{zh?'1. 扫码添加到验证器':'1. Add to your authenticator'}</h2><p>{zh?'用手机验证器扫描二维码。':'Scan this QR code with your authenticator app.'}</p>{qr&&<img className="browser-auth-qr" src={qr} width="240" height="240" alt={zh?'验证器绑定二维码':'Authenticator enrollment QR code'}/>}<details><summary>{zh?'无法扫码？手动输入密钥':'Cannot scan? Enter the secret manually'}</summary><code className="browser-auth-secret">{setup.secret}</code></details><h2>{zh?'2. 输入验证码，确认绑定':'2. Verify to finish enrollment'}</h2></section>}
-      {(setup||action)&&<form className="browser-auth-stack" onSubmit={e=>{e.preventDefault();void perform(()=>finish(setup?'/security/confirm':`/security/${action}`));}}>
-        {action&&<p>{action==='disable'?(zh?'关闭二步验证会降低账号保护，请输入当前验证码确认。':'Disabling two-step verification reduces protection. Confirm with your current code.'):(zh?'重新生成后，所有旧恢复码立即失效。':'Generating a new set immediately invalidates every old recovery code.')}</p>}
-        <label>{recovery&&!setup?(zh?'恢复码':'Recovery code'):(zh?'6 位验证码':'Six-digit code')}<input className="gate-input" aria-label="Verification code" value={code} onChange={e=>setCode(e.target.value)} autoComplete="one-time-code" inputMode={recovery&&!setup?'text':'numeric'} maxLength={recovery&&!setup?39:6} required /></label>
-        {action&&<label><input type="checkbox" checked={recovery} onChange={e=>{setRecovery(e.target.checked);setCode('');}}/>{zh?'使用恢复码':'Use recovery code'}</label>}
-        <button className="d-btn d-btn--primary" disabled={busy||!code.trim()}>{busy?(zh?'处理中…':'Working…'):(zh?'确认':'Confirm')}</button><button type="button" className="d-btn" disabled={busy} onClick={()=>{setSetup(null);setAction(null);setCode('');setError(null);}}>{zh?'取消':'Cancel'}</button>
-      </form>}
-      {status.enabled&&!action&&<div className="browser-auth-stack"><p>{zh?`剩余 ${status.recovery_remaining} 个恢复码。`:`${status.recovery_remaining} recovery codes remaining.`}</p><button className="d-btn" disabled={busy} onClick={()=>{setAction('recovery-codes');setCodes([]);setRecovery(false);}}>{zh?'重新生成恢复码':'Regenerate recovery codes'}</button><button className="d-btn" disabled={busy} onClick={()=>{setAction('disable');setCodes([]);setRecovery(false);}}>{zh?'关闭二步验证':'Disable two-step verification'}</button></div>}
-      <p className="browser-auth-muted">{zh?'开启、关闭或重置恢复码后，其他浏览器和已配对桌面会话会退出，需要重新登录。':'Enabling, disabling or resetting recovery codes signs out other browser and paired desktop sessions.'}</p>
-    </>}
-    <AuthPageFooter />
-  </section></main>;
+  return (
+    <AuthScreen title={zh ? "二步验证" : "Two-step verification"}>
+      <p className="auth-intro">{recovery
+        ? (zh ? "输入一个尚未使用的恢复码。" : "Enter an unused recovery code.")
+        : (zh ? "打开验证器，找到 AgentCommons 的验证码。" : "Open your authenticator and find the code for AgentCommons.")}</p>
+      <form className="auth-stack" onSubmit={e => { e.preventDefault(); void submit(); }}>
+        <VerificationField recovery={recovery} code={code} busy={busy} invalid={error instanceof Error && error.message === "invalid_verification_code"}
+          onChange={value => { setCode(value); setError(null); }} />
+        <AuthError error={error} />
+        <button className="signin-action signin-primary" disabled={busy || !completeVerification(code, recovery)}>
+          {busy ? (zh ? "验证中…" : "Verifying…") : (zh ? "验证并登录" : "Verify and sign in")}
+        </button>
+        <div className="auth-links">
+          <button type="button" className="auth-link" disabled={busy} onClick={() => {
+            setRecovery(!recovery); setCode(""); setError(null);
+          }}>{recovery ? (zh ? "使用验证器" : "Use authenticator") : (zh ? "使用恢复码" : "Use a recovery code")}</button>
+          <button type="button" className="auth-link" disabled={busy} onClick={() => void submit(true)}>
+            {zh ? "取消登录" : "Cancel sign-in"}
+          </button>
+        </div>
+      </form>
+    </AuthScreen>
+  );
 }
+
+interface SecurityStatus { enabled: boolean; recovery_remaining: number; recent_login: boolean; login: string; }
+interface Setup { secret: string; otpauth_uri: string; }
+type SecurityAction = "disable" | "recovery-codes";
+
+export function BrowserSecurity() {
+  const zh = useLocale().locale === "zh";
+  const [status, setStatus] = useState<SecurityStatus | null>(null);
+  const [setup, setSetup] = useState<Setup | null>(null);
+  const [action, setAction] = useState<SecurityAction | null>(null);
+  const [qr, setQr] = useState("");
+  const [code, setCode] = useState("");
+  const [recovery, setRecovery] = useState(false);
+  const [codes, setCodes] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  useEffect(() => {
+    let active = true;
+    browserAuthRequest<SecurityStatus>("/security").then(value => {
+      if (active) setStatus(value);
+    }).catch(cause => { if (active) setError(cause); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    setQr("");
+    if (setup) {
+      void import("qrcode").then(({ default: qrCode }) =>
+        qrCode.toDataURL(setup.otpauth_uri, { width: 240, margin: 4, errorCorrectionLevel: "M" })
+      ).then(url => { if (active) setQr(url); }).catch(() => { /* Manual setup is available. */ });
+    }
+    return () => { active = false; };
+  }, [setup]);
+  async function perform(work: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true); setError(null);
+    try { await work(); } catch (cause) { setError(cause); } finally { setBusy(false); }
+  }
+  function clearForm() {
+    setAction(null); setSetup(null); setRecovery(false); setCode(""); setError(null);
+  }
+  async function finish() {
+    if ((!setup && !action) || !completeVerification(code, recovery)) return;
+    const path = setup ? "/security/confirm" : `/security/${action}`;
+    const result = await browserAuthRequest<{ recovery_codes?: string[] }>(path, { code, recovery });
+    clearForm(); setCodes(result.recovery_codes ?? []);
+    window.dispatchEvent(new Event("commons-auth-refresh"));
+    setStatus(await browserAuthRequest<SecurityStatus>("/security"));
+  }
+  function downloadCodes() {
+    const content = [`AgentCommons — ${status?.login ?? ""}`, zh ? "一次性恢复码" : "One-time recovery codes", "", ...codes, ""].join("\n");
+    const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = "AgentCommons-recovery-codes.txt"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  const changeTitle = action === "disable" ? (zh ? "关闭二步验证" : "Disable two-step verification")
+    : (zh ? "重新生成恢复码" : "Regenerate recovery codes");
+
+  return (
+    <AuthScreen wide title={zh ? "账号安全" : "Account security"}>
+      <div className="auth-stack">
+        <AuthError error={error} />
+        {!status && !error && <p role="status">{zh ? "正在读取设置…" : "Loading settings…"}</p>}
+        {status && !setup && !action && codes.length === 0 && <>
+          <div className="auth-setting">
+            <StudioIcon name="shield" size={22} />
+            <div><h2>{zh ? "二步验证" : "Two-step verification"}</h2>
+              <p>{status.enabled ? (zh ? `剩余 ${status.recovery_remaining} 个恢复码` : `${status.recovery_remaining} recovery codes remaining`)
+                : (zh ? "使用验证器为登录添加一次验证。" : "Use an authenticator when you sign in.")}</p></div>
+            <span>{status.enabled ? (zh ? "已启用" : "On") : (zh ? "未启用" : "Off")}</span>
+          </div>
+          {status.enabled ? <>
+            <button className="signin-action" disabled={busy} onClick={() => setAction("recovery-codes")}>{zh ? "重新生成恢复码" : "Regenerate recovery codes"}</button>
+            <button className="auth-link auth-danger" disabled={busy} onClick={() => setAction("disable")}>{zh ? "关闭二步验证" : "Disable two-step verification"}</button>
+          </> : status.recent_login ? (
+            <button className="signin-action signin-primary" disabled={busy} onClick={() => void perform(async () => {
+              setSetup(await browserAuthRequest<Setup>("/security/setup", {}));
+            })}>{zh ? "绑定验证器" : "Set up authenticator"}</button>
+          ) : <a className="signin-action signin-primary" href={githubLoginUrl("/auth/security")}>{zh ? "重新登录以绑定验证器" : "Sign in again to set up"}</a>}
+        </>}
+
+        {codes.length > 0 && <section className="auth-stack" aria-labelledby="recovery-title">
+          <h2 id="recovery-title">{zh ? "保存恢复码" : "Save your recovery codes"}</h2>
+          <p>{zh ? "这些恢复码仅显示一次，每个可用一次。" : "These codes are shown once. Each works once."}</p>
+          <ul className="auth-codes">{codes.map(item => <li key={item}><code>{item}</code></li>)}</ul>
+          <button className="signin-action signin-primary" onClick={downloadCodes}>{zh ? "下载恢复码" : "Download recovery codes"}</button>
+          <button className="auth-link" onClick={() => setCodes([])}>{zh ? "我已保存" : "I’ve saved them"}</button>
+        </section>}
+
+        {setup && <section className="auth-stack" aria-labelledby="auth-setup-title">
+          <h2 id="auth-setup-title">{zh ? "绑定验证器" : "Set up authenticator"}</h2>
+          <p>{zh ? "用验证器扫描二维码，再输入生成的验证码。" : "Scan the QR code with your authenticator, then enter its code."}</p>
+          {qr && <img className="auth-qr" src={qr} width="192" height="192" alt={zh ? "验证器绑定二维码" : "Authenticator setup QR code"} />}
+          <details><summary>{zh ? "手动输入密钥" : "Enter the key manually"}</summary>
+            <code className="auth-secret">{setup.secret}</code></details>
+        </section>}
+        {(setup || action) && <form className="auth-stack" onSubmit={event => { event.preventDefault(); void perform(finish); }}>
+          {action && <h2>{changeTitle}</h2>}
+          <p className="auth-note">{action === "recovery-codes" && (zh ? "旧恢复码会立即失效。" : "Your old recovery codes will expire. ")}
+            {zh ? "确认后，其他浏览器和已配对的桌面端需要重新登录。" : "After confirmation, your other browser and paired desktop sessions will need to sign in again."}</p>
+          <VerificationField recovery={recovery} code={code} busy={busy} invalid={error instanceof Error && error.message === "invalid_verification_code"}
+            onChange={value => { setCode(value); setError(null); }} />
+          <button className="signin-action signin-primary" disabled={busy || !completeVerification(code, recovery)}>
+            {busy ? (zh ? "处理中…" : "Saving…") : setup ? (zh ? "确认绑定" : "Confirm setup") : changeTitle}
+          </button>
+          <div className="auth-links">
+            {action && <button className="auth-link" type="button" disabled={busy} onClick={() => {
+              setRecovery(!recovery); setCode(""); setError(null);
+            }}>{recovery ? (zh ? "使用验证器" : "Use authenticator") : (zh ? "使用恢复码" : "Use a recovery code")}</button>}
+            <button className="auth-link" type="button" disabled={busy} onClick={clearForm}>{zh ? "取消" : "Cancel"}</button>
+          </div>
+        </form>}
+        {!codes.length && !setup && !action && <a className="auth-link auth-back" href="/"><StudioIcon name="arrow-left" size={15} />{zh ? "返回工作区" : "Back to workspace"}</a>}
+      </div>
+    </AuthScreen>
+  );
+}
+
 export function GithubAuthSetup() {
-  const {locale}=useLocale();const zh=locale==='zh';
-  const [key]=useState(()=>new URLSearchParams(location.hash.slice(1)).get('key')??'');
-  const [busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null);
-  useEffect(()=>{history.replaceState(null,'',location.pathname);},[]);
-  return <main className="gate"><Brand/><section className="d-card browser-security"><h1>{zh?'配置 GitHub 登录':'Configure GitHub sign-in'}</h1><p>{zh?'在你的 GitHub 账号下创建一个专用登录应用。下一页由 GitHub 要求你确认；无需复制 Client Secret。':'Create a dedicated sign-in app under your GitHub account. GitHub will ask you to confirm; no Client Secret copy-pasting is needed.'}</p><p>{zh?'仅验证账号身份，不申请仓库读写权限。应用配置会直接加密保存在本服务器。':'Identity only, with no repository read/write permissions. The app configuration is encrypted on this server.'}</p>
-    {!key&&<p className="banner" role="status">{zh?'请使用部署管理员提供的一次性初始化入口。普通登录不需要此步骤。':'Open the one-time setup entry provided by the administrator. Normal sign-in does not require this step.'}</p>}
-    {error!==null&&<p className="banner banner--red" role="alert">{securityError(error,zh)}</p>}
-    <button className="d-btn d-btn--primary" disabled={busy||!key} onClick={async()=>{setBusy(true);setError(null);try{const data=await browserAuthRequest<{action:string;manifest:Record<string,unknown>}>('/registration/start',{setup_key:key});const target=new URL(data.action);if(target.origin!=='https://github.com'||target.pathname!=='/settings/apps/new')throw new Error('invalid_setup_destination');const form=document.createElement('form');form.method='POST';form.action=target.toString();const field=document.createElement('input');field.type='hidden';field.name='manifest';field.value=JSON.stringify(data.manifest);form.appendChild(field);document.body.appendChild(form);form.submit();}catch(e){setError(e);setBusy(false);}}}>{busy?(zh?'正在前往 GitHub…':'Opening GitHub…'):(zh?'在 GitHub 创建登录应用':'Create sign-in app on GitHub')}</button><p><a href="/">{zh?'返回登录页':'Return to sign-in'}</a></p>
-    <AuthPageFooter />
-  </section></main>;
+  const zh = useLocale().locale === "zh";
+  const [key] = useState(() => new URLSearchParams(location.hash.slice(1)).get("key") ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  useEffect(() => { history.replaceState(null, "", location.pathname); }, []);
+  async function register() {
+    if (!key || busy) return;
+    setBusy(true); setError(null);
+    try {
+      const data = await browserAuthRequest<{ action: string; manifest: Record<string, unknown> }>("/registration/start", { setup_key: key });
+      const target = new URL(data.action);
+      if (target.origin !== "https://github.com" || target.pathname !== "/settings/apps/new") throw new Error("invalid_setup_destination");
+      const form = document.createElement("form");
+      form.method = "POST"; form.action = target.toString();
+      const field = document.createElement("input");
+      field.type = "hidden"; field.name = "manifest"; field.value = JSON.stringify(data.manifest);
+      form.appendChild(field); document.body.appendChild(form); form.submit();
+    } catch (cause) { setError(cause); setBusy(false); }
+  }
+  return <AuthScreen title={zh ? "配置 GitHub 登录" : "Configure GitHub sign-in"}>
+    <div className="auth-stack">
+      <p>{key ? (zh ? "在 GitHub 创建一个应用，用于此工作区的账号登录。" : "Create a GitHub app for signing in to this workspace.")
+        : (zh ? "请从管理员提供的一次性设置链接进入。" : "Open the one-time setup link from your administrator.")}</p>
+      <AuthError error={error} />
+      {key && <button className="signin-action signin-primary" disabled={busy} onClick={() => void register()}>
+        {busy ? (zh ? "正在前往 GitHub…" : "Opening GitHub…") : (zh ? "在 GitHub 创建应用" : "Create app on GitHub")}
+      </button>}
+      <a className={key ? "auth-link auth-back" : "signin-action signin-primary"} href="/">{zh ? "返回登录页" : "Return to sign-in"}</a>
+    </div>
+  </AuthScreen>;
 }
