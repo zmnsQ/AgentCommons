@@ -66,6 +66,17 @@ describe("TokenGate", () => {
     expect(html).toContain(">中<");
   });
 
+  test("shows the token form directly when it is the only configured sign-in method", () => {
+    const html = renderToStaticMarkup(
+      <LocaleProvider>
+        <TokenGate {...props} github={{ configured: false, loading: false, error: null }} />
+      </LocaleProvider>,
+    );
+    expect(html).toContain('id="ap-token"');
+    expect(html).not.toContain('class="signin-alternate"');
+    expect(html).not.toContain('github-login-primary');
+  });
+
   describe("interactive locale switching", () => {
     let renderer: ReactTestRenderer | null = null;
     // Restore globals after each case so a persisted memoryStorage carrying `ap_locale=zh`
@@ -99,15 +110,10 @@ describe("TokenGate", () => {
       });
       const root = renderer!.root;
 
-      const subtitle = () => {
-        const node = root.findAll((n) => n.props.className === "d-hand gate-sub")[0];
-        if (!node) throw new Error("gate subtitle not found");
-        return node.children.join("");
-      };
       // default locale is English
-      expect(subtitle()).toBe("People and agents, working together.");
+      expect(root.findByType("h1").children.join("")).toBe("Sign in to your workspace");
       const providerLabels = () => root
-        .findAll((n) => n.props.className === "d-btn d-btn--primary gate-btn")
+        .findAll((n) => n.type === "button" && n.props["data-provider"])
         .map((n) => n.children.join(""));
       expect(providerLabels()).toEqual([
         "Sign in with account center",
@@ -122,7 +128,7 @@ describe("TokenGate", () => {
 
       act(() => { zhButton.props.onClick(); });
 
-      expect(subtitle()).toBe("人与智能体，一起把事做好。");
+      expect(root.findByType("h1").children.join("")).toBe("登录工作区");
       expect(providerLabels()).toEqual([
         "使用账号中心登录",
         "使用 github 登录",

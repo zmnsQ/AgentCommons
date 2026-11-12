@@ -1,0 +1,123 @@
+/* Keep the entry screen independent of workspace button and card styles. */
+html:root #root:has(> .signin-page) { padding: 0; }
+.signin-page {
+  --signin-bg: #f5f5f3;
+  --signin-panel: #fff;
+  --signin-ink: #232529;
+  --signin-muted: #555b64;
+  --signin-line: #d8dadd;
+  --signin-button: #25272b;
+  --signin-button-ink: #fff;
+  --signin-button-hover: #3b3e44;
+  --signin-error: #a21e32;
+  color-scheme: light;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  color: var(--signin-ink);
+  background: var(--signin-bg);
+  font-family: var(--t-sans, system-ui, sans-serif);
+}
+[data-theme="midnight"] .signin-page {
+  --signin-bg: #17191d;
+  --signin-panel: #202327;
+  --signin-ink: #f4f5f6;
+  --signin-muted: #b7bdc5;
+  --signin-line: #41454d;
+  --signin-button: #f4f5f6;
+  --signin-button-ink: #1c2025;
+  --signin-button-hover: #dfe3e8;
+  --signin-error: #ffa6b0;
+  color-scheme: dark;
+}
+.signin-shell { width: min(100%, 402px); min-width: 0; margin: auto; }
+.signin-panel {
+  padding: clamp(22px, 5vw, 36px);
+  border: 1px solid var(--signin-line);
+  border-radius: 20px;
+  background: var(--signin-panel);
+  box-shadow: 0 6px 24px -14px rgb(0 0 0 / 18%);
+}
+.signin-panel .commons-brand { gap: 9px; font-size: 16px; color: var(--signin-ink); }
+.signin-panel .commons-brand img { width: 30px; height: 30px; border-radius: 8px; }
+.signin-panel h1 {
+  margin: 28px 0 24px;
+  color: var(--signin-ink);
+  font: 650 clamp(1.6rem, 5vw, 1.9rem)/1.22 var(--t-sans, system-ui, sans-serif);
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+.signin-methods, .signin-page .gate-form { display: grid; gap: 10px; }
+.signin-page .signin-action {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--signin-line);
+  border-radius: 10px;
+  color: var(--signin-ink);
+  background-color: var(--signin-panel);
+  font: 600 1rem/1.4 var(--t-sans, system-ui, sans-serif);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.signin-page .signin-primary, .signin-page a.signin-primary:visited {
+  color: var(--signin-button-ink);
+  background-color: var(--signin-button);
+  border-color: var(--signin-button);
+}
+.signin-page .signin-primary:is(:hover, :active):not(:disabled) {
+  color: var(--signin-button-ink);
+  background-color: var(--signin-button-hover);
+  border-color: var(--signin-button-hover);
+}
+.signin-page .signin-action:disabled { opacity: .55; cursor: default; }
+.signin-page :is(a, summary, button, input):focus-visible {
+  outline: 2px solid var(--studio-accent, currentColor);
+  outline-offset: 3px;
+}
+.signin-page summary {
+  cursor: pointer;
+  color: var(--signin-muted);
+  font-size: .875rem;
+  line-height: 1.45;
+  padding-block: 10px;
+}
+.signin-alternate > summary { padding: 12px 2px; }
+.signin-page .gate-form label { color: var(--signin-ink); font-size: .9rem; }
+.signin-page .gate-form input {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 46px;
+  padding: 10px 12px; border: 1px solid var(--signin-line); border-radius: 8px;
+  background: var(--signin-bg); color: var(--signin-ink); font-size: 16px;
+}
+.signin-methods p { margin: 0; font-size: .9rem; }
+.signin-methods .signin-error { color: var(--signin-error); }
+.signin-footer {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  align-items: start; gap: 0 12px; margin-top: 12px; padding: 0 4px;
+}
+.signin-footer .lang-switch { align-self: start; margin-top: 3px; }
+.signin-footer .lang-switch-btn { min-height: 34px; min-width: 36px; }
+.signin-credit { text-align: end; }
+.signin-credit[open] { grid-area: 1 / 1 / 2 / -1; }
+.signin-footer:has(.signin-credit[open]) .lang-switch { grid-column: 1; grid-row: 1; z-index: 1; justify-self: start; }
+.signin-credit[open] > summary { margin-inline-start: auto; width: fit-content; }
+@media (prefers-reduced-motion: no-preference) {
+  .signin-page .signin-action { transition: background-color 120ms ease, border-color 120ms ease; }
+  .signin-primary .studio-icon { transition: transform 140ms ease; }
+  .signin-primary:hover .studio-icon { transform: translateX(2px); }
+}
+@media (forced-colors: active) {
+  .signin-page .signin-action { border-color: ButtonText; }
+  .signin-page :focus-visible { outline-color: Highlight; }
+}

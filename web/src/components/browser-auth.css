@@ -26,9 +26,6 @@
 .browser-recovery { border: 1px solid var(--t-faint, currentColor); border-radius: 8px; padding: 16px; margin: 16px 0; min-width: 0; }
 .browser-recovery pre { max-width: 100%; font-size: .85rem; overflow: auto; line-height: 1.8; }
 .browser-recovery button { margin: 6px 6px 6px 0; }
-.browser-auth-advanced { margin-top: 16px; }
-.browser-auth-advanced summary { cursor: pointer; opacity: .8; }
-.github-login-primary { display: flex; align-items: center; text-align: center; text-decoration: none; width: 100%; box-sizing: border-box; }
 .browser-auth-attribution {
   display: flex;
   flex-direction: column;

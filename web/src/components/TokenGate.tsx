@@ -1,15 +1,15 @@
-import {Brand} from "./Brand";
-import { githubLoginUrl, securityError } from "../lib/browserAuth";
-import "./browser-auth.css";
-// 登录闸（spec §10 双轨）：配置了 SSO provider 时先给 provider 登录，粘贴 token 始终保留
 import { useState } from "react";
+import { githubLoginUrl, securityError } from "../lib/browserAuth";
 import type { AuthProviderConfig } from "../lib/oidc";
 import { useT } from "../i18n/useT";
 import { useLocale } from "../i18n/locale";
+import { Brand } from "./Brand";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OriginalProjectCredit } from "./OriginalProjectCredit";
+import { StudioIcon } from "./StudioIcon";
 import "../i18n/strings/App";
 import "../i18n/strings/TokenGate";
+import "./sign-in.css";
 
 interface Props {
   github?: { configured: boolean; loading: boolean; error: unknown };
@@ -23,88 +23,64 @@ export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) 
   const [value, setValue] = useState("");
   const t = useT();
   const { locale } = useLocale();
+  const tokenOnly = !github?.configured && !github?.loading && providers.length === 0;
+
+  const tokenForm = (
+    <form className="gate-form" onSubmit={(event) => {
+      event.preventDefault();
+      const token = value.trim();
+      if (token) onSubmit(token);
+    }}>
+      <label htmlFor="ap-token">{t("TokenGate.tokenLabel")}</label>
+      <input id="ap-token" type="password" placeholder="ap_…" autoComplete="off"
+        aria-invalid={error !== null} aria-describedby={error ? "ap-token-error" : undefined}
+        value={value} onChange={(event) => setValue(event.target.value)} />
+      <button className={tokenOnly ? "signin-action signin-primary" : "signin-action"} type="submit" disabled={!value.trim()}>
+        {t("TokenGate.submit")}
+      </button>
+    </form>
+  );
 
   return (
-    <main className="gate">
-      <img className="gate-art" src="/brand/workspace.png" alt="" width="1448" height="1086"/>
-      <h1 className="d-title gate-title">
-        <Brand/>
-      </h1>
-      <p className="d-hand gate-sub">{t("TokenGate.subtitle")}</p>
-      <div className="d-card gate-card">
-        {github && <section className="browser-auth-stack">
-          {github.configured ? <a className="d-btn d-btn--primary github-login-primary" href={githubLoginUrl()}>{locale === "zh" ? "使用 GitHub 登录" : "Continue with GitHub"}</a>
-            : <button className="d-btn d-btn--primary" disabled>{github.loading ? (locale === "zh" ? "正在读取登录方式…" : "Loading sign-in…") : (locale === "zh" ? "GitHub 登录等待管理员完成配置" : "GitHub sign-in awaits administrator setup")}</button>}
-          <p className="gate-social">{locale === "zh" ? "无需填写 token。登录后可在账号安全中启用验证器二步验证。" : "No token to paste. Enable authenticator verification in Account security after signing in."}</p>
-          {github.error != null && <p className="banner banner--red" role="alert">{securityError(github.error, locale === "zh")}</p>}
-        </section>}
-        {providers.length > 0 && (
-          <>
-            {providers.map((provider) => (
-              <button
-                key={provider.id}
-                className="d-btn d-btn--primary gate-btn"
-                type="button"
-                onClick={() => onSso(provider)}
-              >
+    <main className="signin-page">
+      <div className="signin-shell">
+        <section className="signin-panel" aria-labelledby="signin-title">
+          <Brand />
+          <h1 id="signin-title">{t("TokenGate.title")}</h1>
+          <div className="signin-methods">
+            {github?.configured && (
+              <a className="signin-action signin-primary github-login-primary" href={githubLoginUrl()}>
+                {t("TokenGate.github")}<StudioIcon name="arrow" size={18} />
+              </a>
+            )}
+            {github?.loading && !github.configured && <p role="status">{t("TokenGate.loading")}</p>}
+            {github?.error != null && <p className="signin-error" role="alert">{securityError(github.error, locale === "zh")}</p>}
+            {providers.map((provider, index) => (
+              <button key={provider.id} type="button" data-provider={provider.id}
+                className={index === 0 && !github?.configured ? "signin-action signin-primary" : "signin-action"}
+                onClick={() => onSso(provider)}>
                 {provider.label || (provider.type === "oidc"
                   ? t("App.auth.oidcSignIn")
                   : t("App.auth.providerSignIn", { id: provider.id }))}
               </button>
             ))}
-            <p className="gate-social">{t("TokenGate.ssoHint")}</p>
-            <p className="t-mono gate-or">{t("TokenGate.or")}</p>
-          </>
-        )}
-        <details className="browser-auth-advanced"><summary>{locale === "zh" ? "高级：机器或旧版凭据" : "Advanced: machine or legacy credentials"}</summary>
-        <form
-          className="gate-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const token = value.trim();
-            if (token) onSubmit(token);
-          }}
-        >
-          <label className="t-mono gate-label" htmlFor="ap-token">
-            {t("TokenGate.tokenLabel")}
-          </label>
-          <input
-            id="ap-token"
-            className="t-mono gate-input"
-            type="password"
-            placeholder="ap_…"
-            autoComplete="off"
-            aria-invalid={error !== null}
-            aria-describedby={error !== null ? "ap-token-error" : undefined}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-          {error !== null && (
-            <p id="ap-token-error" className="banner banner--red" role="alert">
-              {error}
-            </p>
-          )}
-          <button className="d-btn gate-btn" type="submit" disabled={value.trim() === ""}>
-            {t("TokenGate.submit")}
-          </button>
-          <p className="gate-hint">party token create --name you --role human</p>
-        </form>
-        </details>
+            {error !== null && <p id="ap-token-error" className="signin-error" role="alert">{error}</p>}
+            {tokenOnly ? tokenForm : (
+              <details className="signin-alternate">
+                <summary>{t("TokenGate.tokenSignIn")}</summary>
+                {tokenForm}
+              </details>
+            )}
+          </div>
+        </section>
+        <footer className="signin-footer">
+          <LanguageSwitcher />
+          <details className="signin-credit">
+            <summary>{t("TokenGate.credit")}</summary>
+            <OriginalProjectCredit compact />
+          </details>
+        </footer>
       </div>
-      <div className="gate-lang">
-        <LanguageSwitcher />
-      </div>
-      <details className="gate-project-credit"><summary>{locale === "zh" ? "项目、作者与开源许可" : "Project, authors & licenses"}</summary><OriginalProjectCredit /></details>
-      <p className="gate-byline">
-        {t("TokenGate.bylineBy")}
-        <a href="https://github.com/zmnsQ" rel="author noopener noreferrer" target="_blank">
-          {t("TokenGate.bylineAuthor")}
-        </a>
-        {t("TokenGate.bylineAlias")}
-        <a href="https://github.com/leeguooooo/AgentParty" rel="noopener noreferrer" target="_blank">
-          {t("TokenGate.bylineBlog")}
-        </a>
-      </p>
     </main>
   );
 }

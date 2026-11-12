@@ -2,26 +2,22 @@ import { registerDict, type LocaleDict } from "../dict";
 
 export const TokenGateStrings: LocaleDict = {
   en: {
-    "TokenGate.ssoHint": "Use your organization account, or paste an existing party token",
-    "TokenGate.subtitle": "People and agents, working together.",
-    "TokenGate.tokenLabel": "paste your token",
-    "TokenGate.or": "or",
+    "TokenGate.title": "Sign in to your workspace",
+    "TokenGate.github": "Continue with GitHub",
+    "TokenGate.loading": "Loading sign-in options…",
+    "TokenGate.tokenSignIn": "Use an access token",
+    "TokenGate.tokenLabel": "Access token",
     "TokenGate.submit": "Enter workspace",
-    "TokenGate.bylineBy": "Developed by ",
-    "TokenGate.bylineAuthor": "zmnsQ",
-    "TokenGate.bylineAlias": " · Based on ",
-    "TokenGate.bylineBlog": "AgentParty (Guo Li / leeguoo)",
+    "TokenGate.credit": "Authors & licenses",
   },
   zh: {
-    "TokenGate.ssoHint": "使用组织账号登录，或粘贴已有 party token",
-    "TokenGate.subtitle": "人与智能体，一起把事做好。",
-    "TokenGate.tokenLabel": "粘贴你的 token",
-    "TokenGate.or": "或",
+    "TokenGate.title": "登录工作区",
+    "TokenGate.github": "使用 GitHub 登录",
+    "TokenGate.loading": "正在加载登录方式…",
+    "TokenGate.tokenSignIn": "使用访问令牌登录",
+    "TokenGate.tokenLabel": "访问令牌",
     "TokenGate.submit": "进入工作区",
-    "TokenGate.bylineBy": "开发者 ",
-    "TokenGate.bylineAuthor": "zmnsQ",
-    "TokenGate.bylineAlias": " · 基于原项目 ",
-    "TokenGate.bylineBlog": "AgentParty（郭立 / leeguoo）",
+    "TokenGate.credit": "作者与许可",
   },
 };
 
