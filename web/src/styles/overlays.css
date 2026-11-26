@@ -135,15 +135,7 @@
 }
 
 .conversation-details-content .focus-inline {
-  flex-wrap: wrap;
-  gap: 6px;
-  max-width: 100%;
-  overflow: visible;
-}
-
-.conversation-details-content .focus-me {
-  flex-wrap: wrap;
-  max-width: 100%;
+  display: none;
 }
 
 .conversation-tools h3 {

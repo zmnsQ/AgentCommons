@@ -60,8 +60,14 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 16px 0 14px;
+  margin: 0 0 16px;
   min-width: 0;
+}
+.commons-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
 }
 .commons-nav [role=tablist] {
   display: flex;

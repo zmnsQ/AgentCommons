@@ -1,4 +1,14 @@
 /* Cloud integrations: touch-first, readable, token-driven. */
+.agent-join-card:has(.cloud-bridges) {
+  width: min(820px, calc(100vw - 32px));
+  max-width: min(820px, calc(100vw - 32px));
+}
+.cloud-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
 .cloud-bridges {
   display: grid;
   gap: 14px;

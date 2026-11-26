@@ -75,7 +75,8 @@
 }
 .coding-step .coding-links { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12.5px; }
 .coding-step .coding-links a { color: var(--t-link); text-underline-offset: 3px; }
-.coding-step label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--t-muted); }
+.coding-step label:not(.ac-toggle-row):not(.coding-check) { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--t-muted); }
+.coding-step label.ac-toggle-row { display: flex; flex-direction: row; align-items: flex-start; gap: 9px; font-weight: 450; color: var(--t-body); }
 .coding-step input:not([type=checkbox]) {
   width: 100%;
   min-width: 0;
@@ -161,6 +162,19 @@
   font: 12.5px/1.7 var(--t-mono);
   tab-size: 2;
   white-space: pre;
+}
+.coding-details-pad {
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px 12px;
+}
+.coding-step code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  font: 12px/1.4 var(--t-mono);
+  color: var(--t-text);
 }
 .coding-install {
   display: grid;

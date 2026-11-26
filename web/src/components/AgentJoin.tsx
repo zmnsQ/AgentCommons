@@ -68,6 +68,8 @@ import { useModalFocusTrap } from "./useModalFocusTrap";
 import "../i18n/strings/AgentJoin";
 import {CodingAgentSetup,type NativeCodingClient} from "./CodingAgentSetup";
 import {AgentConnectionPicker,type CloudAgentChoice} from "./AgentConnectionPicker";
+import {InlineCloudSetup} from "./InlineCloudSetup";
+import type {GrokSubmissionSafety} from "../lib/grokSubmissionSafety";
 
 interface Props {
   channelTitle?: string;
@@ -86,6 +88,10 @@ interface Props {
   onBack?(): void;
   backLabel?: string;
   onCloudConnect?(provider:CloudAgentChoice): void;
+  canManageCloud?: boolean;
+  canRunCloud?: boolean;
+  submissionSafety?: GrokSubmissionSafety;
+  dispatchScopeReady?: boolean;
   /**
    * 频道页的实时 presence / 历史（WS 流）。传了就直接用（不轮询）；缺省时弹窗打开期间每 pollIntervalMs
    * 拉一次 /presence + /messages，关掉即停（#1005）。
@@ -322,6 +328,10 @@ export function AgentJoin({
   onBack,
   backLabel,
   onCloudConnect,
+  canManageCloud,
+  canRunCloud = false,
+  submissionSafety,
+  dispatchScopeReady = true,
   dutyAdapter = desktopAgentAdapter,
   desktopDetect = isMacDesktop,
   pickDirectory = pickDirectoryDefault,
@@ -340,6 +350,7 @@ export function AgentJoin({
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [localChosen,setLocalChosen]=useState(false);
   const [nativeClient,setNativeClient]=useState<NativeCodingClient|null>(null);
+  const [cloudProvider,setCloudProvider]=useState<CloudAgentChoice|null>(null);
   const [name, setName] = useState("");
   const [mintUnknown,setMintUnknown]=useState(false);
   const [removedIdentity,setRemovedIdentity]=useState<{name:string;mode:"mint"|"rotate"}|null>(null),[recoveryBusy,setRecoveryBusy]=useState(false);
@@ -348,7 +359,7 @@ export function AgentJoin({
   const mintScope=useRef({key:mintKey,epoch:0});
   if(mintScope.current.key!==mintKey)mintScope.current={key:mintKey,epoch:mintScope.current.epoch+1};
   useEffect(()=>{mintAlive.current=true;return()=>{mintAlive.current=false;};},[]);
-  useEffect(()=>{setMintUnknown(false);setRemovedIdentity(null);setRecoveryBusy(false);mintPending.current=false;},[mintKey]);
+  useEffect(()=>{setMintUnknown(false);setRemovedIdentity(null);setRecoveryBusy(false);setCloudProvider(null);mintPending.current=false;},[mintKey]);
   // #612：无人值守值守预设——unattended 生成「装 CLI → init → party serve --runner <选中的>」的
   // 运维脚本（runner 见下方 state，缺省 codex），interactive 仍是贴给 agent harness 的完整接入包。
   const [mode, setMode] = useState<JoinPackMode>("interactive");
@@ -397,6 +408,7 @@ export function AgentJoin({
   const open = useCallback(() => {
     setLocalChosen(false);
     setNativeClient(null);
+    setCloudProvider(null);
     onActiveChange?.(true);
     setName(suggestName(namePrefix, slug));
     setMode("interactive");
@@ -415,6 +427,7 @@ export function AgentJoin({
       return { kind: "idle" };
     });
     setName("");
+    setCloudProvider(null);
     setCopiedKey(null);
     setCopyErr(false);
     setNameErr(null);
@@ -896,8 +909,26 @@ export function AgentJoin({
               </button>
             </header>
 
-            {onCloudConnect && !localChosen ? <AgentConnectionPicker
-              onCloud={provider=>{reset();onCloudConnect(provider);}}
+            {cloudProvider !== null ? (
+              <InlineCloudSetup
+                provider={cloudProvider}
+                token={token}
+                slug={slug}
+                canManage={canManageCloud ?? false}
+                canRun={canRunCloud}
+                submissionSafety={submissionSafety}
+                dispatchScopeReady={dispatchScopeReady}
+                onBack={() => setCloudProvider(null)}
+              />
+            ) : (onCloudConnect || canManageCloud !== undefined) && !localChosen ? <AgentConnectionPicker
+              onCloud={provider=>{
+                if (canManageCloud !== undefined) {
+                  setCloudProvider(provider);
+                } else if (onCloudConnect) {
+                  reset();
+                  onCloudConnect(provider);
+                }
+              }}
               onLocal={provider=>{
                 setHarness(provider==="codex"||provider==="claude"?provider:"other");
                 if(provider==="codex"||provider==="claude")setRunner(provider);

@@ -2950,7 +2950,7 @@ export function ChannelPage({
         taskOpenCount={taskOpenCount}
         taskAttentionCount={taskReviewCount + taskBlockedCount}
         onOpenTeam={() => openPanel("team")}
-        onOpenCollaboration={() => openPanel("collaboration")}
+        onOpenCollaboration={() => { collaborationViewMemory.current = null; setCloudConnectTarget(null); setWorkspaceFiles(true); openPanel("collaboration"); }}
         onOpenSearch={() => openPanel("search")}
         searchActive={q !== "" || agentFilterActive || completionOnly}
         onAddAgent={canMintAgent&&accountKey!==null&&!state.archived?()=>setAdminSurface("agentJoin",true):undefined}/>
@@ -3106,6 +3106,10 @@ export function ChannelPage({
                     onBack={panelBackTarget?backChannelPanel:undefined}
                     backLabel={panelBackLabel}
                     guideSession={joinGuideSession}
+                    canManageCloud={canModerate && !state.archived}
+                    canRunCloud={canWrite && !state.archived}
+                    submissionSafety={submissionSafety}
+                    dispatchScopeReady={accountKey !== null}
                     onCloudConnect={provider=>{collaborationViewMemory.current=null;setWorkspaceFiles(false);setCloudConnectTarget(provider);openPanel("collaboration");}}
                   />
                   <AgentTokens

@@ -93,8 +93,13 @@ function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, tok
   };
   const current = summary === null ? null : { ...summary, permissions: { manage: !archived && summary.permissions.manage, run: !archived && summary.permissions.run, upload: !archived && summary.permissions.upload } };
   return <div className="commons-hub">
-    <header className="commons-hero"><div className="commons-hero-copy"><span className="commons-kicker">AGENT COMMONS</span><h2>{t("Studio.connectLead")}</h2><p>{t("Studio.connectSub")}</p></div><details className="studio-group-detail"><summary>{t("Studio.id")}</summary><code>#{slug}</code></details></header>
-    <div className="commons-nav"><div className="commons-segmented" role="tablist" aria-label={t("Collab.title")}>{TABS.map((item) => <button className={`commons-tab ${tab === item ? "is-active" : ""}`} key={item} id={`commons-tab-${item}`} type="button" role="tab" aria-selected={tab === item} aria-controls={`commons-panel-${item}`} tabIndex={tab === item ? 0 : -1} onKeyDown={(event) => selectWithKeyboard(event, item)} onClick={() => setTab(item)}>{t(item==="bridges"?"Studio.addAgent":item==="files"?"Studio.files":"Studio.code")}{summary !== null && ((item === "repositories" && summary.repositories.length > 0)) && <span>{summary.repositories.length}</span>}</button>)}</div><button className="d-btn commons-refresh" type="button" disabled={loading} onClick={() => void refresh()} aria-label={t("Collab.refresh")}>{t(loading ? "Collab.loading" : "Collab.refresh")}</button></div>
+    <div className="commons-nav">
+      <div className="commons-segmented" role="tablist" aria-label={t("Collab.title")}>{TABS.map((item) => <button className={`commons-tab ${tab === item ? "is-active" : ""}`} key={item} id={`commons-tab-${item}`} type="button" role="tab" aria-selected={tab === item} aria-controls={`commons-panel-${item}`} tabIndex={tab === item ? 0 : -1} onKeyDown={(event) => selectWithKeyboard(event, item)} onClick={() => setTab(item)}>{t(item==="bridges"?"Studio.addAgent":item==="files"?"Studio.files":"Studio.code")}{summary !== null && ((item === "repositories" && summary.repositories.length > 0)) && <span>{summary.repositories.length}</span>}</button>)}</div>
+      <div className="commons-nav-right">
+        <code className="commons-group" title={t("Studio.id")}>#{slug}</code>
+        <button className="d-btn commons-refresh" type="button" disabled={loading} onClick={() => void refresh()} aria-label={t("Collab.refresh")}>{t(loading ? "Collab.loading" : "Collab.refresh")}</button>
+      </div>
+    </div>
     {error !== null && <p className="commons-error" role="alert">{error}</p>}
     {summary === null && loading && <p className="commons-empty" role="status">{t("Collab.loading")}</p>}
     {current !== null && <>

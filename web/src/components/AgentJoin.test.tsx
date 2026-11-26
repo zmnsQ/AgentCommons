@@ -1116,7 +1116,6 @@ describe("mixed cloud and coding team onboarding",()=>{
     expect(r.root.findByProps({"data-coding-provider":"claude"})).toBeTruthy();
     expect(r.root.findByProps({"data-provider":"dot"})).toBeTruthy();
     await act(async()=>r.root.findByProps({"data-coding-provider":provider}).props.onClick());
-    await act(async()=>r.root.findByProps({"data-picker-continue":true}).props.onClick());
     await act(async()=>r.root.findByType(CodingAgentSetup).props.onLegacy());
     expect(r.root.findByProps({name:"agent-join-harness",value:provider}).props.checked).toBe(true);
     expect(savedAgents).toHaveLength(0);
@@ -1127,13 +1126,11 @@ describe("mixed cloud and coding team onboarding",()=>{
     expect(back).toBeTruthy();await act(async()=>back!.props.onClick());
     expect(r.root.findByProps({"data-coding-provider":provider})).toBeTruthy();
     await act(async()=>r.root.findByProps({"data-provider":"muse"}).props.onClick());
-    await act(async()=>r.root.findByProps({"data-picker-continue":true}).props.onClick());
     expect(cloud).toBe("muse");expect(savedAgents).toHaveLength(0);
   });
   test.each(["codex","claude"] as const)("%s connection retains its actual harness in the generated join command",async(provider:"codex"|"claude")=>{
     const r=render(undefined,null,{onCloudConnect:()=>{},presence:[],messages:[]});open(r);
     await act(async()=>r.root.findByProps({"data-coding-provider":provider}).props.onClick());
-    await act(async()=>r.root.findByProps({"data-picker-continue":true}).props.onClick());
     await act(async()=>r.root.findByType(CodingAgentSetup).props.onLegacy());
     await act(async()=>r.root.find(node=>node.props.className==="d-btn d-btn--primary"&&node.props.onClick).props.onClick());
     expect(savedAgents).toHaveLength(1);
@@ -1187,7 +1184,6 @@ test('open manual guide retains one-time credential through polling prop snapsho
  const props={active:true,onCloudConnect:()=>{},presence:[],messages:[]};
  const r=render(undefined,null,props);
  await act(async()=>r.root.findByProps({'data-coding-provider':'other'}).props.onClick());
- await act(async()=>r.root.findByProps({'data-picker-continue':true}).props.onClick());
  const button=(label:string)=>r.root.findAllByType('button').find(b=>b.children.includes(label))!;
  await act(async()=>button('Manual Token / header').props.onClick());
  await act(async()=>button('Create group Agent Token').props.onClick());

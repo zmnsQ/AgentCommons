@@ -1,8 +1,8 @@
 import {registerDict,type LocaleDict} from "../dict";
 export const AgentConnectStrings:LocaleDict={en:{
-"AgentConnect.platformTitle":"Choose a platform", "AgentConnect.platformHint":"Select your tool, then review its requirements and connection steps.","AgentConnect.platformCloud":"Personal agents & services","AgentConnect.nextStep":"View connection steps",
+"AgentConnect.platformTitle":"Choose a platform", "AgentConnect.platformHint":"Click any tool to open its 1-2-3 setup guide. Nothing is authorized or created until you confirm.","AgentConnect.platformCloud":"Cloud & personal agents","AgentConnect.nextStep":"View connection steps",
 "AgentConnect.short.codex":"Code and test in your workspace","AgentConnect.short.codebuddy":"Connect an existing coding session","AgentConnect.short.claude":"Implement and review code","AgentConnect.short.other":"MCP URL + OAuth or manual Token",
-"AgentConnect.short.dot":"Group tools and supported events","AgentConnect.short.muse":"Tool access or a paired bridge","AgentConnect.short.cue":"Send tasks to your existing agent","AgentConnect.short.grok":"Automation trigger · no auto replies","AgentConnect.short.hermes":"Your running agent service",
+"AgentConnect.short.dot":"Connect via OAuth MCP","AgentConnect.short.muse":"MCP connector or device bridge","AgentConnect.short.cue":"Send tasks to your Cue agent","AgentConnect.short.grok":"Automation webhook · no auto replies","AgentConnect.short.hermes":"Connect your Hermes API server",
 
 "AgentConnect.guideOnly":"Selecting a card only opens instructions. No account is authorized, credential created or program started here.",
 "AgentConnect.manualNeeds":"Needs: an HTTP MCP client that supports OAuth or a custom Authorization header. A Token alone does not add event support.",
@@ -65,9 +65,9 @@ export const AgentConnectStrings:LocaleDict={en:{
  "AgentConnect.dotDocs":"Official ChatGPT connection instructions ↗",
  "AgentConnect.mfaFailure":"Two-step verification is required. Open Account security and complete setup before enabling external access."
 },zh:{
-"AgentConnect.platformTitle":"选择你的平台", "AgentConnect.platformHint":"选中常用工具，查看条件后按步骤连接。","AgentConnect.platformCloud":"个人 Agent 与服务","AgentConnect.nextStep":"查看连接步骤",
-"AgentConnect.short.codex":"在开发环境编程与测试","AgentConnect.short.codebuddy":"接入已有编程会话","AgentConnect.short.claude":"实现功能与审查代码","AgentConnect.short.other":"MCP 地址 + OAuth 或手工 Token",
-"AgentConnect.short.dot":"群组工具与支持的事件通知","AgentConnect.short.muse":"工具访问或已配对的桥接","AgentConnect.short.cue":"向你已有的 Agent 发送任务","AgentConnect.short.grok":"自动化触发，不自动回传","AgentConnect.short.hermes":"连接正在运行的 Agent 服务",
+"AgentConnect.platformTitle":"选择要接入的平台", "AgentConnect.platformHint":"点一下即可查看 1-2-3 连接步骤，不会自动授权或创建凭据。","AgentConnect.platformCloud":"云端个人 Agent 与服务","AgentConnect.nextStep":"查看连接步骤",
+"AgentConnect.short.codex":"一键命令接入本地开发会话","AgentConnect.short.codebuddy":"一键接入现有编程会话","AgentConnect.short.claude":"一键接入写代码与代码审查","AgentConnect.short.other":"通用 MCP 地址（OAuth 或 Token）",
+"AgentConnect.short.dot":"通过 OAuth 添加自定义 MCP","AgentConnect.short.muse":"MCP 工具接入或桥接","AgentConnect.short.cue":"向已有 Cue Agent 发送任务","AgentConnect.short.grok":"Automation 触发 · 不自动回传","AgentConnect.short.hermes":"连接运行中的 Hermes 服务",
 
 "AgentConnect.guideOnly":"点击卡片仅打开说明，不会自动授权账号、创建凭证或启动程序。",
 "AgentConnect.manualNeeds":"需要：支持 HTTP MCP，以及 OAuth 或自定义 Authorization 请求头的客户端；Token 不会增加客户端事件能力。",

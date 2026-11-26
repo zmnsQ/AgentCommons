@@ -62,8 +62,15 @@
   transition: border-color var(--ac-duration-fast) var(--ac-ease-out), background var(--ac-duration-fast) var(--ac-ease-out);
 }
 .agent-platform-tile > .provider-mark { width: 30px; height: 30px; }
-.agent-platform-tile > .studio-icon { width: 14px; flex: none; color: var(--t-dim); }
-.agent-platform-tile:hover { border-color: var(--ac-border-strong); background: var(--ac-surface-2); }
+.agent-platform-tile > .studio-icon { width: 14px; flex: none; color: var(--t-dim); transition: transform var(--ac-duration-fast) var(--ac-ease-out), color var(--ac-duration-fast) var(--ac-ease-out); }
+.agent-platform-tile:hover { border-color: var(--t-accent); background: var(--ac-accent-soft); }
+.agent-platform-tile:hover > .studio-icon { color: var(--t-accent); transform: translateX(2px); }
+.agent-platform-tile:active { transform: scale(0.99); }
+.ac-chip--accent {
+  border-color: var(--ac-accent-border);
+  background: var(--ac-accent-soft);
+  color: var(--t-link);
+}
 .agent-platform-tile[aria-pressed=true] {
   border-color: var(--t-accent);
   background: var(--ac-accent-soft);
