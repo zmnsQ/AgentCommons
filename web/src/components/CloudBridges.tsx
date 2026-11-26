@@ -16,6 +16,7 @@ import {useT} from "../i18n/useT";
 import type {CloudAgentChoice} from "./AgentConnectionPicker";
 import "../i18n/strings/AgentConnect";
 import "../styles/cloud-bridges.css";
+import "../styles/agent-connect.css";
 
 interface Props { submissionSafety?:GrokSubmissionSafety; token:string;slug:string;canManage:boolean;canRun:boolean;initialProvider?:CloudAgentChoice;onProviderChange?(provider:CloudAgentChoice):void;showAuthorizationManagement?:boolean;onConfigureApi?(provider:"hermes"|"manus"):void; }
 export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initialProvider,onProviderChange,onConfigureApi,showAuthorizationManagement=true}:Props){
@@ -41,6 +42,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
   submissions.current=submissionStore;
   const busyRequest=useRef<number|null>(null);
   const [busy,setBusy]=useState(false);
+  const [confirmDisconnect,setConfirmDisconnect]=useState(false);
   const [notice,setNotice]=useState("");
   const [error,setError]=useState("");
   const alive=useRef(true);
@@ -55,7 +57,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
   const isActive=useCallback(()=>alive.current&&scope.current.generation===generation&&apiBase()===base,[generation,base]);
   useEffect(()=>{
     setBusy(submissions.current.inFlight);setState(null);setEvents(null);setAuthorizedAgents(null);setCue([]);
-    setName("Grok Automation");setSecret("");setEndpoint("");setApiKey("");setPrompt("");setError("");setNotice("");
+    setName("Grok Automation");setSecret("");setEndpoint("");setApiKey("");setPrompt("");setError("");setNotice("");setConfirmDisconnect(false);
   },[generation]);
   useEffect(()=>{
     const update=()=>setBusy(submissionStore.inFlight||busyRequest.current!==null);
@@ -155,7 +157,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
     <p className="commons-note">{t("AgentConnect.testWarning")}</p>
     <div className="agent-connect-tabs" aria-label={t("AgentConnect.cloud")}>
       {(["dot","muse","cue","hermes","grok"] as const).map(provider=><button className="d-btn" type="button" key={provider}
-        aria-pressed={selected===provider} onClick={()=>{setSelected(provider);onProviderChange?.(provider);}}><ProviderMark provider={provider}/>{t(`AgentConnect.${provider}`)}</button>)}
+        aria-pressed={selected===provider} onClick={()=>{setSelected(provider);setConfirmDisconnect(false);onProviderChange?.(provider);}}><ProviderMark provider={provider}/>{t(`AgentConnect.${provider}`)}</button>)}
     </div>
     {selected==="dot"&&<ChatGptQuickStart key={`${slug}:${token}`} token={token} slug={slug} canManage={canManage} />}
     {(selected==="dot"||selected==="muse")&&<details className="cloud-bridge-card"><summary>{t("AgentConnect.security")}</summary>
@@ -197,7 +199,8 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
     </article>}
     {selected==="grok"&&<article className="cloud-bridge-card">
       <h3>Grok · Automation Webhook</h3>
-      <p>{zh?"此方式需要你已有的 Automation HTTPS 触发地址、签名密钥，并由服务器管理员批准该地址来源。它不是个人 Grok Bot 登录；若账号没有这些能力，请勿填写猜测的地址。保存不验证任务完成，回复也不会自动回群。":"This requires an existing Automation HTTPS trigger, signing secret and server administrator approval of its origin. It is not a personal Grok Bot login. If your account lacks these capabilities, do not guess an endpoint. Saving does not verify task completion; replies are not automatically imported."}</p>
+      <p className="coding-note-line">{zh?"使用你自己的 Automation HTTPS 触发地址与签名密钥；这不是个人 Grok Bot 登录。":"This uses your own Automation HTTPS trigger and signing secret; it is not a personal Grok Bot login."}</p>
+      <details className="ac-callout-details"><summary>{zh?"前提与结果边界":"Prerequisites and result limits"}</summary><p>{zh?"该地址来源需由服务器管理员批准。若账号没有这些能力，请勿填写猜测的地址。保存不验证任务完成，回复也不会自动回群。":"The origin must be approved by the server administrator. If your account lacks these capabilities, do not guess an endpoint. Saving does not verify task completion; replies are not automatically imported."}</p></details>
       <p>{state?.connection?zh?`配置已保存：${state.connection.name}`:`Configured: ${state.connection.name}`:zh?"尚未绑定":"Not configured"}</p>
       {canManage&&<form onSubmit={saveGrok} className="cloud-bridge-form">
         <label>{zh?"显示名称":"Name"}<input value={name} maxLength={80} onChange={e=>setName(e.target.value)} disabled={busy} required/></label>
@@ -210,10 +213,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
         <button className="d-btn" disabled={busy||!prompt.trim()}>{zh?"发送到 Automation":"Send to Automation"}</button>
       </form>}
       {state?.deliveries.slice(0,5).map(d=><p key={d.id}><small>{d.request_id}: {automationDeliveryLabel(d.state,zh)}</small></p>)}
-      {canManage&&state?.connection&&<button type="button" className="d-btn" disabled={busy} onClick={()=>void task(async()=>{
-        if(!confirm(zh?"取消此群 Grok Automation 绑定？已发送的远程任务不会自动取消。":"Disconnect Grok Automation for this group? In-flight remote work is not cancelled."))return;
-        await cloudBridgesApi.disconnectGrok(token,slug);await reload();
-      })}>{zh?"断开连接":"Disconnect"}</button>}
+      {canManage&&state?.connection&&(confirmDisconnect?<div className="commons-confirm"><p>{zh?"取消此群 Grok Automation 绑定？已发送的远程任务不会自动取消。":"Disconnect Grok Automation for this group? In-flight remote work is not cancelled."}</p><div className="commons-actions"><button type="button" className="d-btn d-btn--danger" disabled={busy} onClick={()=>void task(async()=>{await cloudBridgesApi.disconnectGrok(token,slug);if(isActive())setConfirmDisconnect(false);await reload();})}>{busy?(zh?"处理中…":"Working…"):(zh?"确认断开":"Confirm disconnect")}</button><button type="button" className="d-btn" disabled={busy} onClick={()=>setConfirmDisconnect(false)}>{zh?"取消":"Cancel"}</button></div></div>:<button type="button" className="d-btn" disabled={busy} onClick={()=>setConfirmDisconnect(true)}>{zh?"断开连接":"Disconnect"}</button>)}
     </article>}
     {selected==="muse"&&<MuseCloudPanel key={`${slug}:${token}`} token={token} slug={slug} canManage={canManage}/>}
   </section>;

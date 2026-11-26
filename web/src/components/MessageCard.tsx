@@ -1,5 +1,4 @@
 import { PlatformIcon } from "./PlatformIcon";
-import "../styles/prototype-chat.css";
 import { StudioIcon } from "./StudioIcon";
 // 消息渲染：message → doodle 卡片外壳 + mono 元信息 + markdown 正文；
 // status → 时间线分隔条（spec §9 第 2 块）。

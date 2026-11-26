@@ -1,51 +1,209 @@
-/* Agent Commons Studio · zmnsQ. Original application: AgentParty (BUSL-1.1).
- * Design reference: Caho1/open-claude-ui (MIT), see THIRD_PARTY_NOTICES.md.
- * Stable doodle/midnight preference IDs are preserved for existing users. */
-:root,:root[data-theme="midnight"]{
- --ac-surface-0:#191a1b;--ac-surface-1:#2c2f30;--ac-surface-2:#232525;--ac-surface-3:#292c2c;
- --t-bg:var(--ac-surface-0);--t-panel:var(--ac-surface-3);--t-panel2:var(--ac-surface-2);--t-border:var(--ac-border);--t-faint:var(--ac-border);--d-paper:var(--ac-surface-0);--scroll-track:transparent;
- --ac-border:#42433c;--ac-border-strong:#5a5b50;
- --t-text:#f0eee7;--t-body:#d0cfc5;--t-muted:#aaa99c;--t-dim:#a2a193;
- --t-accent:#c6afa2;--t-accent-ink:#201b17;--t-link:#c6afa2;
- --t-green:#96c3a0;--t-red:#ef9c91;--t-blue:#a2bad9;--t-purple:#c0a7da;
- --agent-l-name:72%;--agent-l-soft:62%;
- --d-ink:#e1ded4;--d-red:#c6afa2;--d-shadow:rgba(0,0,0,.18);
- --d-yellow:#403625;--d-red-soft:#473028;--d-blue:#a2bad9;--d-blue-soft:#2b3740;
- --d-green:#96c3a0;--d-green-soft:#293b2f;--d-amber:#d5b76d;--d-amber-soft:#3b3526;
- --code-bg:#1b1c18;--code-border:#42433c;
- --ac-hover:rgba(255,255,240,.06);--ac-focus:rgba(213,142,114,.26);
- --ac-shadow-sm:0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(255,255,240,.03);
- --ac-shadow-popover:0 16px 48px rgba(0,0,0,.32),0 0 0 1px rgba(255,255,240,.07);
- --ac-shadow-modal:0 32px 100px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,240,.08);
- --ac-backdrop:rgba(0,0,0,.50);--ac-accent-soft:#393532;
+/* Agent Commons Studio 2.0 · Unified Design Tokens
+ * Single source of truth for Web, Tauri Desktop, and script-free OAuth pages.
+ * Theme IDs ("midnight" = Dark, "doodle" = Light) are preserved for user settings compatibility. */
+
+:root,
+:root[data-theme="midnight"] {
+  color-scheme: dark;
+
+  /* 4-tier Obsidian Slate Elevation */
+  --ac-surface-0: #0c0d10;
+  --ac-surface-1: #111318;
+  --ac-surface-2: #171a21;
+  --ac-surface-3: #1e222b;
+  --ac-surface-elevated: #242935;
+
+  /* Legacy & Semantic Aliases */
+  --t-bg: var(--ac-surface-0);
+  --t-panel: var(--ac-surface-3);
+  --t-panel2: var(--ac-surface-2);
+  --d-paper: var(--ac-surface-0);
+  --scroll-track: transparent;
+
+  /* Hairline Borders */
+  --ac-border: rgba(255, 255, 255, 0.085);
+  --ac-border-strong: rgba(255, 255, 255, 0.16);
+  --ac-border-subtle: rgba(255, 255, 255, 0.05);
+  --t-border: var(--ac-border);
+  --t-faint: var(--ac-border);
+
+  /* Ink Hierarchy */
+  --t-text: #f3f4f7;
+  --t-body: #cdd2dd;
+  --t-muted: #8b93a5;
+  --t-dim: #6e7688;
+  --d-ink: var(--t-text);
+
+  /* Signature Indigo-Cobalt Accent */
+  --t-accent: #7b88fa;
+  --t-accent-hover: #8f9bff;
+  --t-accent-ink: #ffffff;
+  --ac-accent-soft: rgba(123, 136, 250, 0.14);
+  --ac-accent-border: rgba(123, 136, 250, 0.34);
+  --t-link: #9aa6ff;
+
+  /* Semantic Status Palette */
+  --t-green: #34d399;
+  --d-green: #34d399;
+  --d-green-soft: rgba(52, 211, 153, 0.13);
+  --t-red: #f87171;
+  --d-red: #f87171;
+  --d-red-soft: rgba(248, 113, 113, 0.13);
+  --t-blue: #60a5fa;
+  --d-blue: #60a5fa;
+  --d-blue-soft: rgba(96, 165, 250, 0.13);
+  --d-amber: #fbbf24;
+  --d-amber-soft: rgba(251, 191, 36, 0.13);
+  --t-purple: #a78bfa;
+  --d-yellow: rgba(251, 191, 36, 0.12);
+
+  /* Agent Deterministic Color Lightness */
+  --agent-l-name: 74%;
+  --agent-l-soft: 64%;
+
+  /* Own-Message & Code Surfaces */
+  --ac-own-bg: rgba(123, 136, 250, 0.085);
+  --ac-own-border: rgba(123, 136, 250, 0.2);
+  --ac-own-text: #f3f4f7;
+  --code-bg: #12151c;
+  --code-border: rgba(255, 255, 255, 0.09);
+
+  /* Interactive States & Depth */
+  --ac-hover: rgba(255, 255, 255, 0.055);
+  --ac-hover-strong: rgba(255, 255, 255, 0.095);
+  --ac-focus: rgba(123, 136, 250, 0.32);
+  --d-shadow: rgba(0, 0, 0, 0.36);
+  --ac-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --ac-shadow-popover: 0 14px 40px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --ac-shadow-modal: 0 28px 84px rgba(0, 0, 0, 0.68), 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --ac-backdrop: rgba(5, 6, 9, 0.66);
 }
-:root[data-theme="doodle"]{
- --ac-surface-0:#f5f4ef;--ac-surface-1:#eeede9;--ac-surface-2:#faf9f6;--ac-surface-3:#faf9f4;
- --ac-border:#dedbd3;--ac-border-strong:#c8c3b8;
- --t-bg:var(--ac-surface-0);--t-panel:var(--ac-surface-3);--t-panel2:var(--ac-surface-2);--t-border:var(--ac-border);
- --t-text:#292720;--t-body:#49463f;--t-muted:#6f6b62;--t-dim:#78746a;--t-faint:var(--ac-border);
- --t-green:#347354;--t-red:#b73f37;--t-blue:#315e9b;--t-purple:#7958a4;
- --t-accent:#876b5a;--t-accent-ink:#ffffff;--t-link:#785d4e;
- --agent-l-name:37%;--agent-l-soft:55%;
- --d-ink:#38352e;--d-paper:var(--ac-surface-0);--d-yellow:#f6ead8;--d-red:#876b5a;
- --d-red-soft:#f8e8e3;--d-blue:#43688d;--d-blue-soft:#e9eff6;--d-green:#347354;--d-green-soft:#e9f2e9;
- --d-amber:#94661c;--d-amber-soft:#f6efde;--d-shadow:rgba(43,34,22,.07);
- --code-bg:#f3f1ec;--code-border:#e4e0d7;--scroll-track:transparent;
- --ac-hover:rgba(63,48,31,.055);--ac-focus:rgba(165,77,50,.22);
- --ac-shadow-sm:0 1px 2px rgba(43,34,22,.04),0 0 0 1px rgba(43,34,22,.04);
- --ac-shadow-popover:0 16px 48px rgba(43,34,22,.12),0 0 0 1px rgba(43,34,22,.07);
- --ac-shadow-modal:0 32px 100px rgba(43,34,22,.20),0 0 0 1px rgba(43,34,22,.08);
- --ac-backdrop:rgba(30,27,22,.32);--ac-accent-soft:#f2e5de;
+
+:root[data-theme="doodle"] {
+  color-scheme: light;
+
+  /* 4-tier Crisp Alabaster / Porcelain Elevation */
+  --ac-surface-0: #ffffff;
+  --ac-surface-1: #f5f6f9;
+  --ac-surface-2: #f8f9fc;
+  --ac-surface-3: #ffffff;
+  --ac-surface-elevated: #ffffff;
+
+  /* Legacy & Semantic Aliases */
+  --t-bg: var(--ac-surface-0);
+  --t-panel: var(--ac-surface-3);
+  --t-panel2: var(--ac-surface-2);
+  --d-paper: var(--ac-surface-0);
+  --scroll-track: transparent;
+
+  /* Hairline Borders */
+  --ac-border: rgba(15, 23, 42, 0.09);
+  --ac-border-strong: rgba(15, 23, 42, 0.17);
+  --ac-border-subtle: rgba(15, 23, 42, 0.05);
+  --t-border: var(--ac-border);
+  --t-faint: var(--ac-border);
+
+  /* Ink Hierarchy */
+  --t-text: #111318;
+  --t-body: #2d3442;
+  --t-muted: #5c6578;
+  --t-dim: #798296;
+  --d-ink: var(--t-text);
+
+  /* Signature Cobalt-Indigo Accent */
+  --t-accent: #4f46e5;
+  --t-accent-hover: #4338ca;
+  --t-accent-ink: #ffffff;
+  --ac-accent-soft: rgba(79, 70, 229, 0.08);
+  --ac-accent-border: rgba(79, 70, 229, 0.24);
+  --t-link: #4338ca;
+
+  /* Semantic Status Palette */
+  --t-green: #059669;
+  --d-green: #059669;
+  --d-green-soft: rgba(5, 150, 105, 0.1);
+  --t-red: #dc2626;
+  --d-red: #dc2626;
+  --d-red-soft: rgba(220, 38, 38, 0.09);
+  --t-blue: #2563eb;
+  --d-blue: #2563eb;
+  --d-blue-soft: rgba(37, 99, 235, 0.09);
+  --d-amber: #d97706;
+  --d-amber-soft: rgba(217, 119, 6, 0.11);
+  --t-purple: #7c3aed;
+  --d-yellow: #fef3c7;
+
+  /* Agent Deterministic Color Lightness */
+  --agent-l-name: 38%;
+  --agent-l-soft: 52%;
+
+  /* Own-Message & Code Surfaces */
+  --ac-own-bg: rgba(79, 70, 229, 0.07);
+  --ac-own-border: rgba(79, 70, 229, 0.18);
+  --ac-own-text: #111318;
+  --code-bg: #f6f7fa;
+  --code-border: rgba(15, 23, 42, 0.09);
+
+  /* Interactive States & Depth */
+  --ac-hover: rgba(15, 23, 42, 0.045);
+  --ac-hover-strong: rgba(15, 23, 42, 0.08);
+  --ac-focus: rgba(79, 70, 229, 0.22);
+  --d-shadow: rgba(15, 23, 42, 0.08);
+  --ac-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.03);
+  --ac-shadow-popover: 0 12px 32px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06);
+  --ac-shadow-modal: 0 24px 64px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.07);
+  --ac-backdrop: rgba(15, 23, 42, 0.36);
 }
-:root{
- --t-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
- --t-mono:"JetBrains Mono","SFMono-Regular",Consolas,ui-monospace,"PingFang SC","Microsoft YaHei",monospace;
- --ac-display:ui-serif,Georgia,"Songti SC","STSong",serif;
- --d-marker:var(--t-sans);--d-hand:var(--t-sans);
- --p-working:var(--d-green);--p-waiting:var(--d-blue);--p-blocked:var(--t-red);--p-busy:var(--d-amber);--p-done:var(--t-muted);--p-offline:var(--t-faint);
- --ac-radius-xs:6px;--ac-radius-sm:10px;--ac-radius-md:14px;--ac-radius-lg:20px;
- --ac-duration-press:90ms;--ac-duration-fast:160ms;--ac-duration-panel:300ms;
- --ac-ease-out:cubic-bezier(.22,1,.36,1);--ac-ease-standard:cubic-bezier(.2,0,0,1);
- --ac-space-1:4px;--ac-space-2:8px;--ac-space-3:12px;--ac-space-4:16px;--ac-space-6:24px;--ac-space-8:32px;
+
+:root {
+  /* Native System Typography Stack */
+  --t-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --t-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  --ac-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "PingFang SC", system-ui, sans-serif;
+  --d-marker: var(--t-sans);
+  --d-hand: var(--t-sans);
+
+  /* Presence Semantic Mapping */
+  --p-working: var(--d-green);
+  --p-waiting: var(--d-blue);
+  --p-blocked: var(--t-red);
+  --p-busy: var(--d-amber);
+  --p-done: var(--t-muted);
+  --p-offline: var(--t-dim);
+
+  /* Radii Ladder */
+  --ac-radius-xs: 6px;
+  --ac-radius-sm: 8px;
+  --ac-radius-md: 12px;
+  --ac-radius-lg: 16px;
+  --ac-radius-xl: 20px;
+  --ac-radius-pill: 9999px;
+
+  /* Spacing & Layout Dimensions */
+  --ac-space-1: 4px;
+  --ac-space-2: 8px;
+  --ac-space-3: 12px;
+  --ac-space-4: 16px;
+  --ac-space-5: 20px;
+  --ac-space-6: 24px;
+  --ac-space-8: 32px;
+  --ac-sidebar-width: 268px;
+  --ac-navigation-width: 268px;
+  --ac-header-height: 56px;
+  --ac-reading-width: 820px;
+
+  /* Motion */
+  --ac-duration-press: 90ms;
+  --ac-duration-fast: 150ms;
+  --ac-duration-panel: 240ms;
+  --ac-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ac-ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
-@media(prefers-reduced-motion:reduce){:root{--ac-duration-press:0ms;--ac-duration-fast:0ms;--ac-duration-panel:0ms}}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ac-duration-press: 0ms;
+    --ac-duration-fast: 0ms;
+    --ac-duration-panel: 0ms;
+  }
+}

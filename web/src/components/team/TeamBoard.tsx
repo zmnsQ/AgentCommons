@@ -6,6 +6,7 @@ import "../../i18n/strings/TeamBoard";
 import { presenceStateLabel } from "../../lib/presenceLabels";
 import { TEAM_LANES, type TeamBoardModel, type TeamCard, type TeamLane, type TeamUnassignedRole } from "../../lib/teamBoard";
 import { TeamSquads, type TeamSquadDraft } from "./TeamSquads";
+import "./team-board.css";
 
 /** 与 Channel.tsx 的 RoleDraft 同形，避免组件依赖页面文件。 */
 export interface TeamRoleDraft {

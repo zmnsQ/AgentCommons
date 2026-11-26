@@ -1,81 +1,81 @@
-/* Cloud integrations: touch-first, readable without relying on viewport-wide widths. */
+/* Cloud integrations: touch-first, readable, token-driven. */
 .cloud-bridges {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  gap: 14px;
   min-width: 0;
   max-width: 100%;
 }
-.cloud-bridges h2 { margin: 0; font-size: 1.25rem; }
+.cloud-bridges > p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--t-muted); }
+.cloud-bridges h2 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.02em; }
+.cloud-bridges h3 { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.4; }
 .cloud-bridge-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
   min-width: 0;
   max-width: 100%;
-  padding: clamp(14px, 2.4vw, 20px);
-  border: 1px solid var(--t-faint, currentColor);
-  border-radius: 8px;
-  background: var(--t-panel2, transparent);
+  padding: clamp(14px, 2.4vw, 18px);
+  border: 1px solid var(--t-border);
+  border-radius: var(--ac-radius-md);
+  background: var(--ac-surface-1);
   overflow-wrap: anywhere;
 }
 .cloud-bridge-card > * { min-width: 0; }
-.cloud-bridge-card h3 { margin: 0; font-size: 1rem; line-height: 1.45; }
-.cloud-bridge-card p { margin: 0 !important; line-height: 1.55; }
-.cloud-bridge-card small { opacity: .8; }
-.cloud-bridge-card a { overflow-wrap: anywhere; }
+.cloud-bridge-card > p { margin: 0; font-size: 13px; line-height: 1.65; color: var(--t-body); }
+.cloud-bridge-card > p.coding-note-line { font-size: 13px; }
+.cloud-bridge-card small { color: var(--t-muted); font-size: 11.5px; }
+.cloud-bridge-card a { color: var(--t-link); overflow-wrap: anywhere; }
+.cloud-bridge-card ol,
+.cloud-bridge-card ul { min-width: 0; margin: 0; padding-inline-start: 18px; }
+.cloud-bridge-card li { min-width: 0; padding-block: 4px; font-size: 13px; line-height: 1.65; }
+.cloud-bridge-card li .d-btn { margin-inline-start: 8px; }
+.cloud-bridge-card code {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--code-bg);
+  color: var(--t-body);
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
 .cloud-bridge-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 12px;
+  gap: 11px;
   width: 100%;
-  max-width: 650px;
+  max-width: 620px;
   margin: 0;
 }
-.cloud-bridge-form label { min-width: 0; display: grid; gap: 6px; }
+.cloud-bridge-form label { display: grid; gap: 5px; min-width: 0; font-size: 12px; font-weight: 600; color: var(--t-muted); }
 .cloud-bridge-form input,
 .cloud-bridge-form textarea {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  border: 1px solid var(--t-faint, #888);
-  border-radius: 4px;
-  padding: 10px 12px;
-  background: var(--t-panel, transparent);
-  color: var(--t-text, inherit);
-  font: inherit;
+  padding: 9px 11px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--ac-radius-sm);
+  background: var(--ac-surface-2);
+  color: var(--t-text);
+  font: 13.5px/1.5 var(--t-sans);
   resize: vertical;
 }
-.cloud-bridge-form .d-btn { justify-self: start; }
-.cloud-bridge-card code {
-  display: inline-block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-.cloud-bridge-card ul {
-  min-width: 0;
-  margin: 0;
-  padding-inline-start: 18px;
-}
-.cloud-bridge-card li {
-  min-width: 0;
-  padding-block: 8px;
-  line-height: 1.6;
-}
-.cloud-bridge-card li .d-btn { margin-inline-start: 8px; }
+.cloud-bridge-form input[type=password] { font-family: var(--t-mono); font-size: 12.5px; }
+.cloud-bridge-form .d-btn { justify-self: start; min-height: 38px; }
 .cloud-bridge-grant {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px 12px;
+  gap: 4px 12px;
   align-items: center;
   min-width: 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--t-faint, currentColor);
+  padding-top: 11px;
+  border-top: 1px solid var(--t-border);
 }
-.cloud-bridge-grant p { grid-column: 1; }
-.cloud-bridge-grant small { grid-column: 1; overflow-wrap: anywhere; }
+.cloud-bridge-grant p { grid-column: 1; margin: 0; font-size: 13px; }
+.cloud-bridge-grant small { grid-column: 1; overflow-wrap: anywhere; font-size: 11.5px; color: var(--t-muted); }
 .cloud-bridge-grant > .d-btn {
   grid-column: 2;
   grid-row: 1 / 3;
@@ -83,15 +83,41 @@
   white-space: normal;
   text-align: center;
 }
-/* Four platforms are independent cards; never hide the last card offscreen. */
+
+/* Authoritative OAuth/Events status is independent from realtime WebSocket presence. */
+.connector-presence-list { display: grid; gap: 8px; margin: 0; padding: 0; }
+.connector-presence-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--ac-radius-sm);
+  background: var(--ac-surface-2);
+}
+.connector-presence-item dt { display: flex; flex-direction: column; min-width: 0; grid-row: 1 / 4; }
+.connector-presence-item strong { overflow-wrap: anywhere; font-size: 12.5px; }
+.connector-presence-item code {
+  display: block;
+  padding: 0;
+  background: none;
+  color: var(--t-muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.connector-presence-item dd { min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: 12px; color: var(--t-body); }
+.host-assignment-mcp-note { grid-column: 1 / -1; }
+
 @media (max-width: 720px) {
   .cloud-bridges { gap: 12px; }
   .cloud-bridge-card { padding: 14px; gap: 10px; }
-  .cloud-bridge-card h3 { font-size: 15px; }
+  .cloud-bridge-card h3 { font-size: 14.5px; }
   .cloud-bridge-card .d-btn,
   .cloud-bridge-form button { min-height: 44px; }
   .cloud-bridge-form input,
   .cloud-bridge-form textarea { font-size: 16px; }
+  .cloud-bridge-form input[type=password] { font-size: 16px; }
   .cloud-bridge-form .d-btn { width: 100%; justify-self: stretch; }
   .cloud-bridge-card ul { padding-inline-start: 16px; }
   .cloud-bridge-card li .d-btn { margin-inline-start: 0; margin-top: 6px; }
@@ -99,32 +125,13 @@
   .cloud-bridge-grant p,
   .cloud-bridge-grant small,
   .cloud-bridge-grant > .d-btn { grid-column: 1; }
-  .cloud-bridge-grant > .d-btn {
-    grid-row: auto;
-    justify-self: stretch;
-    width: 100%;
-  }
+  .cloud-bridge-grant > .d-btn { grid-row: auto; justify-self: stretch; width: 100%; }
+}
+@media (max-width: 640px) {
+  .connector-presence-item { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .connector-presence-item dt { grid-row: auto; }
 }
 @media (max-width: 400px) {
   .cloud-bridge-card { padding: 12px; }
   .cloud-bridge-card code { font-size: 11px; }
-}
-
-/* Authoritative OAuth/Events status is independent from realtime WebSocket presence. */
-.connector-presence-list { display:grid; gap:8px; margin:0; padding:0; }
-.connector-presence-item {
-  min-width:0; padding:12px; display:grid;
-  grid-template-columns:minmax(0, 1.3fr) minmax(0, 1fr);
-  gap:5px 12px; border:1px solid var(--t-faint);
-  border-radius:8px; background:var(--t-panel);
-}
-.connector-presence-item dt { display:flex; flex-direction:column; min-width:0; grid-row:1 / 4; }
-.connector-presence-item strong { overflow-wrap:anywhere; }
-.connector-presence-item code { display:block; opacity:.65; font-size:11px; overflow-wrap:anywhere; }
-.connector-presence-item dd { min-width:0; margin:0; overflow-wrap:anywhere; font-size:12px; }
-.host-assignment-mcp-note { grid-column:1 / -1; }
-@media (max-width: 640px) {
-  .connector-presence-item { grid-template-columns:minmax(0,1fr); gap:8px; }
-  .connector-presence-item dt { grid-row:auto; }
-  .connector-presence-item dd { padding-left:0; }
 }

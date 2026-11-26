@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { ChannelStrings } from "./Channel";
 
 const channelSource = readFileSync(resolve(import.meta.dir, "../../pages/Channel.tsx"), "utf8");
+const charterSource = readFileSync(resolve(import.meta.dir, "../../components/channel/CharterBanner.tsx"), "utf8");
 const welcomeSource = readFileSync(resolve(import.meta.dir, "../../components/ChannelWelcome.tsx"), "utf8");
 const styles = readFileSync(resolve(import.meta.dir, "../../styles/app.css"), "utf8");
 
@@ -48,9 +49,9 @@ describe("Channel loading and recovery surfaces (#344 #345 #346 #354)", () => {
   });
 
   test("shows charter load errors outside edit mode and exposes retry", () => {
-    expect(channelSource).toContain("error !== null && !(canModerate && editing)");
-    expect(channelSource).toContain("onRetry?: () => void");
-    expect(channelSource).toContain('t("Channel.charter.retry")');
+    expect(charterSource).toContain("error !== null && !(canModerate && editing)");
+    expect(charterSource).toContain("onRetry?: () => void");
+    expect(charterSource).toContain('t("Channel.charter.retry")');
     expect(channelSource).toContain("onRetry={() => void loadCharter()}");
   });
 
@@ -70,7 +71,7 @@ describe("Channel loading and recovery surfaces (#344 #345 #346 #354)", () => {
     const refreshEffect = channelSource.slice(refreshEffectStart, refreshEffectEnd);
     expect(channelSource).toContain("charterEditingRef.current = editing");
     expect(channelSource).toContain("const charterEditBaseRevRef = useRef<number | null>(null);");
-    expect(channelSource).toContain('className="d-btn charter-edit" type="button" disabled={charter === null}');
+    expect(charterSource).toContain('className="d-btn charter-edit" type="button" disabled={charter === null}');
     expect(channelSource).toContain("const editCharter = useCallback(() => {\n    if (charter === null) {");
     expect(loadCharter).toContain(
       'if (!charterEditingRef.current) setCharterDraft(body.charter ?? "");',

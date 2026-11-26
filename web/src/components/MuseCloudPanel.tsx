@@ -18,8 +18,9 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
  const scope=JSON.stringify([base,slug]),currentScope=useRef(scope);currentScope.current=scope;
  const inFlight=useRef(new Set<string>()),uncertain=useRef(new Set<string>()),revocationTarget=useRef(new Map<string,string>());
  const [blocked,setBlocked]=useState(false);
+ const [revokeTarget,setRevokeTarget]=useState<string|null>(null);
  const uncertainText=locale==='zh'?'上次变更结果待确认。请检查现有客户端，不要重复创建或撤销。':'The previous change needs confirmation. Inspect existing clients; do not repeat creation or revocation.';
- useEffect(()=>{const n=++epoch.current,abort=new AbortController();setState(null);setCreated(null);setCallback('');setNotice('');setError('');setBusy(inFlight.current.has(scope));setBlocked(uncertain.current.has(scope));
+ useEffect(()=>{const n=++epoch.current,abort=new AbortController();setState(null);setCreated(null);setCallback('');setNotice('');setError('');setRevokeTarget(null);setBusy(inFlight.current.has(scope));setBlocked(uncertain.current.has(scope));
   if(canManage)void cloudBridgesApi.muse(token,slug,abort.signal).then(data=>{if(epoch.current===n&&!abort.signal.aborted&&base===apiBase()){
     setState(data);
     const target=revocationTarget.current.get(scope);
@@ -32,7 +33,7 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
    .catch(()=>{if(!abort.signal.aborted&&epoch.current===n)setError(t('Muse.error'));});
   return()=>{abort.abort();++epoch.current;};
  },[token,slug,canManage,revision,base,locale]);
- useEffect(()=>{setMethod(null);},[token,slug,base]);
+ useEffect(()=>{setMethod(null);setRevokeTarget(null);},[token,slug,base]);
  const copy=async(value:string)=>{const n=epoch.current;try{if(await copyText(value)&&epoch.current===n&&currentScope.current===scope&&base===apiBase())setNotice(t('Muse.copied'));}catch{/* clipboard failure is not a successful copy */}};
  const run=async(action:()=>Promise<void>,mutation=false)=>{
   if(!canManage||currentScope.current!==scope||base!==apiBase()||inFlight.current.has(scope)||(mutation&&uncertain.current.has(scope)))return;
@@ -102,9 +103,10 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
        <div className="muse-inline-actions"><button className="d-btn" onClick={()=>void copy(created.client_secret)}><StudioIcon name="copy"/>{t('Muse.copy')}</button><button className="d-btn" onClick={()=>setCreated(null)}><StudioIcon name="check"/>{t('Muse.saved')}</button></div>
      </div>}
      <details className="muse-technical"><summary>{t('Muse.authDetails')}</summary><dl>{Object.entries(state.configuration).filter(([,v])=>typeof v==='string').map(([k,v])=><div key={k}><dt>{k}</dt><dd>{String(v)}</dd></div>)}</dl></details>
-     {clients.map(client=><div className="muse-client-row" key={client.client_id}><div><strong>{client.name}</strong><code>{client.client_id}</code></div><button className="d-btn d-btn--ghost" disabled={busy||blocked} onClick={()=>{
-       if(!confirm(t('Muse.revokeConfirm')))return;void run(async()=>{revocationTarget.current.set(scope,client.client_id);const n=epoch.current;await cloudBridgesApi.revokeMuseClient(token,slug,client.client_id);if(epoch.current!==n||base!==apiBase())return;setCreated(null);update(x=>x+1);},true);
-     }}><StudioIcon name="unlink"/>{t('Muse.revoke')}</button></div>)}
+     {clients.map(client=><div className="muse-client" key={client.client_id}>
+       <div className="muse-client-row"><div><strong>{client.name}</strong><code>{client.client_id}</code></div><button className="d-btn d-btn--ghost" disabled={busy||blocked} onClick={()=>setRevokeTarget(client.client_id)}><StudioIcon name="unlink"/>{t('Muse.revoke')}</button></div>
+       {revokeTarget===client.client_id&&<div className="commons-confirm"><p>{t('Muse.revokeConfirm')}</p><div className="commons-actions"><button type="button" className="d-btn d-btn--danger" disabled={busy||blocked} onClick={()=>void run(async()=>{revocationTarget.current.set(scope,client.client_id);const n=epoch.current;await cloudBridgesApi.revokeMuseClient(token,slug,client.client_id);if(epoch.current!==n||base!==apiBase())return;setCreated(null);setRevokeTarget(null);update(x=>x+1);},true)}>{busy?(locale==='zh'?'撤销中…':'Revoking…'):t('Muse.revoke')}</button><button type="button" className="d-btn" disabled={busy} onClick={()=>setRevokeTarget(null)}>{locale==='zh'?'取消':'Cancel'}</button></div></div>}
+     </div>)}
     </div></li>
     <li><span className="muse-step-index">2</span><div><h4>{t('Muse.step2')}</h4><p>{t('Muse.step2Help')}</p><textarea readOnly value={prompt} rows={3} aria-label={t('Muse.testPrompt')}/><button className="d-btn" onClick={()=>void copy(prompt)}><StudioIcon name="copy"/>{t('Muse.copy')}</button></div></li>
     <li><span className="muse-step-index">3</span><div><h4>{t('Muse.step4')}</h4><p>{t('Muse.step4Help')}</p><div className="muse-inline-actions"><button className="d-btn" disabled={busy} onClick={()=>void run(async()=>{

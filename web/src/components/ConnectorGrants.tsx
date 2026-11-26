@@ -9,6 +9,7 @@ export function ConnectorGrants({slug}:{slug?:string}) {
   const [error,setError]=useState<string|null>(null);
   const [loading,setLoading]=useState(true);
   const [busy,setBusy]=useState<string|null>(null);
+  const [confirmId,setConfirmId]=useState<string|null>(null);
   useEffect(()=>{
     if(isTauriEnvironment()){setLoading(false);return;}
     const controller=new AbortController();
@@ -21,9 +22,7 @@ export function ConnectorGrants({slug}:{slug?:string}) {
   },[slug]);
   if(isTauriEnvironment())return null;
   const revoke=async(grant:Grant)=>{
-    if(!confirm(zh?`撤销 ${grant.client_name} 对 ${grant.group} 的连接？`:
-      `Revoke ${grant.client_name}'s connection to ${grant.group}?`))return;
-    setBusy(grant.id);setError(null);
+    setBusy(grant.id);setError(null);setConfirmId(null);
     try {
       const result=await fetch("/oauth/grants/revoke",{
         method:"POST",credentials:"same-origin",cache:"no-store",
@@ -44,8 +43,8 @@ export function ConnectorGrants({slug}:{slug?:string}) {
     {grants.map(grant=><div className="cloud-bridge-grant" key={grant.id}>
       <p><strong>{grant.client_name}</strong> · #{grant.group}</p>
       <small>{grant.scopes.join(", ")} · {grant.agent_name}</small>
-      <button type="button" className="d-btn" disabled={busy!==null} onClick={()=>void revoke(grant)}>
-        {zh?"撤销连接":"Revoke connection"}</button>
+      {confirmId===grant.id?<div className="commons-confirm"><p>{zh?`撤销 ${grant.client_name} 对 ${grant.group} 的连接？`:`Revoke ${grant.client_name}'s connection to ${grant.group}?`}</p><div className="commons-actions"><button type="button" className="d-btn d-btn--danger" disabled={busy!==null} onClick={()=>void revoke(grant)}>{busy===grant.id?(zh?"撤销中…":"Revoking…"):(zh?"确认撤销":"Confirm revoke")}</button><button type="button" className="d-btn" disabled={busy!==null} onClick={()=>setConfirmId(null)}>{zh?"取消":"Cancel"}</button></div></div>:<button type="button" className="d-btn" disabled={busy!==null} onClick={()=>setConfirmId(grant.id)}>
+        {zh?"撤销连接":"Revoke connection"}</button>}
     </div>)}
   </section>;
 }

@@ -1,7 +1,6 @@
 import { PlatformIcon } from "./PlatformIcon";
-import "../styles/prototype-chat.css";
-import {useCompactViewport} from "../lib/useCompactViewport";
-import {useLocale} from "../i18n/locale";
+import { useCompactViewport } from "../lib/useCompactViewport";
+import { useLocale } from "../i18n/locale";
 import { StudioIcon } from "./StudioIcon";
 import {isCompositionKey} from "../lib/compositionGuard";
 // 底部插话框：Markdown、@name mention（动态在线列表补全，issue #39）、Cmd/Ctrl+Enter 发送（spec §9 第 4 块）。
@@ -515,13 +514,99 @@ export function Composer({
           })}
         </ul>
       )}
-      {<button type="button" className="composer-more" aria-label={locale==="zh"?"附件与更多":"Attachments and more"} aria-expanded={extrasOpen} onClick={()=>setExtrasOpen(value=>!value)}><StudioIcon name={extrasOpen?"close":"plus"}/></button>}
+      <button
+        type="button"
+        className="composer-more"
+        aria-label={locale === "zh" ? "附件与更多" : "Attachments and more"}
+        aria-expanded={extrasOpen}
+        onClick={() => setExtrasOpen((value) => !value)}
+      >
+        <StudioIcon name={extrasOpen ? "close" : "plus"} />
+      </button>
+      {(mentionStatuses.length > 0 || attachments.length > 0 || uploads.length > 0 || uploadError !== null || pasteError !== null) && (
+        <div
+          className="composer-context"
+          role="region"
+          aria-label={locale === "zh" ? "待发送内容与提示" : "Pending content and notices"}
+          tabIndex={0}
+        >
+          {mentionStatuses.length > 0 && (
+            <ul className="composer-reach" aria-label="mention reachability">
+              {mentionStatuses.map((s) => (
+                <li key={s.name} className={`composer-reach-item composer-reach-item--${REACH_TIER[s.tier]}`}>
+                  <span className="composer-reach-dot" aria-hidden="true" />
+                  <span className="composer-reach-name t-mono">@{s.display}</span>
+                  <span className="composer-reach-label">{reachLabel(s)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {attachments.length > 0 && (
+            <ul className="composer-attachments" aria-label="pending attachments">
+              {attachments.map((att) => (
+                <PendingAttachment
+                  key={att.key}
+                  att={att}
+                  onRemove={onRemoveAttachment}
+                  removeLabel={`remove ${att.filename}`}
+                />
+              ))}
+            </ul>
+          )}
+          {uploads.length > 0 && (
+            <ul className="composer-uploads" aria-label="uploads in progress">
+              {uploads.map((u) => (
+                <li key={u.id} className={`composer-upload composer-upload--${u.status} t-mono`}>
+                  {u.status === "uploading" ? (
+                    <span className="composer-upload-spinner" aria-hidden="true" />
+                  ) : (
+                    <span className="composer-upload-icon composer-upload-icon--error" aria-hidden="true">!</span>
+                  )}
+                  <span className="composer-upload-name">{u.filename}</span>
+                  {u.status === "uploading" ? (
+                    <span className="composer-upload-status">{t("Composer.upload.uploading")}</span>
+                  ) : (
+                    <span className="composer-upload-status composer-upload-error-text">
+                      {u.error ?? t("Composer.upload.failed")}
+                    </span>
+                  )}
+                  {u.status === "error" && onRetryUpload !== undefined && (
+                    <button
+                      type="button"
+                      className="composer-upload-retry"
+                      onClick={() => onRetryUpload(u.id)}
+                    >
+                      {t("Composer.upload.retry")}
+                    </button>
+                  )}
+                  {onCancelUpload !== undefined && (
+                    <button
+                      type="button"
+                      className="composer-upload-cancel"
+                      aria-label={`dismiss ${u.filename}`}
+                      onClick={() => onCancelUpload(u.id)}
+                    >
+                      <StudioIcon name="close" />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {uploadError !== null && <p className="banner banner--red composer-upload-error">{uploadError}</p>}
+          {pasteError !== null && (
+            <p className="composer-paste-error" role="alert">
+              {pasteError}
+            </p>
+          )}
+        </div>
+      )}
       <textarea
         ref={taRef}
         className="composer-input t-mono"
         rows={1}
         aria-label={t("Composer.placeholder")}
-        placeholder={compact ? (locale==="zh"?"发送消息…":"Message…") : t("Composer.placeholder")}
+        placeholder={compact ? (locale === "zh" ? "发送消息…" : "Message…") : t("Composer.placeholder")}
         value={draft}
         onChange={onChange}
         onKeyUp={onKeyUp}
@@ -530,128 +615,81 @@ export function Composer({
         onCompositionStart={onCompositionStart}
         onCompositionEnd={onCompositionEnd}
         onPaste={onPaste}
-        onFocus={()=>{if(blurTimerRef.current!==null){clearTimeout(blurTimerRef.current);blurTimerRef.current=null;}}}
-        onBlur={()=>{if(blurTimerRef.current!==null)clearTimeout(blurTimerRef.current);blurTimerRef.current=setTimeout(()=>{setMenu(null);blurTimerRef.current=null;},120);}}
+        onFocus={() => {
+          if (blurTimerRef.current !== null) {
+            clearTimeout(blurTimerRef.current);
+            blurTimerRef.current = null;
+          }
+        }}
+        onBlur={() => {
+          if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
+          blurTimerRef.current = setTimeout(() => {
+            setMenu(null);
+            blurTimerRef.current = null;
+          }, 120);
+        }}
       />
-      {(mentionStatuses.length>0 || attachments.length>0 || uploads.length>0 || uploadError!==null || pasteError!==null) && <div className="composer-context" role="region" aria-label={locale==='zh'?'待发送内容与提示':'Pending content and notices'} tabIndex={0}>
-      {mentionStatuses.length > 0 && (
-        <ul className="composer-reach" aria-label="mention reachability">
-          {mentionStatuses.map((s) => (
-            <li key={s.name} className={`composer-reach-item composer-reach-item--${REACH_TIER[s.tier]}`}>
-              <span className="composer-reach-dot" aria-hidden="true" />
-              <span className="composer-reach-name t-mono">@{s.display}</span>
-              <span className="composer-reach-label">{reachLabel(s)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {attachments.length > 0 && (
-        <ul className="composer-attachments" aria-label="pending attachments">
-          {attachments.map((att) => (
-            <PendingAttachment
-              key={att.key}
-              att={att}
-              onRemove={onRemoveAttachment}
-              removeLabel={`remove ${att.filename}`}
-            />
-          ))}
-        </ul>
-      )}
-      {uploads.length > 0 && (
-        <ul className="composer-uploads" aria-label="uploads in progress">
-          {uploads.map((u) => (
-            <li key={u.id} className={`composer-upload composer-upload--${u.status} t-mono`}>
-              {u.status === "uploading" ? (
-                <span className="composer-upload-spinner" aria-hidden="true" />
-              ) : (
-                <span className="composer-upload-icon composer-upload-icon--error" aria-hidden="true">!</span>
-              )}
-              <span className="composer-upload-name">{u.filename}</span>
-              {u.status === "uploading" ? (
-                <span className="composer-upload-status">{t("Composer.upload.uploading")}</span>
-              ) : (
-                <span className="composer-upload-status composer-upload-error-text">
-                  {u.error ?? t("Composer.upload.failed")}
-                </span>
-              )}
-              {u.status === "error" && onRetryUpload !== undefined && (
+      <div className="composer-toolbar composer-actions">
+        <div className="composer-toolbar-left">
+          <div className="composer-secondary-actions" hidden={compact ? !extrasOpen : false}>
+            {canAttach && (
+              <>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  multiple
+                  className="composer-file-input"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    if (e.target.files !== null && e.target.files.length > 0) onPickFiles?.(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
                 <button
                   type="button"
-                  className="composer-upload-retry"
-                  onClick={() => onRetryUpload(u.id)}
+                  className="d-btn composer-attach"
+                  onClick={() => {
+                    fileRef.current?.click();
+                    setExtrasOpen(false);
+                  }}
+                  disabled={uploading}
+                  title={t("Composer.attach.title")}
                 >
-                  {t("Composer.upload.retry")}
+                  <StudioIcon name="attachment" />
+                  <span>{uploading ? t("Composer.attach.uploading") : t("Composer.attach.label")}</span>
                 </button>
-              )}
-              {onCancelUpload !== undefined && (
-                <button
-                  type="button"
-                  className="composer-upload-cancel"
-                  aria-label={`dismiss ${u.filename}`}
-                  onClick={() => onCancelUpload(u.id)}
-                >
-                  <StudioIcon name="close" />
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {uploadError !== null && <p className="banner banner--red composer-upload-error">{uploadError}</p>}
-      {pasteError !== null && (
-        <p className="composer-paste-error" role="alert">
-          {pasteError}
-        </p>
-      )}
-      </div>}
-      <div className="composer-actions">
-        <div className="composer-secondary-actions" hidden={!extrasOpen}>
-        {canAttach && (
-          <>
-            <input
-              ref={fileRef}
-              type="file"
-              multiple
-              className="composer-file-input"
-              style={{ display: "none" }}
-              onChange={(e) => {
-                if (e.target.files !== null && e.target.files.length > 0) onPickFiles?.(e.target.files);
-                e.target.value = "";
-              }}
-            />
+              </>
+            )}
             <button
               type="button"
-              className="d-btn composer-attach"
-              onClick={() => {fileRef.current?.click();setExtrasOpen(false);}}
-              disabled={uploading}
-              title={t("Composer.attach.title")}
+              className={"d-btn composer-paste" + (canReadClipboard ? "" : " composer-paste--insecure")}
+              aria-disabled={canReadClipboard ? undefined : true}
+              onClick={() => {
+                void onPasteClick();
+                setExtrasOpen(false);
+              }}
+              title={canReadClipboard ? t("Composer.paste.title") : t("Composer.paste.insecureTitle")}
             >
-              <StudioIcon name="attachment"/><span>{uploading ? t("Composer.attach.uploading") : t("Composer.attach.label")}</span>
+              <StudioIcon name="copy" />
+              <span>{t("Composer.paste.label")}</span>
             </button>
-          </>
-        )}
-        <button
-          type="button"
-          className={"d-btn composer-paste" + (canReadClipboard ? "" : " composer-paste--insecure")}
-          aria-disabled={canReadClipboard ? undefined : true}
-          onClick={() => {void onPasteClick();setExtrasOpen(false);}}
-          title={canReadClipboard ? t("Composer.paste.title") : t("Composer.paste.insecureTitle")}
-        >
-          <StudioIcon name="copy"/><span>{t("Composer.paste.label")}</span>
-        </button>
-        <FeatureTip tip="Tips.wake" className="composer-wake-tip"/>
+            <FeatureTip tip="Tips.wake" className="composer-wake-tip" />
+          </div>
         </div>
-        <span className="composer-keyboard-hint">{t("Composer.keyboardHint")}</span>
-        <button
-          type="button"
-          className="d-btn d-btn--primary composer-send"
-          aria-label={t("Composer.send.label")}
-          onClick={onSend}
-          disabled={sendDisabled}
-          title={ready ? t("Composer.send.readyTitle") : t("Composer.send.connectingTitle")}
-        >
-          <StudioIcon name="arrow-up"/><span className="composer-send-label">{t("Composer.send.label")}</span>
-        </button>
+        <div className="composer-toolbar-right">
+          <span className="composer-keyboard-hint">{t("Composer.keyboardHint")}</span>
+          <button
+            type="button"
+            className="d-btn d-btn--primary composer-send"
+            aria-label={t("Composer.send.label")}
+            onClick={onSend}
+            disabled={sendDisabled}
+            title={ready ? t("Composer.send.readyTitle") : t("Composer.send.connectingTitle")}
+          >
+            <StudioIcon name="arrow-up" />
+            <span className="composer-send-label">{t("Composer.send.label")}</span>
+          </button>
+        </div>
       </div>
     </div>
     <div className="composer-caption"><span>{t("Composer.keyboardHint")}</span></div>

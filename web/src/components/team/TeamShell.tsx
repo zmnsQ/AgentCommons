@@ -1,6 +1,7 @@
 import { StudioIcon } from "../StudioIcon";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useT } from "../../i18n/useT";
+import "./team-board.css";
 
 /**
  * 团队面板外壳（#1060 PR B）：一个标题 + 关闭按钮 + 单一内容区 + 可切入的成员详情。

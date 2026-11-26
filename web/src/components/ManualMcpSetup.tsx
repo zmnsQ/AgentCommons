@@ -4,6 +4,7 @@ import {useEffect,useRef,useState} from 'react';
 import {useLocale} from '../i18n/locale';
 import {apiBase} from '../lib/base';
 import {createChannelAgent,AuthError,ForbiddenError,ValidationError,ConflictError} from '../lib/api';
+import '../styles/agent-connect.css';
 
 /** URL and credential stay separate: never embed a bearer in URLs or persisted drafts. */
 export function ManualMcpSetup({endpoint,slug,token,namePrefix,onBack,creationAttempt,accountKey}:{accountKey?:string;creationAttempt?:{current:boolean};endpoint:string;slug:string;token:string;namePrefix:string;onBack():void}){
@@ -40,28 +41,29 @@ export function ManualMcpSetup({endpoint,slug,token,namePrefix,onBack,creationAt
   }finally{clearTimeout(timer);if(active()){pending.current=false;setBusy(false);}}
  };
  const copy=async(value:string)=>{if(!active())return;let ok=false;try{if(typeof navigator!=="undefined"&&navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);ok=true;}}catch{/* No DOM fallback: a late rejection must never reinsert a cleared secret. */}if(active())setNotice(ok?(zh?'已复制，请只粘贴到可信客户端的对应字段。':'Copied. Paste only into the matching field of a trusted client.'):(zh?'复制失败，请手动复制。':'Copy failed; copy manually.'));};
- const block=(value:string,label:string)=><div className="coding-command"><pre tabIndex={0} aria-label={label}>{value}</pre><button type="button" className="d-btn" aria-label={`${zh?'复制':'Copy'} ${label}`} onClick={()=>void copy(value)}>{zh?'复制':'Copy'}</button></div>;
- return <section className="coding-step" aria-label={zh?'手动 Bearer 接入':'Manual Bearer setup'}>
-  <button type="button" className="d-btn" onClick={()=>{setCredential(null);setNotice('');onBack();}}>{zh?'返回授权方式':'Back to authorization methods'}</button>
-  <h4>{zh?'为本群创建专用 Agent 凭据':'Create a dedicated agent credential for this group'}</h4>
-  <p>{zh?'适用于支持远程 HTTP MCP 和自定义 Authorization 请求头、但不支持 OAuth 的客户端；无需安装本地 CLI。':'For clients supporting remote HTTP MCP and custom Authorization headers but not OAuth. No local CLI is required.'}</p>
-  <p>{zh?'这是普通群组范围 Agent Token，不是仅限 MCP 的密钥：也可能调用该身份获准的本群 REST 接口。不会展示或复制你的人类登录凭据。':'This is a normal group-scoped Agent Token, not an MCP-only key: it may also access this identity’s permitted group REST APIs. Your human login credential is never shown or copied.'}</p>
+ const block=(value:string,label:string)=><div className="coding-command"><div className="coding-command-head"><span className="coding-command-label">{label}</span><button type="button" className="d-btn coding-command-copy" aria-label={`${zh?'复制':'Copy'} ${label}`} onClick={()=>void copy(value)}><span aria-hidden="true">⧉</span>{zh?'复制':'Copy'}</button></div><pre tabIndex={0} aria-label={label}>{value}</pre></div>;
+ return <section className="coding-setup coding-manual" aria-label={zh?'手动 Bearer 接入':'Manual Bearer setup'}>
+  <div className="coding-topbar"><button type="button" className="d-btn d-btn--ghost" onClick={()=>{setCredential(null);setNotice('');onBack();}}>{zh?'返回授权方式':'Back to authorization methods'}</button><span className="ac-kicker">MANUAL BEARER</span></div>
+  <header className="coding-setup-head"><div><span className="ac-chip">{zh?'手动 Token':'Manual token'}</span><h4>{zh?'为本群创建专用 Agent 凭据':'Create a dedicated agent credential for this group'}</h4><p>{zh?'适用于支持远程 HTTP MCP 和自定义 Authorization 请求头、但不支持 OAuth 的客户端；无需安装本地 CLI。':'For clients supporting remote HTTP MCP and custom Authorization headers but not OAuth. No local CLI is required.'}</p></div></header>
   {secure&&<McpReadiness token={token} slug={slug}/>}
-  {!secure&&<p role="alert">{zh?'请在可信 HTTPS 群页面操作。':'Use a trusted HTTPS group page.'}</p>}
-  {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
+  {!secure&&<p role="alert" className="commons-error">{zh?'请在可信 HTTPS 群页面操作。':'Use a trusted HTTPS group page.'}</p>}
+  {error&&<p role="alert" className="commons-error">{error}</p>}{notice&&<p role="status" className="ac-inline-status">{notice}</p>}
   {removedName&&<AgentAccessRecovery name={removedName} slug={slug} token={token} onBusyChange={setRecoveryBusy} onRestored={()=>{if(active()){setRemovedName(null);setError('');attempted.current=false;setNotice(zh?'身份已恢复。请再次点击创建；已有有效凭据时请使用原凭据或到“我的 Agent”管理。':'Identity restored. Click Create separately; if a credential is already active, use it or manage it in My Agents.');}}}/>}
   {secure&&block(endpoint,zh?'MCP 服务地址':'MCP server URL')}
-  <p>{zh?'已有本群 Agent Token 时，可直接在客户端填写上方地址和自己的 Token，无需再创建。':'If you already hold a token for this group, use the URL above and that token in your client; do not create another.'}</p>
-  {!visibleCredential&&<><label>{zh?'Agent 身份名称':'Agent identity name'}<input value={name} onChange={e=>{setName(e.target.value);if(!busy&&!unknown){setError('');setRemovedName(null);}}} disabled={busy||attempted.current||recoveryBusy} maxLength={64}/></label><button type="button" className="d-btn" disabled={busy||attempted.current||recoveryBusy||!!removedName||!secure} onClick={()=>void create()}>{busy?(zh?'正在创建，请稍候（最多30秒）…':'Creating, please wait (up to 30 seconds)…'):(zh?'创建本群 Agent Token':'Create group Agent Token')}</button></>}
-  {visibleCredential&&<>
-   <p role="status">{zh?`已创建身份 ${visibleCredential.name}。凭据只在本次页面显示；请立即安全保存。`:`Created ${visibleCredential.name}. The credential is shown only in this view; save it securely now.`}</p>
+  <details className="ac-callout-details"><summary>{zh?'这个 Token 能做什么？':'What this token can access'}</summary><p>{zh?'这是普通群组范围 Agent Token，不是仅限 MCP 的密钥：也可能调用该身份获准的本群 REST 接口。不会展示或复制你的人类登录凭据。':'This is a normal group-scoped Agent Token, not an MCP-only key: it may also access this identity’s permitted group REST APIs. Your human login credential is never shown or copied.'}</p></details>
+  {!visibleCredential&&<div className="coding-create-card"><label>{zh?'Agent 身份名称':'Agent identity name'}<input value={name} onChange={e=>{setName(e.target.value);if(!busy&&!unknown){setError('');setRemovedName(null);}}} disabled={busy||attempted.current||recoveryBusy} maxLength={64}/></label><button type="button" className="d-btn d-btn--primary" disabled={busy||attempted.current||recoveryBusy||!!removedName||!secure} onClick={()=>void create()}>{busy?(zh?'正在创建，请稍候（最多30秒）…':'Creating, please wait (up to 30 seconds)…'):(zh?'创建本群 Agent Token':'Create group Agent Token')}</button></div>}
+  {visibleCredential&&<div className="ac-secret-card">
+   <p role="status" className="ac-inline-status">{zh?`已创建身份 ${visibleCredential.name}。凭据只在本次页面显示；请立即安全保存。`:`Created ${visibleCredential.name}. The credential is shown only in this view; save it securely now.`}</p>
    {block(visibleCredential.token,zh?'Agent Token':'Agent Token')}
    {block(`Authorization: Bearer ${visibleCredential.token}`,zh?'Authorization 请求头':'Authorization header')}
    {block(JSON.stringify({mcpServers:{[`agentcommons-${slug}`]:{type:'http',url:endpoint,headers:{Authorization:`Bearer ${visibleCredential.token}`}}}},null,2),zh?'完整 MCP JSON 配置':'Complete MCP JSON configuration')}
-   <p>{zh?'完整 JSON 含密钥，仅粘贴到可信客户端的私密 MCP 配置。不同客户端字段可能不同；请合并服务条目，不要覆盖已有配置。':'The complete JSON contains a secret. Paste only into a trusted client’s private MCP configuration. Client schemas may differ; merge the server entry rather than replacing existing configuration.'}</p>
-   <p>{zh?'若客户端提供 Bearer Token 专用字段，只粘贴 Token；若提供自定义请求头，名称填 Authorization，值填 Bearer 后接空格与 Token。不要放入地址、聊天消息或公开配置。':'For a Bearer Token field, paste only the token. For custom headers, use name Authorization and value Bearer followed by a space and the token. Never put it in a URL, chat message or public configuration.'}</p>
-   <p>{zh?'先只读调用 commons_profile 核对群和身份，再读取消息。配置成功不代表订阅、常驻在线或自动响应。':'Verify group and identity with read-only commons_profile, then read messages. Configuration does not prove subscription, continuous presence or automatic replies.'}</p>
-  </>}
-  {(visibleCredential||unknown)&&<p>{zh?'返回或关闭只清除此页显示，不会撤销已创建的凭据。到群详情 → 我的 Agent 管理、撤销或重新生成凭据；重新生成会使旧 Token 失效，不需要重复创建身份。复制到剪贴板的内容不会由此页自动清除。':'Back or close clears this view, not the created credential. Use group details → My Agents to manage, revoke or regenerate credentials. Regeneration invalidates the old token without duplicating the identity. Copied clipboard contents are not automatically cleared.'}</p>}
+   <details className="ac-callout-details"><summary>{zh?'粘贴位置与安全边界':'Where to paste and safety'}</summary>
+    <p>{zh?'完整 JSON 含密钥，仅粘贴到可信客户端的私密 MCP 配置。不同客户端字段可能不同；请合并服务条目，不要覆盖已有配置。':'The complete JSON contains a secret. Paste only into a trusted client’s private MCP configuration. Client schemas may differ; merge the server entry rather than replacing existing configuration.'}</p>
+    <p>{zh?'若客户端提供 Bearer Token 专用字段，只粘贴 Token；若提供自定义请求头，名称填 Authorization，值填 Bearer 后接空格与 Token。不要放入地址、聊天消息或公开配置。':'For a Bearer Token field, paste only the token. For custom headers, use name Authorization and value Bearer followed by a space and the token. Never put it in a URL, chat message or public configuration.'}</p>
+    <p>{zh?'先只读调用 commons_profile 核对群和身份，再读取消息。配置成功不代表订阅、常驻在线或自动响应。':'Verify group and identity with read-only commons_profile, then read messages. Configuration does not prove subscription, continuous presence or automatic replies.'}</p>
+   </details>
+  </div>}
+  <p className="coding-note-line">{zh?'已有本群 Agent Token 时，可直接在客户端填写上方地址和自己的 Token，无需再创建。':'If you already hold a token for this group, use the URL above and that token in your client; do not create another.'}</p>
+  {(visibleCredential||unknown)&&<details className="ac-callout-details"><summary>{zh?'返回或关闭之后':'After leaving this view'}</summary><p>{zh?'返回或关闭只清除此页显示，不会撤销已创建的凭据。到群详情 → 我的 Agent 管理、撤销或重新生成凭据；重新生成会使旧 Token 失效，不需要重复创建身份。复制到剪贴板的内容不会由此页自动清除。':'Back or close clears this view, not the created credential. Use group details → My Agents to manage, revoke or regenerate credentials. Regeneration invalidates the old token without duplicating the identity. Copied clipboard contents are not automatically cleared.'}</p></details>}
  </section>;
 }

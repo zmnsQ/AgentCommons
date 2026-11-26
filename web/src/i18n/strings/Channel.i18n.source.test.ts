@@ -6,6 +6,10 @@ import { ChannelStrings } from "./Channel";
 import { StudioStrings } from "./Studio";
 
 const source = readFileSync(resolve(import.meta.dir, "../../pages/Channel.tsx"), "utf8");
+const channelModuleSource = [
+  "ChannelPanelModal", "CharterBanner", "ChannelSearchPanel", "CompletionPanel",
+  "TaskLedgerPanel", "TeamThread", "GuardSettingsPanel",
+].map((name) => readFileSync(resolve(import.meta.dir, `../../components/channel/${name}.tsx`), "utf8")).join("\n");
 const hostBoardSource = readFileSync(
   resolve(import.meta.dir, "../../components/HostBoardPanel.tsx"),
   "utf8",
@@ -16,7 +20,7 @@ const catchupSource = readFileSync(
 );
 const teamBoardSource = readFileSync(resolve(import.meta.dir, "../../components/team/TeamBoard.tsx"), "utf8");
 const teamShellSource = readFileSync(resolve(import.meta.dir, "../../components/team/TeamShell.tsx"), "utf8");
-const localizedSurfaceSource = `${source}\n${hostBoardSource}\n${catchupSource}\n${teamBoardSource}\n${teamShellSource}`;
+const localizedSurfaceSource = `${source}\n${channelModuleSource}\n${hostBoardSource}\n${catchupSource}\n${teamBoardSource}\n${teamShellSource}`;
 
 const REQUIRED_KEYS = [
   "Channel.banner.archived",
@@ -160,9 +164,9 @@ describe("Channel i18n source guard (#350)", () => {
     }
   });
 
-  test("removes audited user-visible English literals from Channel.tsx", () => {
+  test("removes audited user-visible English literals from the channel and its extracted modules", () => {
     for (const literal of FORBIDDEN_VISIBLE_ENGLISH) {
-      expect(source.includes(literal), `Channel.tsx still hardcodes: ${literal}`).toBe(false);
+      expect(`${source}\n${channelModuleSource}`.includes(literal), `Channel still hardcodes: ${literal}`).toBe(false);
     }
   });
 
@@ -251,6 +255,6 @@ describe("Channel i18n source guard (#350)", () => {
   });
 
   test("reject actions no longer use a browser prompt", () => {
-    expect(source).not.toContain("window.prompt");
+    expect(`${source}\n${channelModuleSource}`).not.toContain("window.prompt");
   });
 });

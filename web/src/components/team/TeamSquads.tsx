@@ -3,6 +3,7 @@ import type { ChannelSquad } from "@agentparty/shared";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/TeamBoard";
 import type { TeamCard } from "../../lib/teamBoard";
+import "./team-board.css";
 
 /** 与 api.ts 的 SquadWriteBody 同形；组件不直接依赖 api。 */
 export interface TeamSquadDraft {

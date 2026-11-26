@@ -151,6 +151,7 @@ test('ambiguous revoke unlocks only when readback explicitly marks that exact cl
    return Response.json(value);
   }) as typeof fetch;
   await act(async()=>root.findByProps({className:'muse-client-row'}).findByType('button').props.onClick());
+  await act(async()=>root.findByProps({className:'commons-confirm'}).findAllByType('button')[0]!.props.onClick());
   await act(async()=>root.findByProps({'aria-label':'Refresh status'}).props.onClick());
   expect(text(root)).toContain('previous change needs confirmation');expect(deletes).toBe(1);
   disabled=true;await act(async()=>root.findByProps({'aria-label':'Refresh status'}).props.onClick());

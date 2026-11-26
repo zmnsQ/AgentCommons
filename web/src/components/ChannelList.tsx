@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import type { ChannelInfo } from "../lib/api";
 import { StudioIcon } from "./StudioIcon";
 import { useLocale } from "../i18n/locale";
-import "../styles/prototype-sidebar.css";
 import { useT } from "../i18n/useT";
 import "../i18n/strings/Home"; // 复用 "已归档 (N)" key，两处折叠开关文案一致
 import "../i18n/strings/App";
@@ -18,10 +17,10 @@ interface Props {
   onOpen(slug: string): void;
   onRetry?: () => void;
   onCreate?: () => void;
-  onConnect?:()=>void;
+  onConnect?: () => void;
   onAgentSelect?: (name: string) => void;
   /** Authoritative agent roster only; presence alone does not identify an agent. */
-  agents?: readonly { name: string; display?: string; role?:string; connector_type?:string }[];
+  agents?: readonly { name: string; display?: string; role?: string; connector_type?: string }[];
 }
 
 // 分类筛选：全部 / 我创建的（owned）/ 我加入的（member）。只筛 live 段，archived 段独立不受影响。
@@ -46,11 +45,9 @@ function presenceDotPriority(state: ChannelInfo["presence"][number]["state"]): n
   return 1;
 }
 
-// 参与者状态点：每人一个蜡笔点，色 = presence 状态；没人报过 presence 给一颗灰点占位
+// 参与者状态点：每人一个状态点，色 = presence 状态；没人报过 presence 给一颗灰点占位
 export function PresenceDots({ channel }: { channel: ChannelInfo }) {
   const t = useT();
-  // 列表最多只能放四颗点：先把正在工作和其他在线成员提到离线记录前面，再截断。
-  // sort 是稳定的，同一优先级内继续沿用服务端顺序，不让状态点在每次刷新时乱跳。
   const entries = [...(channel.presence ?? [])]
     .sort((a, b) => presenceDotPriority(a.state) - presenceDotPriority(b.state))
     .slice(0, MAX_DOTS);
@@ -92,36 +89,53 @@ function ChannelPill({
       aria-current={c.slug === active ? "page" : undefined}
       title={c.topic ?? c.slug}
     >
-      <span className="prototype-channel-symbol" aria-hidden="true"><StudioIcon name="group" size={18}/></span>
-      <span className="prototype-channel-copy"><span className="chan-head">
-        <PresenceDots channel={c} />
-        <span className="chan-name">{c.title ?? c.slug}</span>
-        {c.visibility === "public" && <span className="d-hl public-badge">PUBLIC</span>}
-        {c.mode === "party" && <span className="d-hl party-badge">PARTY</span>}
-        {c.kind === "temp" && <span className="chan-tag t-mono">temp</span>}
-        {c.archived_at !== null && <span className="chan-tag t-mono">archived</span>}
+      <span className="prototype-channel-symbol" aria-hidden="true">
+        <StudioIcon name="group" size={14} />
       </span>
-      {preview !== null && <span className="chan-last t-mono">{preview}</span>}</span>
+      <span className="prototype-channel-copy">
+        <span className="chan-head">
+          <PresenceDots channel={c} />
+          <span className="chan-name">{c.title ?? c.slug}</span>
+          {c.visibility === "public" && <span className="d-hl public-badge">PUBLIC</span>}
+          {c.mode === "party" && <span className="d-hl party-badge">PARTY</span>}
+          {c.kind === "temp" && <span className="chan-tag t-mono">temp</span>}
+          {c.archived_at !== null && <span className="chan-tag t-mono">archived</span>}
+        </span>
+        {preview !== null && <span className="chan-last">{preview}</span>}
+      </span>
     </button>
   );
 }
 
 type ScopedProps = Omit<Props, "scopeKey">;
 
-function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, onCreate, onConnect, onAgentSelect }: ScopedProps) {
+function ScopedChannelList({
+  channels,
+  active,
+  error,
+  onOpen,
+  onRetry,
+  agents,
+  onCreate,
+  onConnect,
+  onAgentSelect,
+}: ScopedProps) {
   const { locale } = useLocale();
+  const zh = locale === "zh";
   const [query, setQuery] = useState("");
-  const searchLabel = locale === "zh" ? "搜索会话" : "Search conversations";
-  const matches = (c: ChannelInfo) => [c.title, c.slug, c.topic].some(value => value?.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
-  const uniqueAgents = [...new Map((agents ?? []).map(agent => [agent.name, agent])).values()];
+  const searchLabel = zh ? "搜索群组…" : "Search groups…";
+  const matches = (c: ChannelInfo) =>
+    [c.title, c.slug, c.topic].some((value) =>
+      value?.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
+    );
+  const uniqueAgents = [...new Map((agents ?? []).map((agent) => [agent.name, agent])).values()];
   const [showArchived, setShowArchived] = useState(false);
   const [category, setCategory] = useState<ChannelCategory>("all");
   const previousActiveRef = useRef<string | null | undefined>(undefined);
   const t = useT();
-  // 默认只显示活跃频道；归档的（联调用完的 temp 等）折叠起来，避免刷屏
+
   const live = channels?.filter((c) => c.archived_at === null) ?? null;
   const archived = channels?.filter((c) => c.archived_at !== null) ?? [];
-  // 分类只筛 live，archived 段保持独立不受影响。owned/member 缺字段（旧 worker）按 false 处理。
   const createdCount = live?.filter((c) => c.owned === true).length ?? 0;
   const joinedCount = live?.filter((c) => c.member === true).length ?? 0;
   const categoryCount: Record<ChannelCategory, number> = {
@@ -129,6 +143,7 @@ function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, o
     created: createdCount,
     joined: joinedCount,
   };
+
   useEffect(() => {
     if (channels === null || previousActiveRef.current === active) return;
     previousActiveRef.current = active;
@@ -145,6 +160,7 @@ function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, o
       (category === "joined" && activeChannel.member !== true);
     if (excluded) setCategory("all");
   }, [active, category, channels]);
+
   const filteredLive =
     live === null
       ? null
@@ -154,74 +170,143 @@ function ScopedChannelList({ channels, active, error, onOpen, onRetry, agents, o
           if (category === "joined") return c.member === true;
           return true;
         });
+
   return (
     <nav className="side prototype-sidebar" aria-label={t("Home.channelsLabel")}>
-      <div className="sidebar-top"><span>{locale === "zh" ? "我的空间" : "My workspace"}</span><button type="button" className="sidebar-icon-button" aria-label={locale === "zh" ? "创建群组" : "Create group"} title={locale === "zh" ? "创建群组" : "Create group"} disabled={!onCreate} onClick={onCreate}><StudioIcon name="plus"/></button></div>
-      <label className="prototype-sidebar-search"><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg><input type="search" aria-label={searchLabel} placeholder={searchLabel} value={query} onChange={e=>setQuery(e.currentTarget.value)}/></label>
-      <div className="prototype-sidebar-scroll">
-      <div className="side-section-title"><span>{locale === "zh" ? "对话" : "Conversations"}</span><button type="button" className="sidebar-icon-button" aria-label={locale === "zh" ? "新对话" : "New conversation"} disabled={!onCreate} onClick={onCreate}><StudioIcon name="plus"/></button></div>
-      {channels === null && error === null && <p className="side-note t-mono">{t("Home.loading")}</p>}
-      {error !== null && (
-        <p className="side-note side-note--err t-mono">
-          <span>{error}</span>{" "}
-          {onRetry && (
-            <button type="button" className="d-btn channels-retry" onClick={onRetry}>
-              {t("App.error.retry")}
-            </button>
-          )}
-        </p>
-      )}
-      {channels !== null && (
-        <details className="sidebar-category-filter"><summary>{locale === "zh" ? "筛选" : "Filter"}<span>{t(CATEGORY_LABEL_KEY[category], { count: categoryCount[category] })}</span></summary>
-        <div className="chan-cat-switch" role="group" aria-label="channel categories">
-          {(Object.keys(CATEGORY_LABEL_KEY) as ChannelCategory[]).map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              className={"chan-cat-btn" + (cat === category ? " is-active" : "")}
-              aria-pressed={cat === category}
-              onClick={() => setCategory(cat)}
-            >
-              {t(CATEGORY_LABEL_KEY[cat], { count: categoryCount[cat] })}
-            </button>
-          ))}
-        </div></details>
-      )}
-      <div className="studio-channel-items group-list">
-        {filteredLive?.map((c) => (
-          <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />
-        ))}
+      <div className="prototype-sidebar-controls">
+        <label className="prototype-sidebar-search">
+          <StudioIcon name="search" size={14} />
+          <input
+            type="search"
+            aria-label={searchLabel}
+            placeholder={searchLabel}
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+          />
+        </label>
+        {channels !== null && (
+          <div className="chan-cat-switch" role="group" aria-label={zh ? "群组筛选" : "Group filter"}>
+            {(Object.keys(CATEGORY_LABEL_KEY) as ChannelCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className={"chan-cat-btn" + (cat === category ? " is-active" : "")}
+                aria-pressed={cat === category}
+                onClick={() => setCategory(cat)}
+              >
+                {t(CATEGORY_LABEL_KEY[cat], { count: categoryCount[cat] })}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {live !== null && live.length === 0 && archived.length === 0 && (
-        <p className="side-note t-mono">{t("Home.channelsEmpty")}</p>
-      )}
-      {query.trim() && filteredLive?.length === 0 && archived.filter(matches).length === 0 && <p className="side-note">{locale === "zh" ? "没有匹配的会话" : "No matching conversations"}</p>}
-      {!query.trim() && category !== "all" && filteredLive !== null && filteredLive.length === 0 && live !== null && live.length > 0 && (
-        <p className="side-note t-mono">{t(CATEGORY_EMPTY_KEY[category])}</p>
-      )}
-      {archived.length > 0 && (
-        <>
+
+      <div className="prototype-sidebar-scroll">
+        <div className="side-section-title">
+          <span>{zh ? "群组对话" : "Groups"}</span>
           <button
             type="button"
-            className="side-archived-toggle t-mono"
-            onClick={() => setShowArchived((v) => !v)}
-            aria-expanded={showArchived || query.trim().length > 0}
+            className="sidebar-icon-button"
+            aria-label={zh ? "创建群组" : "Create group"}
+            title={zh ? "创建群组" : "Create group"}
+            disabled={!onCreate}
+            onClick={onCreate}
           >
-            {showArchived || query.trim() ? "▾" : "▸"} {t("Home.archivedToggle", { count: archived.length })}
+            <StudioIcon name="plus" size={15} />
           </button>
-          {(showArchived || query.trim()) &&
-            archived.filter(matches).map((c) => (
-              <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />
-            ))}
-        </>
-      )}
-      {uniqueAgents.length > 0 && <section className="prototype-sidebar-agents" aria-label={locale === "zh" ? "你的 Agent" : "Your agents"}>
-        <h3 className="side-section-title agent-label">{locale === "zh" ? "你的 Agent" : "Your agents"}<span>{uniqueAgents.length}</span></h3>
-        <ul className="agent-list">{uniqueAgents.map(agent=><li key={agent.name}><button type="button" disabled={!onAgentSelect} onClick={()=>onAgentSelect?.(agent.name)} title={agent.name}><span className="prototype-agent-avatar" aria-hidden="true"><PlatformIcon platform={agent.connector_type} size={18} decorative /></span><span>{agent.display?.trim()||agent.name}</span>{agent.role&&<small>{agent.role}</small>}</button></li>)}</ul>
-      </section>}
-      {onConnect&&<button type="button" className="discover-link" onClick={onConnect}><span aria-hidden="true">＋</span>{locale==="zh"?"连接更多 Agent":"Connect more agents"}</button>}
+        </div>
+
+        {channels === null && error === null && (
+          <p className="side-note">{t("Home.loading")}</p>
+        )}
+
+        {error !== null && (
+          <p className="side-note side-note--err">
+            <span>{error}</span>{" "}
+            {onRetry && (
+              <button type="button" className="d-btn channels-retry" onClick={onRetry}>
+                {t("App.error.retry")}
+              </button>
+            )}
+          </p>
+        )}
+
+        <div className="studio-channel-items group-list">
+          {filteredLive?.map((c) => (
+            <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />
+          ))}
+        </div>
+
+        {live !== null && live.length === 0 && archived.length === 0 && (
+          <p className="side-note">{t("Home.channelsEmpty")}</p>
+        )}
+
+        {query.trim() && filteredLive?.length === 0 && archived.filter(matches).length === 0 && (
+          <p className="side-note">{zh ? "没有匹配的群组" : "No matching groups"}</p>
+        )}
+
+        {!query.trim() &&
+          category !== "all" &&
+          filteredLive !== null &&
+          filteredLive.length === 0 &&
+          live !== null &&
+          live.length > 0 && <p className="side-note">{t(CATEGORY_EMPTY_KEY[category])}</p>}
+
+        {archived.length > 0 && (
+          <>
+            <button
+              type="button"
+              className="side-archived-toggle"
+              onClick={() => setShowArchived((v) => !v)}
+              aria-expanded={showArchived || query.trim().length > 0}
+            >
+              <span>{showArchived || query.trim() ? "▾" : "▸"}</span>
+              <span>{t("Home.archivedToggle", { count: archived.length })}</span>
+            </button>
+            {(showArchived || query.trim()) &&
+              archived
+                .filter(matches)
+                .map((c) => <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />)}
+          </>
+        )}
+
+        {uniqueAgents.length > 0 && (
+          <section
+            className="prototype-sidebar-agents"
+            aria-label={zh ? "当前群组 Agent" : "Group agents"}
+          >
+            <h3 className="side-section-title agent-label">
+              <span>{zh ? "当前群组 Agent" : "Group agents"}</span>
+              <span className="side-section-count">{uniqueAgents.length}</span>
+            </h3>
+            <ul className="agent-list">
+              {uniqueAgents.map((agent) => (
+                <li key={agent.name}>
+                  <button
+                    type="button"
+                    disabled={!onAgentSelect}
+                    onClick={() => onAgentSelect?.(agent.name)}
+                    title={agent.name}
+                  >
+                    <span className="prototype-agent-avatar" aria-hidden="true">
+                      <PlatformIcon platform={agent.connector_type} size={16} decorative />
+                    </span>
+                    <span>{agent.display?.trim() || agent.name}</span>
+                    {agent.role && <small>{agent.role}</small>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {onConnect && (
+          <button type="button" className="discover-link" onClick={onConnect}>
+            <StudioIcon name="plus" size={14} />
+            <span>{zh ? "接入新 Agent" : "Connect agent"}</span>
+          </button>
+        )}
       </div>
-      <div className="sidebar-foot"><span className="sidebar-foot-dot" aria-hidden="true"/>{locale === "zh" ? "一起想，比一个人想更好。" : "Better ideas, together."}</div>
     </nav>
   );
 }

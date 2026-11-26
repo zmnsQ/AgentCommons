@@ -33,9 +33,9 @@ test('production Channel actually composes details and header, not the legacy pe
 });
 
 test('details sits below existing nested roster dialogs and delegates their focus trap',()=>{
- const css=readFileSync(new URL('../styles/conversation-layout.css',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../styles/overlays.css',import.meta.url),'utf8');
  const component=readFileSync(new URL('./ConversationDetails.tsx',import.meta.url),'utf8');
- expect(css).toContain('z-index:55');expect(component).toContain('active:open&&!suspended');
+ expect(css).toContain('z-index: 55');expect(component).toContain('active:open&&!suspended');
 });
 
 test('header exposes real pending mentions and connection failure without opening details',()=>{
@@ -43,8 +43,8 @@ test('header exposes real pending mentions and connection failure without openin
  act(()=>{r=create(<LocaleProvider><ConversationHeader title="Group" members={[]} onDetails={()=>{}} attentionCount={2} onAttention={()=>jumped++} connectionStatus="closed"/></LocaleProvider>);});
  act(()=>r!.root.findByProps({className:'conversation-attention'}).props.onClick());
  expect(jumped).toBe(1);expect(r!.root.findByProps({role:'status'}).children).toEqual(['Disconnected']);
- const css=readFileSync(new URL('../styles/conversation-layout.css',import.meta.url),'utf8');
- expect(css).toContain('height:73px');expect(css).toContain('font-size:12px;font-weight:400');
+ const css=readFileSync(new URL('../styles/conversation.css',import.meta.url),'utf8');
+ expect(css).toContain('height: var(--ac-header-height)');expect(css).toContain('font-size: 15px');
 });
 test('header uses declared platform metadata with neutral unknown, not nickname guessing',()=>{
  act(()=>{r=create(<LocaleProvider><ConversationHeader title="Group" members={[{name:'worker',display:'Assistant',kind:'agent',connector_type:'chatgpt'},{name:'muse',display:'ChatGPT',kind:'agent'}]} onDetails={()=>{}}/></LocaleProvider>);});

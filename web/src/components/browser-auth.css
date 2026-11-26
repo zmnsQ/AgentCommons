@@ -19,15 +19,15 @@
 .browser-auth-stack input:not([type=checkbox]) { box-sizing: border-box; width: 100%; min-width: 0; }
 .browser-auth-stack input[type=checkbox] { align-self: flex-start; }
 .browser-auth-stack .d-btn { justify-content: center; text-align: center; white-space: normal; }
-.browser-auth-qr { align-self: center; max-width: 100%; height: auto; border-radius: 8px; background: #fff; }
-.browser-auth-secret { display: block; overflow-wrap: anywhere; padding: 12px; font-size: .9rem; }
+.browser-auth-qr { align-self: center; max-width: 100%; height: auto; border-radius: var(--ac-radius-sm); background: #fff; }
+.browser-auth-secret { display: block; overflow-wrap: anywhere; padding: 12px; font-size: 13px; }
 .browser-auth-status { font-weight: 700; }
-.browser-auth-muted { opacity: .75; font-size: .85rem; }
-.browser-recovery { border: 1px solid var(--t-faint, currentColor); border-radius: 8px; padding: 16px; margin: 16px 0; min-width: 0; }
-.browser-recovery pre { max-width: 100%; font-size: .85rem; overflow: auto; line-height: 1.8; }
+.browser-auth-muted { color: var(--t-muted); font-size: 12.5px; line-height: 1.55; }
+.browser-recovery { border: 1px solid var(--t-border); border-radius: var(--ac-radius-md); background: var(--ac-surface-1); padding: 14px 16px; margin: 14px 0; min-width: 0; }
+.browser-recovery pre { max-width: 100%; padding: 10px; border-radius: var(--ac-radius-sm); background: var(--code-bg); font-size: 12px; overflow: auto; line-height: 1.8; }
 .browser-recovery button { margin: 6px 6px 6px 0; }
-.browser-auth-advanced { margin-top: 16px; }
-.browser-auth-advanced summary { cursor: pointer; opacity: .8; }
+.browser-auth-advanced { margin-top: 14px; }
+.browser-auth-advanced summary { cursor: pointer; color: var(--t-muted); font-size: 12.5px; }
 .github-login-primary { display: flex; align-items: center; text-align: center; text-decoration: none; width: 100%; box-sizing: border-box; }
 .browser-auth-attribution {
   display: flex;

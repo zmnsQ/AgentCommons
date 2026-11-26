@@ -37,24 +37,26 @@ export function McpSecurityPanel({token,slug,canManage}:{token:string;slug:strin
       ...(key==="enabled"&&!checked?{allow_write:false,allow_events:false}:{})}}:null);setNote("");
   };
   const editable=canManage&&value?.can_manage===true;
-  return <section className="cloud-bridge-card mcp-security" aria-label={t("AgentConnect.security")}>
-    <h3>{t("AgentConnect.security")}</h3><p>{t("AgentConnect.urlWarning")}</p>
+  const statusKey=!saved?.policy.enabled||!saved.policy.owner_mfa_enabled?"AgentConnect.disabled":saved?.policy.allow_write?"AgentConnect.readwrite":"AgentConnect.readonly";
+  return <section className="ac-card mcp-security" aria-label={t("AgentConnect.security")}>
+    <div className="ac-card-head"><div><span className="ac-kicker">MCP POLICY</span><h3>{t("AgentConnect.security")}</h3></div><span className={`ac-status-pill ${!saved?.policy.enabled||!saved.policy.owner_mfa_enabled?"is-idle":"is-ok"}`}>{t(statusKey)}</span></div>
+    <p className="ac-card-hint">{t("AgentConnect.urlWarning")}</p>
     {error&&<p role="alert" className="commons-error">{error}</p>}
-    {note&&<p role="status">{note}</p>}
-    {!value&&!error&&<p role="status">{t("AgentConnect.loading")}</p>}
+    {note&&<p role="status" className="ac-inline-status">{note}</p>}
+    {!value&&!error&&<p role="status" className="ac-inline-status">{t("AgentConnect.loading")}</p>}
     {value&&<>
-      <strong className="mcp-security-status">{t(!saved?.policy.enabled||!saved.policy.owner_mfa_enabled?"AgentConnect.disabled":saved?.policy.allow_write?"AgentConnect.readwrite":"AgentConnect.readonly")}</strong>
-      <p>{t("AgentConnect.mfa")}</p>
-      {!value.policy.owner_mfa_enabled&&<p className="commons-note">{t("AgentConnect.noMfa")} <a href="/auth/security">{t("AgentConnect.setupMfa")}</a></p>}
+      <strong className="mcp-security-status">{t(statusKey)}</strong>
+      <p className="ac-card-hint">{t("AgentConnect.mfa")}</p>
+      {!value.policy.owner_mfa_enabled&&<p className="ac-callout is-warn">{t("AgentConnect.noMfa")} <a href="/auth/security">{t("AgentConnect.setupMfa")}</a></p>}
       {editable?<div className="mcp-security-options">
-        <label><input type="checkbox" checked={value.policy.enabled} onChange={e=>change("enabled",e.target.checked)} disabled={busy||(!value.policy.owner_mfa_enabled&&!value.policy.enabled)}/><span>{t("AgentConnect.enable")}</span></label>
-        <label><input type="checkbox" checked={value.policy.allow_write} onChange={e=>change("allow_write",e.target.checked)} disabled={busy||!value.policy.enabled}/><span>{t("AgentConnect.write")}</span></label>
-        <label><input type="checkbox" checked={value.policy.allow_events} onChange={e=>change("allow_events",e.target.checked)} disabled={busy||!value.policy.enabled}/><span>{t("AgentConnect.events")}</span></label>
-        <div className="commons-actions"><button className="d-btn" type="button" disabled={busy} onClick={()=>void save()}><StudioIcon name="check" />{t("AgentConnect.save")}</button>
+        <label className="ac-toggle-row"><input type="checkbox" checked={value.policy.enabled} onChange={e=>change("enabled",e.target.checked)} disabled={busy||(!value.policy.owner_mfa_enabled&&!value.policy.enabled)}/><span>{t("AgentConnect.enable")}</span></label>
+        <label className="ac-toggle-row"><input type="checkbox" checked={value.policy.allow_write} onChange={e=>change("allow_write",e.target.checked)} disabled={busy||!value.policy.enabled}/><span>{t("AgentConnect.write")}</span></label>
+        <label className="ac-toggle-row"><input type="checkbox" checked={value.policy.allow_events} onChange={e=>change("allow_events",e.target.checked)} disabled={busy||!value.policy.enabled}/><span>{t("AgentConnect.events")}</span></label>
+        <div className="mcp-security-actions"><button className="d-btn d-btn--primary" type="button" disabled={busy} onClick={()=>void save()}><StudioIcon name="check" />{t("AgentConnect.save")}</button>
           <button className="d-btn" type="button" disabled={busy} onClick={()=>setRevision(n=>n+1)}><StudioIcon name="refresh" />{t("Collab.refresh")}</button></div>
-      </div>:<p>{t("AgentConnect.ownerOnly")}</p>}
+      </div>:<p className="ac-card-hint">{t("AgentConnect.ownerOnly")}</p>}
     </>}
-    <label className="mcp-endpoint-label">{t("AgentConnect.endpoint")}<input readOnly type="url" value={endpoint} onFocus={e=>e.currentTarget.select()} /></label>
-    <button type="button" className="d-btn" onClick={()=>{void (navigator.clipboard? navigator.clipboard.writeText(endpoint):Promise.reject(new Error("clipboard_unavailable"))).then(()=>setNote(t("AgentConnect.copied"))).catch(()=>setError(t("AgentConnect.copyFailed")));}}><StudioIcon name="copy" />{t("AgentConnect.copy")}</button>
+    <div className="mcp-endpoint-row"><label className="mcp-endpoint-label">{t("AgentConnect.endpoint")}<input readOnly type="url" value={endpoint} onFocus={e=>e.currentTarget.select()} /></label>
+      <button type="button" className="d-btn mcp-copy-endpoint" aria-label={t("AgentConnect.copy")} onClick={()=>{void (navigator.clipboard? navigator.clipboard.writeText(endpoint):Promise.reject(new Error("clipboard_unavailable"))).then(()=>setNote(t("AgentConnect.copied"))).catch(()=>setError(t("AgentConnect.copyFailed")));}}><StudioIcon name="copy" />{t("AgentConnect.copy")}</button></div>
   </section>;
 }

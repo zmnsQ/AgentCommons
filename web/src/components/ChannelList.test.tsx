@@ -235,9 +235,8 @@ test('prototype workspace actions use real callbacks and stable agent identity',
  let created=0;const selected:string[]=[];
  act(()=>{renderer=create(<LocaleProvider><ChannelList scopeKey="actions" channels={[channel('live')]} active="live" error={null} onOpen={()=>{}} onCreate={()=>created++} onAgentSelect={name=>selected.push(name)} agents={[{name:'stable-agent',display:'Friendly name'}]}/></LocaleProvider>);});
  const r=renderer!;
- expect(r.root.findByProps({className:'sidebar-top'})).toBeTruthy();
- expect(r.root.findByProps({className:'sidebar-category-filter'}).type).toBe('details');
- expect(r.root.findByProps({className:'sidebar-category-filter'}).props.open).toBeUndefined();
+ expect(r.root.findByProps({className:'prototype-sidebar-controls'})).toBeTruthy();
+ expect(r.root.findByProps({className:'chan-cat-switch'})).toBeTruthy();
  act(()=>r.root.findAllByProps({className:'sidebar-icon-button'})[0]!.props.onClick());
  expect(created).toBe(1);
  act(()=>r.root.findByProps({title:'stable-agent'}).props.onClick());
