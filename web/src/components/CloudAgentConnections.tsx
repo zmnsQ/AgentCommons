@@ -17,20 +17,24 @@ interface AgentProps {
   client: CollaborationClient;
   onChanged(): Promise<void>;
   initialProvider?: DirectAgentProvider;
+  initialRemoteId?: string;
+  initialName?: string;
   onConnect?():void;
 }
 
-function ConnectionForm({ token, slug, connection, client, onSaved, onClose, initialProvider }: {
+function ConnectionForm({ token, slug, connection, client, onSaved, onClose, initialProvider, initialRemoteId, initialName }: {
   token: string; slug: string; connection: CloudAgentConnection | null; client: CollaborationClient;
   initialProvider?: DirectAgentProvider;
+  initialRemoteId?: string;
+  initialName?: string;
   onSaved(id: string): Promise<void>; onClose(): void;
 }) {
   const t = useT();
   const {locale}=useLocale(),zh=locale==="zh";
   const [provider, setProvider] = useState<DirectAgentProvider>(connection?.provider ?? initialProvider ?? "hermes");
-  const [name, setName] = useState(connection?.name ?? "");
+  const [name, setName] = useState(connection?.name ?? initialName ?? "");
   const [endpoint, setEndpoint] = useState(connection?.endpoint ?? "");
-  const [remoteId, setRemoteId] = useState(connection?.remote_agent_id ?? "");
+  const [remoteId, setRemoteId] = useState(connection?.remote_agent_id ?? initialRemoteId ?? "");
   const [credential, setCredential] = useState("");
   const [personalContext, setPersonalContext] = useState(connection?.personal_context_acknowledged ?? false);
   const [saving, setSaving] = useState(false);
@@ -185,7 +189,7 @@ export function CloudAgentRuns({ token, slug, connection, canRun, client }: {
   );
 }
 
-export function CloudAgentConnections({ token, slug, summary, client, onChanged, initialProvider, onConnect }: AgentProps) {
+export function CloudAgentConnections({ token, slug, summary, client, onChanged, initialProvider, initialRemoteId, initialName, onConnect }: AgentProps) {
   const t = useT();
   const { locale } = useLocale();
   const [selectedId, setSelectedId] = useState<string | null>(summary.connections[0]?.id ?? null);
@@ -207,7 +211,7 @@ export function CloudAgentConnections({ token, slug, summary, client, onChanged,
       <div className="commons-section-head"><h2>{t("Collab.agents")}</h2>{summary.permissions.manage && <button className="d-btn commons-primary" type="button" onClick={() => { if(onConnect){onConnect();return;} setForm("new"); setNotice(null); }}>{t("Collab.addAgent")}</button>}</div>
       {notice && <p className="commons-success" role="status">{notice}</p>}
       {error && <p className="commons-error" role="alert">{error}</p>}
-      {form !== null && <ConnectionForm initialProvider={initialProvider} key={form === "new" ? "new" : form.id} token={token} slug={slug} connection={form === "new" ? null : form} client={client} onClose={() => setForm(null)} onSaved={async (id) => { setForm(null); setSelectedId(id); setNotice(t("Collab.saved")); await onChanged(); }} />}
+      {form !== null && <ConnectionForm initialProvider={initialProvider} initialRemoteId={initialRemoteId} initialName={initialName} key={form === "new" ? "new" : form.id} token={token} slug={slug} connection={form === "new" ? null : form} client={client} onClose={() => setForm(null)} onSaved={async (id) => { setForm(null); setSelectedId(id); setNotice(t("Collab.saved")); await onChanged(); }} />}
       {summary.connections.length === 0 ? <div className="commons-empty"><span className="commons-empty-symbol" aria-hidden="true">↗</span><h3>{t("Collab.noAgents")}</h3><p>{t("Collab.noAgentsHint")}</p></div> : <div className="commons-agent-layout">
         <div className="commons-agent-list" role="group" aria-label={t("Collab.agents")}>
           {summary.connections.map((connection) => <button className={`commons-agent-card ${selected?.id === connection.id ? "is-selected" : ""}`} type="button" key={connection.id} aria-pressed={selected?.id === connection.id} onClick={() => { setSelectedId(connection.id); setConfirmId(null); }}>

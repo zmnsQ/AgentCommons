@@ -6,6 +6,8 @@ import type { CollaborationRole, MsgFrame, PresenceEntry, Sender, TaskRecord } f
 import { autoWakeReachable, wakeableState } from "@agentparty/shared";
 import { useRef } from "react";
 import { fmtRel } from "../lib/time";
+import { useLocale } from "../i18n/locale";
+import { presenceStateLabel } from "../lib/presenceLabels";
 import { useT } from "../i18n/useT";
 import { useModalFocusTrap } from "./useModalFocusTrap";
 import { LiveSessionEntryButton, LiveSessionView } from "./LiveSessionView";
@@ -112,6 +114,7 @@ function AgentDetailContent({
   onClose,
 }: AgentDetailPanelProps & { onClose?: () => void }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
 
   const now = Date.now();
   const history = filterAgentHistory(messages, name);
@@ -193,7 +196,7 @@ function AgentDetailContent({
             <span className="agent-detail-online-badge">
               {online ? t("AgentDetailModal.online") : t("AgentDetailModal.offline")}
             </span>
-            <span className={`t-mono agent-detail-kind agent-detail-kind--${kind}`}>{kind}</span>
+            <span className={`t-mono agent-detail-kind agent-detail-kind--${kind}`}>{kind === "human" ? (zh ? "成员" : "Member") : (zh ? "智能体" : "Agent")}</span>
             {owner !== null && owner !== "" && <span className="agent-detail-owner">{owner}</span>}
           </p>
         </div>
@@ -221,7 +224,7 @@ function AgentDetailContent({
             <LiveSessionView name={name} display={display} session={liveSession} compact />
           </section>
         )}
-        <section className={`agent-detail-section agent-detail-reception agent-detail-reception--${receptionState}`} aria-label={t("AgentDetailModal.reception")}>
+        {kind === "agent" && <section className={`agent-detail-section agent-detail-reception agent-detail-reception--${receptionState}`} aria-label={t("AgentDetailModal.reception")}>
           <h3>{t("AgentDetailModal.reception")}</h3>
           <dl className="agent-detail-facts">
             <div className="agent-detail-fact">
@@ -276,18 +279,18 @@ function AgentDetailContent({
               </dd>
             </div>
           </dl>
-        </section>
-        <section className="agent-detail-section" aria-label={t("AgentDetailModal.status")}>
+        </section>}
+        {kind === "agent" && <section className="agent-detail-section" aria-label={t("AgentDetailModal.status")}>
           <h3>{t("AgentDetailModal.status")}</h3>
           <dl className="agent-detail-facts">
             <div className="agent-detail-fact">
               <dt>{t("AgentDetailModal.state")}</dt>
-              <dd className="t-mono">{state}</dd>
+              <dd className="t-mono">{presenceStateLabel(state, t)}</dd>
             </div>
             {staleReportedState !== null && (
               <div className="agent-detail-fact">
                 <dt>{t("AgentDetailModal.lastReportedState")}</dt>
-                <dd className="t-mono">{staleReportedState}</dd>
+                <dd className="t-mono">{presenceStateLabel(staleReportedState, t)}</dd>
               </div>
             )}
             <div className="agent-detail-fact">
@@ -344,7 +347,7 @@ function AgentDetailContent({
               </div>
             )}
           </dl>
-        </section>
+        </section>}
         {tasks !== undefined && (
           <section className="agent-detail-section" aria-label={t("AgentDetailModal.tasks")}>
             <h3>{t("AgentDetailModal.tasks")}</h3>
@@ -414,7 +417,7 @@ function AgentDetailContent({
             <div className="agent-detail-fact">
               <dt>{t("AgentDetailModal.role")}</dt>
               <dd className="t-mono">
-                {role ?? t("AgentDetailModal.roleNone")}
+                {role === null ? t("AgentDetailModal.roleNone") : ({host: zh ? "协调者" : "Coordinator", critic: zh ? "评审" : "Reviewer", reviewer: zh ? "评审" : "Reviewer", observer: zh ? "观察者" : "Observer", worker: zh ? "执行者" : "Contributor"}[role] ?? role)}
                 {role !== null && confidenceLabel()}
               </dd>
             </div>
@@ -430,19 +433,17 @@ function AgentDetailContent({
                 <dd className="t-mono">{reportsTo}</dd>
               </div>
             )}
-            {clientVersion !== null && (
+            {kind === "agent" && clientVersion !== null && (
               <div className="agent-detail-fact">
                 <dt>{t("AgentDetailModal.clientVersion")}</dt>
                 <dd className="t-mono">v{clientVersion}</dd>
               </div>
             )}
-            {agentSession !== null && (
+            {kind === "agent" && agentSession !== null && (
               <>
                 <div className="agent-detail-fact">
                   <dt>{t("AgentDetailModal.session")}</dt>
-                  <dd className="t-mono">
-                    {agentSession.harness}:{agentSession.session_id} · {fmtRel(agentSession.updated_at, now)}
-                  </dd>
+                  <dd><details><summary>{zh ? "运行详情" : "Runtime details"}</summary><code>{agentSession.harness}:{agentSession.session_id} · {fmtRel(agentSession.updated_at, now)}</code></details></dd>
                 </div>
                 {agentSession.cwd !== undefined && (
                   <div className="agent-detail-fact">
@@ -474,6 +475,7 @@ export function AgentDetailPanel(props: AgentDetailPanelProps) {
 /** Backward-compatible modal wrapper for existing callers. */
 export function AgentDetailModal({ onClose, ...props }: AgentDetailModalProps) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useModalFocusTrap({ active: true, containerRef: dialogRef, onEscape: onClose });
 

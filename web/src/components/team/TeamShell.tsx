@@ -42,20 +42,18 @@ export function TeamShell({
 
   return (
     <section ref={rootRef} className="team-blog team-shell" aria-label={t("Channel.tools.team")}>
-      <header className="team-blog-head team-shell-head">
-        {onClose !== undefined && (
-          <button
-            type="button"
-            className="d-btn team-blog-close"
-            disabled={closeDisabled}
-            onClick={() => {
-              if (!closeDisabled) onClose();
-            }}
-          >
-            {t("Channel.tools.close")} <StudioIcon name="close" />
-          </button>
-        )}
-      </header>
+      {onClose !== undefined && (
+        <button
+          type="button"
+          className="d-btn team-blog-close"
+          disabled={closeDisabled}
+          onClick={() => {
+            if (!closeDisabled) onClose();
+          }}
+        >
+          {t("Channel.tools.close")} <StudioIcon name="close" />
+        </button>
+      )}
       <div className="team-blog-panel team-shell-body" hidden={showingDetail}>
         {children}
       </div>

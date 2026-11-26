@@ -1,7 +1,7 @@
 // 自助设置/修改可@别名（Task B2 + #165）。纯表单：输入 + 保存 + 内联错误行，不含自己的开关按钮/
 // 定位逻辑——由调用方（App.tsx 的 me chip 入口）决定何时挂载、挂在哪。
 // mode="handle"：人类账号 @handle（ASCII，2–32）；mode="nickname"：agent 昵称（可中文，1–64，#165）。
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   AuthError,
   ConflictError,
@@ -10,6 +10,7 @@ import {
   setNickname,
   ValidationError,
 } from "../lib/api";
+import { isCompositionKey } from "../lib/compositionGuard";
 import { useT } from "../i18n/useT";
 import "../i18n/strings/HandleSetup";
 
@@ -32,18 +33,28 @@ export function HandleSetup({ current, mode = "handle", onSaved, onClose }: Prop
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const composing = useRef(false);
+  const pending = useRef(false);
+  const [savedValue, setSavedValue] = useState(current ?? "");
+  const [saved, setSaved] = useState(false);
   const trimmed = value.trim();
+  const unchanged = trimmed === savedValue;
   const formatOk = (nick ? NICKNAME_RE : HANDLE_RE).test(trimmed);
   // 键前缀：nickname 模式用 HandleSetup.nick.*，缺省回退到通用键（save/saving/cancel 等共用）。
   const s = (key: string) => t(nick ? `HandleSetup.nick.${key}` : `HandleSetup.${key}`);
 
   const submit = useCallback(async () => {
-    if (!formatOk || busy) return;
+    if (!formatOk || busy || pending.current || unchanged) return;
+    pending.current = true;
+    setSaved(false);
     setErr(null);
     setBusy(true);
     try {
       const saved = nick ? (await setNickname(trimmed)).nickname : (await setHandle(trimmed)).handle;
       setBusy(false);
+      setSavedValue(saved);
+      setValue(saved);
+      setSaved(true);
       onSaved(saved);
     } catch (e) {
       setBusy(false);
@@ -58,8 +69,8 @@ export function HandleSetup({ current, mode = "handle", onSaved, onClose }: Prop
                 ? t("HandleSetup.errGeneric")
                 : t("HandleSetup.errGeneric"),
       );
-    }
-  }, [formatOk, busy, nick, trimmed, onSaved, t]);
+    } finally { pending.current = false; }
+  }, [formatOk, busy, unchanged, nick, trimmed, onSaved, t]);
 
   return (
     <div className="handlesetup">
@@ -73,10 +84,13 @@ export function HandleSetup({ current, mode = "handle", onSaved, onClose }: Prop
         autoFocus
         spellCheck={false}
         placeholder={nick ? t("HandleSetup.nick.placeholder") : t("HandleSetup.placeholder")}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => { setValue(e.target.value); setSaved(false); }}
+        onCompositionStart={() => { composing.current = true; }}
+        onCompositionEnd={() => { composing.current = false; }}
         onKeyDown={(e) => {
-          if (e.key === "Enter") void submit();
-          if (e.key === "Escape") onClose?.();
+          if (composing.current || isCompositionKey(e)) { e.stopPropagation(); return; }
+          if (e.key === "Enter") { e.preventDefault(); void submit(); }
+          if (e.key === "Escape" && !busy) onClose?.();
         }}
         disabled={busy}
       />
@@ -88,6 +102,7 @@ export function HandleSetup({ current, mode = "handle", onSaved, onClose }: Prop
           {err}
         </p>
       )}
+      {saved && <p role="status">{t("HandleSetup.saved")}</p>}
       <div className="handlesetup-actions">
         {onClose !== undefined && (
           <button type="button" className="d-btn handlesetup-cancel" onClick={onClose} disabled={busy}>
@@ -98,7 +113,7 @@ export function HandleSetup({ current, mode = "handle", onSaved, onClose }: Prop
           type="button"
           className="d-btn d-btn--primary"
           onClick={submit}
-          disabled={busy || !formatOk}
+          disabled={busy || !formatOk || unchanged}
         >
           {busy ? t("HandleSetup.saving") : t("HandleSetup.save")}
         </button>

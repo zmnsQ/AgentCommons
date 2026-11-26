@@ -144,16 +144,20 @@ export function ChannelFocusBar({
       (item.waitingOnMe ? " focus-item--me" : "") +
       (onClick !== undefined ? " focus-item--drill" : "");
     // 紧凑内联：dot + 名字 + 状态标签（stalled 才带 hint），标题/note 收进 title 悬停，避免撑长头部。
+    // 当已经在「等你拍板」组里且状态本身就是 waiting_decision 时，不再重复「等人拍板」标签。
+    const showStatePill = !(item.waitingOnMe && item.state === "waiting_decision");
     const body = (
       <>
         <span className={`focus-dot focus-dot--${item.state}`} aria-hidden="true">{STATE_ICON[item.state]}</span>
         <span className="focus-item-name">{displayOf(item.name)}</span>
-        <span
-          className={`focus-item-state focus-item-state--${item.state}`}
-          title={item.state === "stalled" ? t("ChannelFocusBar.stalledHint") : undefined}
-        >
-          {stateLabel(item, t)}
-        </span>
+        {showStatePill && (
+          <span
+            className={`focus-item-state focus-item-state--${item.state}`}
+            title={item.state === "stalled" ? t("ChannelFocusBar.stalledHint") : undefined}
+          >
+            {stateLabel(item, t)}
+          </span>
+        )}
       </>
     );
     const chipTitle = [displayOf(item.name), stateLabel(item, t), item.label !== item.name ? item.label : null]

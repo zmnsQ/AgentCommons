@@ -5,6 +5,8 @@ import type { MentionReceipt } from "../../lib/wakeReceipt";
 import type { TeamMessageThread } from "../../lib/teams";
 import { fmtTime } from "../../lib/time";
 import { MessageCard } from "../MessageCard";
+import { useLocale } from "../../i18n/locale";
+import { resolveIdentityPresentation, formatIdentityPresentation } from "../../lib/identityDisplay";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
 
@@ -74,6 +76,9 @@ export function TeamThread({
   onEditSave: () => void;
 }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
+  const rootName = formatIdentityPresentation(resolveIdentityPresentation(thread.rootAgent, identityDisplay), (owner, agent) => `${owner} · ${agent}`);
+  const preview = thread.messages.find(message => message.body.trim())?.body.slice(0, 100);
   const parentLabel =
     thread.parentAgents.length === 1
       ? t("Channel.teamThread.parent", { name: thread.parentAgents[0]! })
@@ -93,15 +98,17 @@ export function TeamThread({
     <details className="team-thread" title={title}>
       <summary className="team-thread-summary">
         <span className="team-thread-dot" aria-hidden="true" />
-        <span className="team-thread-name">{thread.teamId}</span>
+        <span className="team-thread-name">{zh ? `${rootName} 的协作讨论` : `Discussion with ${rootName}`}</span>
         <span className="t-mono team-thread-meta">{memberLabel}</span>
         <span className="t-mono team-thread-meta">
-          #{thread.firstSeq}..#{thread.lastSeq}
+          {zh ? `${thread.messages.length} 条消息` : `${thread.messages.length} messages`}
         </span>
         <span className="team-thread-fill" />
         <time className="t-mono">{fmtTime(thread.lastTs)}</time>
       </summary>
+      {preview && <p className="team-thread-preview">{preview}</p>}
       <div className="team-thread-messages">
+        <details><summary>{zh ? "讨论信息" : "Discussion details"}</summary><p>{title}</p></details>
         {thread.messages.map((message) => (
           <MessageCard
             key={message.seq}

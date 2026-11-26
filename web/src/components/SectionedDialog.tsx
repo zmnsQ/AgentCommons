@@ -1,6 +1,7 @@
 import { ModalPortal } from "./ModalPortal";
 import { COMPACT_MEDIA } from "../lib/mobileViewport";
 import { StudioIcon } from "./StudioIcon";
+import { getModalFocusableElements } from "./useModalFocusTrap";
 import {isCompositionKey} from "../lib/compositionGuard";
 import {
   useEffect,
@@ -124,17 +125,7 @@ export function SectionedDialog<SectionId extends string>({
   useEffect(() => {
     const doc = typeof document === "undefined" ? null : document;
     const previouslyFocused = (doc?.activeElement ?? null) as HTMLElement | null;
-    const focusables = (): HTMLElement[] => {
-      const panel = panelRef.current;
-      if (panel === null || typeof panel.querySelectorAll !== "function") return [];
-      return Array.from(
-        panel.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter(
-        (element) => element.tabIndex >= 0 && element.closest?.("[hidden]") === null,
-      );
-    };
+    const focusables = (): HTMLElement[] => getModalFocusableElements(panelRef.current);
 
     (tabRefs.current.get(activeSection) ?? focusables()[0] ?? panelRef.current)?.focus?.();
     const onKey = (event: KeyboardEvent) => {

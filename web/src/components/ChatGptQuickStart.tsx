@@ -64,7 +64,7 @@ export function ChatGptQuickStart({token,slug,canManage}:{token:string;slug:stri
       <button className="d-btn" type="button" onClick={()=>setRevision(v=>v+1)}>{t("ConnectorUsage.refresh")}</button></div>
     {!value&&!error&&<p role="status">{t("ConnectorUsage.loading")}</p>}
     {error&&<p role="alert">{t("ConnectorUsage.error")}</p>}
-    {value&&!agent&&<><strong>{t("ConnectorUsage.none")}</strong><p>{t("ConnectorUsage.before")}</p></>}
+    {value&&!agent&&<><strong>{t("ConnectorUsage.none")}</strong><p>{t("ConnectorUsage.before")}</p><a className="d-btn d-btn--primary connector-open-chat" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">{zh?"打开 ChatGPT ↗":"Open ChatGPT ↗"}</a></>}
     {value&&agent&&<>
       {agents.length>1&&<label>{t("ConnectorUsage.choose")}<select value={agent.name} onChange={e=>{setSelected(e.target.value);setCopied(null);}}>
         {agents.map(a=><option key={a.name} value={a.name}>{a.nickname??a.oauth?.client_name} · {a.name}</option>)}

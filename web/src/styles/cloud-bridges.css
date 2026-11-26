@@ -18,6 +18,8 @@
 .cloud-bridges > p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--t-muted); }
 .cloud-bridges h2 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.02em; }
 .cloud-bridges h3 { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.4; }
+.cloud-bridge-status-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cloud-bridge-status-row p { margin: 0; }
 .cloud-bridge-card {
   display: flex;
   flex-direction: column;

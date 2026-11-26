@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
+  "summary",
   "button:not([disabled])",
   "input:not([disabled])",
   "select:not([disabled])",
@@ -19,13 +20,26 @@ interface ModalFocusTrapOptions {
   shouldRestoreFocus?(): boolean;
 }
 
-function focusableElements(container: HTMLElement | null): HTMLElement[] {
+export function getModalFocusableElements(container: HTMLElement | null): HTMLElement[] {
   if (container === null || typeof container.querySelectorAll !== "function") return [];
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) =>
-      (element.closest?.('[hidden], [aria-hidden="true"]') ?? null) === null &&
-      // jsdom leaves tabIndex undefined on bare stubs; only a negative value means opted out.
-      (element.tabIndex === undefined || element.tabIndex >= 0),
+    (element) => {
+      if (
+        element.tabIndex < 0 ||
+        element.closest?.("[hidden]") ||
+        element.closest?.('[aria-hidden="true"]') ||
+        element.closest?.("[inert]")
+      ) return false;
+      for (let node: HTMLElement | null = element; node !== null; node = node.parentElement ?? null) {
+        const style = node.ownerDocument?.defaultView?.getComputedStyle?.(node);
+        if (style?.display === "none" || style?.visibility === "hidden" || style?.visibility === "collapse") return false;
+        if (node.tagName?.toLowerCase() === "details" && !node.hasAttribute("open")) {
+          const summary = Array.from(node.children).find(child => child.tagName.toLowerCase() === "summary");
+          if (!summary?.contains(element)) return false;
+        }
+      }
+      return true;
+    },
   );
 }
 
@@ -54,12 +68,13 @@ export function useModalFocusTrap({
     const win = typeof window === "undefined" ? null : window;
     const previouslyFocused = (doc?.activeElement ?? null) as HTMLElement | null;
     const container = () => containerRef.current;
-    const items = () => focusableElements(container());
+    const items = () => getModalFocusableElements(container());
 
     (initialFocusRef?.current ?? items()[0] ?? container())?.focus?.();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (event.defaultPrevented) return;
         onEscapeRef.current?.();
         return;
       }

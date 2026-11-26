@@ -48,6 +48,14 @@ describe("teamLaneOf：泳道判定顺序", () => {
     expect(teamLaneOf(presence("a", { state: "waiting" }), [], [task(1, "a", "needs_review")])).toBe("waiting");
     expect(teamLaneOf(presence("a", { state: "done" }), [], [])).toBe("idle");
   });
+
+  test("connected participants never fall into offline just because presence is missing", () => {
+    expect(teamLaneOf(null, [], [], true)).toBe("idle");
+    expect(teamLaneOf(presence("a", { state: "offline" }), [], [], true)).toBe("idle");
+    expect(teamLaneOf(null, [delivery("d", "a", "waiting_owner")], [], true)).toBe("blocked");
+    expect(teamLaneOf(null, [], [task(1, "a", "in_progress")], true)).toBe("working");
+    expect(teamLaneOf(null, [], [], false)).toBe("offline");
+  });
 });
 
 describe("buildTeamBoard：一张卡一份事实", () => {
@@ -68,9 +76,9 @@ describe("buildTeamBoard：一张卡一份事实", () => {
       presence("worker-a", { state: "waiting", owner: "lark:on_opaque", context: { repo: "leeguooooo/AgentParty", branch: "feat/x" } }),
       presence("worker-b", { state: "waiting", role: "worker", role_source: "self" }),
       presence("leo", { kind: "human", state: "online" as never, display_name: "Leo" }),
-      presence("old", { state: "offline", last_seen: NOW - 60_000 }),
+      presence("old", { state: "offline", live: false, last_seen: NOW - 60_000 }),
     ],
-    participants: [sender("lead"), sender("worker-a", "agent", { owner: "lark:on_opaque" }), sender("worker-b"), sender("leo", "human"), sender("old")],
+    participants: [sender("lead"), sender("worker-a", "agent", { owner: "lark:on_opaque" }), sender("worker-b"), sender("leo", "human")],
     roles,
     tasks: [task(7, "lead", "in_progress", { title: "发版" }), task(8, "worker-a", "assigned"), task(9, "old", "done")],
     deliveries: [delivery("d1", "worker-b", "waiting_owner")],
@@ -88,6 +96,19 @@ describe("buildTeamBoard：一张卡一份事实", () => {
       "old:offline",
     ]);
     expect(model.counts).toMatchObject({ blocked: 1, working: 1, waiting: 1, idle: 1, offline: 1, people: 1, agents: 4 });
+  });
+
+  test("a connected participant without a presence frame is online, not offline", () => {
+    const online = buildTeamBoard({
+      presence: [],
+      participants: [sender("just-connected")],
+      roles: [],
+      now: NOW,
+    });
+    expect(online.cards).toHaveLength(1);
+    expect(online.cards[0]!.online).toBe(true);
+    expect(online.cards[0]!.lane).toBe("idle");
+    expect(online.counts.offline).toBe(0);
   });
 
   test("卡上带齐角色、主持、汇报、squad、正在做什么", () => {

@@ -5,6 +5,7 @@ import { act, create, type ReactTestRenderer } from "react-test-renderer";
 import { LocaleProvider } from "../../i18n/locale";
 import { buildTeamBoard } from "../../lib/teamBoard";
 import { StudioIcon } from "../StudioIcon";
+import { PlatformIcon } from "../PlatformIcon";
 import { TeamBoard } from "./TeamBoard";
 
 const NOW = 1_700_000_000_000;
@@ -52,9 +53,9 @@ function model() {
       presence("lead", { state: "working", current_task: 7, role: "host", role_source: "assigned" }),
       presence("worker-a", { state: "waiting", context: { repo: "leeguooooo/AgentParty", branch: "feat/x" } }),
       presence("worker-b", { state: "waiting", role: "worker", role_source: "self" }),
-      presence("old", { state: "offline", last_seen: NOW - 3_600_000 * 2 }),
+      presence("old", { state: "offline", live: false, last_seen: NOW - 3_600_000 * 2 }),
     ],
-    participants: [sender("lead"), sender("worker-a"), sender("worker-b"), sender("old")],
+    participants: [sender("lead"), sender("worker-a"), sender("worker-b")],
     roles: [role("lead", "host"), role("worker-a", "worker", { responsibility: "写前端", reports_to: "lead" }), role("ghost", "reviewer")],
     tasks: [task(7, "lead", "in_progress", "发版"), task(8, "worker-a", "assigned")],
     deliveries: [delivery("d1", "worker-b", "waiting_owner")],
@@ -147,5 +148,24 @@ describe("TeamBoard（#1060 PR B）", () => {
   test("空频道给一句人话提示", () => {
     const r = render({ model: buildTeamBoard({ presence: [], participants: [], roles: [], now: NOW }) });
     expect(allText(r)).toContain("还没有成员");
+  });
+
+  test("空频道提供可用的连接 Agent CTA", () => {
+    let adds = 0;
+    const r = render({ model: buildTeamBoard({ presence: [], participants: [], roles: [], now: NOW }), onAddAgent: () => { adds += 1; } });
+    act(() => r.root.findByProps({ className: "d-btn d-btn--primary team-board-empty-cta" }).props.onClick());
+    expect(adds).toBe(1);
+  });
+
+  test("已声明的 connector 显示平台图标而不是字母头像", () => {
+    const m = buildTeamBoard({
+      presence: [presence("lead")],
+      participants: [sender("lead")],
+      roles: [],
+      identities: [{ name: "lead", kind: "agent", display: "Lead", connector_type: "chatgpt" }],
+      now: NOW,
+    });
+    const r = render({ model: m });
+    expect(r.root.findByType(PlatformIcon).props.platform).toBe("chatgpt");
   });
 });

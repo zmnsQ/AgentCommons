@@ -14,6 +14,7 @@ const copiedTexts: string[] = [];
 
 type AgentFixture = { name: string; owner: string; channel_scope: string; created_at: number; nickname?: string | null };
 let agentsFixture: AgentFixture[] = [];
+let rotateImpl = async (name: string): Promise<{name:string;token:string}> => ({name,token:"ap_rotated"});
 // @ts-expect-error Bun supports query-suffixed imports that bypass process-wide module mocks.
 const actualApi = await import("../lib/api.ts?test-actual");
 
@@ -27,7 +28,7 @@ mock.module("../lib/api", () => ({
   listChannelAgents: async () => agentsFixture,
   listProjectAgentProfiles: async () => [],
   deleteChannelAgent: async () => {},
-  rotateChannelAgent: async (_token: string, _slug: string, name: string) => ({ name, token: "ap_rotated" }),
+  rotateChannelAgent: async (_token: string, _slug: string, name: string) => rotateImpl(name),
   setChannelAgentNickname: async (_token: string, _slug: string, name: string, nickname: string) => ({ name, nickname }),
 }));
 
@@ -74,6 +75,7 @@ let originalClipboardDescriptor: PropertyDescriptor | undefined;
 
 beforeEach(() => {
   agentsFixture = [];
+  rotateImpl = async name => ({name,token:"ap_rotated"});
   copiedTexts.length = 0;
   guided.length = 0;
   onlineNames = new Set(["legacy-bot", "helper-bot", "codex-bot"]);
@@ -358,4 +360,28 @@ describe('controlled manager navigation memory',()=>{
   await show(true);expect(tab(r,'channel').props['aria-selected']).toBe(true);
   await act(async()=>tab(r,'projects').props.onClick());expect(query(r).props.value).toBe('');
  });
+});
+
+test("rotation is locked per agent and late completion after close saves the credential without opening a guide", async () => {
+  localStorage.removeItem('ap_agent_token_vault:v1');
+  agentsFixture=[{name:'codex-bot',owner:'acct-1',channel_scope:'demo',created_at:0}];
+  let finish!: (value:{name:string;token:string})=>void;let writes=0;
+  rotateImpl=name=>{writes++;return new Promise(resolve=>{finish=resolve;});};
+  const r=await renderOpen(); const button=buttonsWithText(r,'Replace credential and rebuild instructions')[0]!;
+  await act(async()=>{button.props.onClick();button.props.onClick();});expect(writes).toBe(1);
+  await act(async()=>r.root.findByProps({className:'settings-close'}).props.onClick());
+  await act(async()=>finish({name:'codex-bot',token:'ap_new_saved_fixture'}));
+  expect(guided).toHaveLength(0);
+  const saved=JSON.parse(localStorage.getItem('ap_agent_token_vault:v1')!);
+  expect(saved.some((entry:{name:string;token:string})=>entry.name==='codex-bot'&&entry.token==='ap_new_saved_fixture')).toBe(true);
+});
+
+test("rotation cannot navigate over a different selected agent", async () => {
+  localStorage.removeItem('ap_agent_token_vault:v1');
+  agentsFixture=[{name:'codex-bot',owner:'acct-1',channel_scope:'demo',created_at:0},{name:'other-bot',owner:'acct-1',channel_scope:'demo',created_at:0}];
+  let finish!: (value:{name:string;token:string})=>void;
+  rotateImpl=()=>new Promise(resolve=>{finish=resolve;});
+  const r=await renderOpen();await act(async()=>buttonsWithText(r,'Replace credential and rebuild instructions')[0]!.props.onClick());
+  const option=r.root.findAllByType('button').find(button=>button.props.className?.includes('agentmanager-list-item') && button.findByProps({className:'agentmanager-list-name'}).children.includes('other-bot'))!;
+  await act(async()=>option.props.onClick());await act(async()=>finish({name:'codex-bot',token:'ap_rotated_fixture'}));expect(guided).toHaveLength(0);
 });

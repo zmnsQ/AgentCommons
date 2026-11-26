@@ -83,7 +83,7 @@ export async function applyAutostartSetting(
   runtime: DesktopSettingsRuntime,
   next: boolean,
   previous: boolean,
-): Promise<{ enabled: boolean; failed: boolean }> {
+): Promise<{ enabled: boolean | null; failed: boolean }> {
   try {
     if (await runtime.setAutostartEnabled(next)) return { enabled: next, failed: false };
   } catch {
@@ -93,7 +93,7 @@ export async function applyAutostartSetting(
   try {
     return { enabled: await runtime.isAutostartEnabled(), failed: true };
   } catch {
-    return { enabled: previous, failed: true };
+    return { enabled: null, failed: true };
   }
 }
 
@@ -124,7 +124,8 @@ export function updateDesktopSettingsFocus(
 }
 
 interface PanelProps {
-  enabled: boolean;
+  enabled: boolean | null;
+  onRetry?: () => void;
   pending: boolean;
   error: boolean;
   versions: DesktopVersionInfo;
@@ -141,6 +142,7 @@ export function DesktopSettingsPanel({
   versions,
   t,
   onToggle,
+  onRetry,
   switchRef,
   embedded = false,
 }: PanelProps) {
@@ -163,14 +165,16 @@ export function DesktopSettingsPanel({
           type="button"
           className={`desktop-settings-switch${enabled ? " is-on" : ""}`}
           role="switch"
-          aria-checked={enabled}
+          aria-checked={enabled ?? false}
+          aria-describedby={enabled === null ? "autostart-unknown" : undefined}
           aria-label={t("DesktopSettings.autostart.label")}
-          disabled={pending}
+          disabled={pending || enabled === null}
           onClick={onToggle}
         >
           <span aria-hidden="true" />
         </button>
       </div>
+      {enabled === null && !pending && <p id="autostart-unknown" role="status">{t("DesktopSettings.autostart.unknown")} {onRetry && <button type="button" className="d-btn" onClick={onRetry}>{t("DesktopSettings.autostart.retry")}</button>}</p>}
       {pending && <p className="desktop-settings-status">{t("DesktopSettings.autostart.loading")}</p>}
       {error && <p className="desktop-settings-error" role="alert">{t("DesktopSettings.autostart.error")}</p>}
       <dl className="desktop-settings-versions">
@@ -208,7 +212,8 @@ export function DesktopSettings({
   const t = useT();
   const desktop = runtime.isDesktopRuntime();
   const [open, setOpen] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [loadRevision, setLoadRevision] = useState(0);
   const [pending, setPending] = useState(desktop);
   const [error, setError] = useState(false);
   const [versions, setVersions] = useState<DesktopVersionInfo>({
@@ -233,13 +238,13 @@ export function DesktopSettings({
         const next = await loadAutostartSetting(runtime);
         if (alive) setEnabled(next);
       } catch {
-        if (alive) setError(true);
+        if (alive) { setEnabled(null); setError(true); }
       } finally {
         if (alive) setPending(false);
       }
     })();
     return () => { alive = false; };
-  }, [desktop, runtime]);
+  }, [desktop, runtime, loadRevision]);
 
   useEffect(() => {
     if (!desktop) return;
@@ -287,7 +292,7 @@ export function DesktopSettings({
   if (!desktop) return null;
 
   const toggleAutostart = () => {
-    if (pending) return;
+    if (pending || enabled === null) return;
     const previous = enabled;
     setPending(true);
     setError(false);
@@ -316,6 +321,7 @@ export function DesktopSettings({
           versions={versions}
           t={t}
           onToggle={toggleAutostart}
+          onRetry={() => setLoadRevision(value => value + 1)}
           switchRef={switchRef}
           embedded
         />
@@ -349,6 +355,7 @@ export function DesktopSettings({
           versions={versions}
           t={t}
           onToggle={toggleAutostart}
+          onRetry={() => setLoadRevision(value => value + 1)}
           switchRef={switchRef}
         />
       )}

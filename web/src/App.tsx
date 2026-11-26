@@ -123,6 +123,7 @@ import { extractPairingCodeAndSanitizeUrl, PairPage } from "./pages/Pair";
 import { matchChannel, matchInvite, matchJoin, matchPair, useRoute } from "./router";
 import { InviteLanding, InviteRequiredGate } from "./components/InviteLanding";
 import { useT } from "./i18n/useT";
+import { useLocale } from "./i18n/locale";
 import "./i18n/strings/App";
 
 // 邀请链接兑换：未登录时跳 OIDC 会离开页面，用 sessionStorage 把 code 带过登录、回来接着兑换。
@@ -161,6 +162,8 @@ export function App() {
   }, []);
 
   const t = useT();
+  const { locale } = useLocale();
+  const zh = locale === "zh";
   const [path, navigate, replace] = useRoute();
   const desktop = useRef(isDesktopRuntime()).current;
   const [serverProfiles, setServerProfiles] = useState<ServerProfile[]>(() => loadServerProfiles());
@@ -1201,6 +1204,7 @@ export function App() {
     return (
       <TokenGate
         github={!desktop ? browserAuth : undefined}
+        onRetryGitHub={!desktop ? () => { void browserAuth.refresh().catch(() => {}); } : undefined}
         error={
           !desktop && matchPair(path) && authProvidersResolved && authProviders.length === 0
             ? t("Pair.providerMissing")
@@ -1303,7 +1307,7 @@ export function App() {
             <strong className="app-me-name">{meDisplay}</strong>
             {me !== null && (
               <span className="workspace-account-sub">
-                {me.handle ? `@${me.handle}` : me.kind}
+                {me.handle ? `@${me.handle}` : me.kind === "human" ? (zh ? "成员" : "Member") : "Agent"}
                 {readableOwner(me) !== null ? ` · ${readableOwner(me)}` : ""}
               </span>
             )}
@@ -1358,7 +1362,9 @@ export function App() {
             <div className="prototype-rail-popover">
               {me !== null && (
                 <div className="app-me" title={meTitle(me)}>
-                  <span className={`app-me-chip app-me-chip--${me.kind}`}>{me.kind}</span>
+                  <span className={`app-me-chip app-me-chip--${me.kind}`}>
+                    {zh ? (me.kind === "human" ? "成员" : "Agent") : me.kind}
+                  </span>
                   {me.role !== me.kind && <span className="app-me-chip">{me.role}</span>}
                   {me.kind === "human" &&
                     isLeeguoooooDeployment(deploymentOrigin) &&
@@ -1481,8 +1487,8 @@ export function App() {
           </span>
         </p>
       )}
-      <WorkspaceShell route={slug} navigationError={listError} requestOpen={createGroupRequest} title={currentChannel?.title}
-        onBrandClick={() => navigate("/")}
+      <WorkspaceShell route={slug} navigationError={listError} title={currentChannel?.title}
+        onBrandClick={() => { if (slug === null) navigate("/"); }}
         mobileActions={accountControls} navigationFooter={accountControls}
         navigation={<>
           {canCreate && token !== null && (

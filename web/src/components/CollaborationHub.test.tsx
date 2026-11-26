@@ -502,6 +502,7 @@ test("one connection entry leads from platform choice to configuration; existing
   expect(renderer!.root.findAllByProps({role:"tab"})).toHaveLength(3);
   expect(renderer!.root.findAllByProps({id:"commons-tab-agents"})).toHaveLength(0);
   expect(renderer!.root.findAllByType("form")).toHaveLength(0);
+  await act(async () => { renderer!.root.findByProps({ id: "commons-tab-bridges" }).props.onClick(); });
   expect(renderer!.root.findAllByType("article")).toHaveLength(0);
   await click("Hermes Agent");
   await click("Continue with Hermes");

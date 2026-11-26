@@ -385,3 +385,27 @@ test("human handle editor continues to initialize from own handle", () => {
   const r = render({ me: { ...me, kind: "human", handle: "human-handle", display_name: "SSO Person" }, canSetHandle: true, onHandleSaved: () => {}, initialSection: "account", onClose: () => {}, onLogout: () => {} });
   expect(r.root.findByProps({ className: "t-mono handlesetup-input" }).props.value).toBe("human-handle");
 });
+
+test("desktop preferences omit the iPhone guide while Help can still explain it", () => {
+  const r=render({me,onClose:()=>{},onLogout:null,onShowOnboarding:()=>{}});
+  const preferences=r.root.findByProps({id:'global-settings-panel-preferences'});
+  expect(preferences.findAllByProps({className:'settings-section home-screen-guide'})).toHaveLength(0);
+  expect(r.root.findAllByProps({className:'settings-section home-screen-guide'})).toHaveLength(1);
+});
+test("iOS preferences show the Home Screen guide", () => {
+  const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  try {
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{userAgent:'iPhone',platform:'iPhone',maxTouchPoints:5}});
+    const r=render({me,onClose:()=>{},onLogout:null});
+    expect(r.root.findAllByProps({className:'settings-section home-screen-guide'})).toHaveLength(1);
+  } finally {if(prior)Object.defineProperty(globalThis,'navigator',prior);else Reflect.deleteProperty(globalThis,'navigator');}
+});
+test("Account security retains the current workspace route as a safe return path", () => {
+  const prior=Object.getOwnPropertyDescriptor(globalThis,'location');
+  try {
+    Object.defineProperty(globalThis,'location',{configurable:true,value:{pathname:'/c/demo',search:'?thread=12',hash:'#42'}});
+    const r=render({me:{...me,provider:'github'},onClose:()=>{},onLogout:null});
+    const link=r.root.findAllByType('a').find(a=>String(a.props.href).startsWith('/auth/security?'))!;
+    expect(new URL(link.props.href,'https://example.test').searchParams.get('return_to')).toBe('/c/demo?thread=12#42');
+  } finally {if(prior)Object.defineProperty(globalThis,'location',prior);else Reflect.deleteProperty(globalThis,'location');}
+});

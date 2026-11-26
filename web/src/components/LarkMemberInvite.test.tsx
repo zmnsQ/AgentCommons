@@ -107,6 +107,7 @@ test("removes an existing member after confirmation and makes them inviteable ag
   act(() => input.props.onChange({ target: { value: "Alice" } }));
   await act(async () => renderer!.root.findByType("form").props.onSubmit({ preventDefault() {} }));
   await act(async () => renderer!.root.findByProps({ "data-lark-user-id": "on_alice" }).props.onClick());
+  await act(async () => renderer!.root.findByProps({ role: "alertdialog" }).findAllByType("button")[0]!.props.onClick());
   expect(removed).toEqual(["on_alice"]);
   expect(renderer!.root.findByProps({ "data-lark-user-id": "on_alice" }).children.join(" ")).toContain("Invite");
 });
@@ -136,6 +137,7 @@ test("keeps the member removed and reports a bot removal-notice failure", async 
   act(() => input.props.onChange({ target: { value: "Alice" } }));
   await act(async () => renderer!.root.findByType("form").props.onSubmit({ preventDefault() {} }));
   await act(async () => renderer!.root.findByProps({ "data-lark-user-id": "on_alice" }).props.onClick());
+  await act(async () => renderer!.root.findByProps({ role: "alertdialog" }).findAllByType("button")[0]!.props.onClick());
   expect(renderer!.root.findByProps({ "data-lark-user-id": "on_alice" }).children.join(" ")).toContain("Invite");
   expect(renderer!.root.findByProps({ role: "alert" }).children.join(" ")).toContain("removal notice");
 });

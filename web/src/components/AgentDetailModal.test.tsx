@@ -320,9 +320,9 @@ describe("AgentDetailModal (#272)", () => {
 
     const text = JSON.stringify(renderer!.toJSON());
     expect(text).toContain('"状态"');
-    expect(text).toContain('"offline"');
+    expect(text).toContain('"离线"');
     expect(text).toContain("最后上报状态");
-    expect(text).toContain('"working"');
+    expect(text).toContain('"处理中"');
     expect(text).toContain("空闲");
     expect(text).not.toContain("忙碌 · 排队 3 条");
     expect(text).toContain("最后上报任务");
@@ -503,7 +503,7 @@ describe("AgentDetailModal (#272)", () => {
     });
 
     const text = JSON.stringify(renderer!.toJSON());
-    expect(text).toContain("reviewer");
+    expect(text).toContain("评审");
     expect(text).toContain("owns release approval");
     expect(text).toContain("formal-lead");
     expect(text).not.toContain("presence-lead");
@@ -578,4 +578,10 @@ describe("AgentDetailModal (#272)", () => {
     act(() => scrim.props.onClick());
     expect(closed).toBe(true);
   });
+});
+
+test("human details show tasks and history without agent reception or runtime warnings", () => {
+  const root=render({name:'alice',display:'Alice',kind:'human',owner:null,online:true,presence:null,messages:[],tasks:[],onClose:()=>{}});
+  expect(root.findAll(node=>String(node.props.className??'').includes('agent-detail-reception'))).toHaveLength(0);
+  const text=JSON.stringify(renderer!.toJSON());expect(text).not.toContain('当前无人接待');expect(text).not.toContain('人工暂停');expect(text).toContain('Alice');
 });

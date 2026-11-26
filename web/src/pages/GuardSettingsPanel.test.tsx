@@ -101,40 +101,30 @@ describe("GuardSettingsPanel input affordance (#182)", () => {
   });
 });
 
-describe("GuardSettingsPanel one-click unlimited (#182)", () => {
-  test("renders a one-click unlimited button for the loop guard", () => {
-    render("zh", baseProps());
-    expect(unlimitedButtons().length).toBeGreaterThanOrEqual(1);
-    expect(unlimitedButtons()[0]!.props.children).toBe(ChannelStrings.zh["Channel.settings.setUnlimited"]);
+describe("GuardSettingsPanel explicit save", () => {
+  test("disabling edits a draft rather than silently persisting, with a saved-state badge", () => {
+    let next: boolean | null = null; let saved = 0;
+    const props = baseProps({ saved: {loopEnabled: true, loopLimit: "10", workflowEnabled: true, workflowLimit: "30"}, loopEnabled: false, loopLimit: "10", onLoopEnabled: value => {next = value;}, onSaveLoop: () => {saved++;} });
+    const root = render("en", props);
+    expect(unlimitedButtons()).toHaveLength(0);
+    expect(root.findByProps({className: "guard-settings-state"}).children[0]).toBe(ChannelStrings.en["Channel.settings.enabled"]);
+    expect(root.findByProps({role: "status"}).children.join("")).toContain("Unsaved");
+    act(() => root.findAllByProps({type:"checkbox"})[0]!.props.onChange({currentTarget:{checked:false}}));
+    expect(next).toBe(false); expect(saved).toBe(0);
+    act(() => root.findAllByType("button")[0]!.props.onClick()); expect(saved).toBe(1);
   });
-
-  test("clicking the loop unlimited button fires onLoopUnlimited", () => {
-    let called = 0;
-    render("zh", baseProps({ onLoopUnlimited: () => { called += 1; } }));
-    act(() => unlimitedButtons()[0]!.props.onClick());
-    expect(called).toBe(1);
+  test("unchanged saved sections have no pending indication and cannot save", () => {
+    const root = render("en", baseProps({loopLimit:"10", saved:{loopEnabled:true,loopLimit:"10",workflowEnabled:true,workflowLimit:"30"}}));
+    expect(root.findAllByProps({role:"status"})).toHaveLength(0);
+    expect(root.findAllByType("button").every(button => button.props.disabled)).toBe(true);
   });
-
-  test("clicking the workflow unlimited button fires onWorkflowUnlimited", () => {
-    let called = 0;
-    render("zh", baseProps({ onWorkflowUnlimited: () => { called += 1; } }));
-    act(() => unlimitedButtons()[1]!.props.onClick());
-    expect(called).toBe(1);
-  });
-
-  test("unlimited button is disabled once the guard is already off (nothing to disable)", () => {
-    render("zh", baseProps({ loopEnabled: false }));
-    expect(unlimitedButtons()[0]!.props.disabled).toBe(true);
-  });
-
-  test("unlimited button is disabled for non-moderators", () => {
-    render("zh", baseProps({ canModerate: false }));
-    expect(unlimitedButtons()[0]!.props.disabled).toBe(true);
-  });
-
-  test("unlimited button is disabled while a save is in flight", () => {
-    render("zh", baseProps({ saving: "loop" }));
-    expect(unlimitedButtons()[0]!.props.disabled).toBe(true);
+  test("non-moderators and in-flight saves cannot change settings", () => {
+    for (const props of [baseProps({canModerate:false}),baseProps({saving:"loop"})]) {
+      const root = render("en",props);
+      expect(root.findAllByType("input").every(input => input.props.disabled)).toBe(true);
+      expect(root.findAllByType("button").every(button => button.props.disabled)).toBe(true);
+      act(()=>renderer!.unmount());renderer=null;
+    }
   });
 });
 

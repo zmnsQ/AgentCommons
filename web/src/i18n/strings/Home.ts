@@ -22,8 +22,8 @@ export const HomeStrings: LocaleDict = {
     "Home.channelCategoryAll": "全部 ({count})",
     "Home.channelCategoryCreated": "创建 ({count})",
     "Home.channelCategoryJoined": "加入 ({count})",
-    "Home.channelCategoryEmptyCreated": "我创建的：暂无频道。",
-    "Home.channelCategoryEmptyJoined": "我加入的：暂无频道。",
+    "Home.channelCategoryEmptyCreated": "还没有你创建的群组。",
+    "Home.channelCategoryEmptyJoined": "还没有加入其他人的群组。",
   },
 };
 

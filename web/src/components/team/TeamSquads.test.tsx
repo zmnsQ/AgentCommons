@@ -40,8 +40,8 @@ function squad(name: string, members: string[], leader: string | null = null): C
 }
 function model(squads: ChannelSquad[]) {
   return buildTeamBoard({
-    presence: [presence("a"), presence("b"), presence("c", { state: "offline" })],
-    participants: [sender("a"), sender("b"), sender("c")],
+    presence: [presence("a"), presence("b"), presence("c", { state: "offline", live: false })],
+    participants: [sender("a"), sender("b")],
     roles: [],
     squads,
     now: NOW,
@@ -106,7 +106,11 @@ describe("TeamBoard · 小队与主持（#1060 PR C）", () => {
     await act(async () => { await form.props.onSubmit({ preventDefault() {} }); });
     expect(onUpdateSquad).toHaveBeenCalledWith("fe", { title: null, members: ["a"], leader: "a" });
     const del = r.root.findByProps({ "data-squad": "fe" }).findAll((n) => n.type === "button" && String(n.props.className).includes("team-squad-delete"))[0]!;
-    await act(async () => { del.props.onClick(); await Promise.resolve(); });
+    act(() => del.props.onClick());
+    expect(onDeleteSquad).not.toHaveBeenCalled();
+    const confirm = r.root.findByProps({ "data-squad": "fe" }).findByProps({ className: "team-squad-confirm" });
+    const confirmButton = confirm.findAllByType("button")[0]!;
+    await act(async () => { confirmButton.props.onClick(); await Promise.resolve(); });
     expect(onDeleteSquad).toHaveBeenCalledWith("fe");
   });
 

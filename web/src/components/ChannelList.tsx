@@ -46,8 +46,19 @@ function presenceDotPriority(state: ChannelInfo["presence"][number]["state"]): n
 }
 
 // 参与者状态点：每人一个状态点，色 = presence 状态；没人报过 presence 给一颗灰点占位
+const PRESENCE_STATE_ZH: Record<string, string> = {
+  working: "处理中",
+  waiting: "等待中",
+  idle: "空闲",
+  blocked: "受阻",
+  offline: "离线",
+  online: "在线",
+};
+
 export function PresenceDots({ channel }: { channel: ChannelInfo }) {
   const t = useT();
+  const { locale } = useLocale();
+  const zh = locale === "zh";
   const entries = [...(channel.presence ?? [])]
     .sort((a, b) => presenceDotPriority(a.state) - presenceDotPriority(b.state))
     .slice(0, MAX_DOTS);
@@ -55,7 +66,11 @@ export function PresenceDots({ channel }: { channel: ChannelInfo }) {
     <span className="chan-dots">
       {entries.length === 0 && <span className="d-dot d-dot--offline" title={t("Home.noParticipants")} />}
       {entries.map((p) => (
-        <span key={p.name} className={`d-dot d-dot--${p.state}`} title={`${p.name} — ${p.state}`} />
+        <span
+          key={p.name}
+          className={`d-dot d-dot--${p.state}`}
+          title={`${p.name} — ${zh ? (PRESENCE_STATE_ZH[p.state] ?? p.state) : p.state}`}
+        />
       ))}
     </span>
   );
@@ -71,10 +86,12 @@ function ChannelPill({
   c,
   active,
   onOpen,
+  zh,
 }: {
   c: ChannelInfo;
   active: string | null;
   onOpen(slug: string): void;
+  zh: boolean;
 }) {
   const preview = lastMessagePreview(c);
   return (
@@ -96,10 +113,10 @@ function ChannelPill({
         <span className="chan-head">
           <PresenceDots channel={c} />
           <span className="chan-name">{c.title ?? c.slug}</span>
-          {c.visibility === "public" && <span className="d-hl public-badge">PUBLIC</span>}
-          {c.mode === "party" && <span className="d-hl party-badge">PARTY</span>}
-          {c.kind === "temp" && <span className="chan-tag t-mono">temp</span>}
-          {c.archived_at !== null && <span className="chan-tag t-mono">archived</span>}
+          {c.visibility === "public" && <span className="d-hl public-badge">{zh ? "公开" : "PUBLIC"}</span>}
+          {c.mode === "party" && <span className="d-hl party-badge">{zh ? "协作" : "PARTY"}</span>}
+          {c.kind === "temp" && <span className="chan-tag t-mono">{zh ? "临时" : "temp"}</span>}
+          {c.archived_at !== null && <span className="chan-tag t-mono">{zh ? "已归档" : "archived"}</span>}
         </span>
         {preview !== null && <span className="chan-last">{preview}</span>}
       </span>
@@ -137,7 +154,7 @@ function ScopedChannelList({
   const live = channels?.filter((c) => c.archived_at === null) ?? null;
   const archived = channels?.filter((c) => c.archived_at !== null) ?? [];
   const createdCount = live?.filter((c) => c.owned === true).length ?? 0;
-  const joinedCount = live?.filter((c) => c.member === true).length ?? 0;
+  const joinedCount = live?.filter((c) => c.member === true && c.owned !== true).length ?? 0;
   const categoryCount: Record<ChannelCategory, number> = {
     all: live?.length ?? 0,
     created: createdCount,
@@ -157,7 +174,7 @@ function ScopedChannelList({
     }
     const excluded =
       (category === "created" && activeChannel.owned !== true) ||
-      (category === "joined" && activeChannel.member !== true);
+      (category === "joined" && !(activeChannel.member === true && activeChannel.owned !== true));
     if (excluded) setCategory("all");
   }, [active, category, channels]);
 
@@ -167,7 +184,7 @@ function ScopedChannelList({
       : live.filter((c) => {
           if (!matches(c)) return false;
           if (category === "created") return c.owned === true;
-          if (category === "joined") return c.member === true;
+          if (category === "joined") return c.member === true && c.owned !== true;
           return true;
         });
 
@@ -233,7 +250,7 @@ function ScopedChannelList({
 
         <div className="studio-channel-items group-list">
           {filteredLive?.map((c) => (
-            <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />
+            <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} zh={zh} />
           ))}
         </div>
 
@@ -266,7 +283,7 @@ function ScopedChannelList({
             {(showArchived || query.trim()) &&
               archived
                 .filter(matches)
-                .map((c) => <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} />)}
+                .map((c) => <ChannelPill key={c.slug} c={c} active={active} onOpen={onOpen} zh={zh} />)}
           </>
         )}
 
@@ -303,7 +320,7 @@ function ScopedChannelList({
         {onConnect && (
           <button type="button" className="discover-link" onClick={onConnect}>
             <StudioIcon name="plus" size={14} />
-            <span>{zh ? "接入新 Agent" : "Connect agent"}</span>
+            <span>{zh ? "添加 Agent" : "Add Agent"}</span>
           </button>
         )}
       </div>

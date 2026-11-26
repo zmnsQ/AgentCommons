@@ -452,6 +452,12 @@ export function ChannelPage({
   const [localLoopGuardLimit, setLocalLoopGuardLimit] = useState(loopGuardLimit === null ? "" : String(loopGuardLimit));
   const [localWorkflowGuardEnabled, setLocalWorkflowGuardEnabled] = useState(workflowGuardEnabled);
   const [localWorkflowGuardLimit, setLocalWorkflowGuardLimit] = useState(String(workflowGuardLimit));
+  const [savedGuard, setSavedGuard] = useState(() => ({
+    loopEnabled: loopGuardEnabled,
+    loopLimit: loopGuardLimit === null ? "" : String(loopGuardLimit),
+    workflowEnabled: workflowGuardEnabled,
+    workflowLimit: String(workflowGuardLimit),
+  }));
   const [guardSaving, setGuardSaving] = useState<"loop" | "workflow" | null>(null);
   const [guardConfigError, setGuardConfigError] = useState<string | null>(null);
   // 可见性可在会话内切换（issue #38 web；#381 三档），本地 state 让顶栏徽章即时反映，无需重载
@@ -556,10 +562,18 @@ export function ChannelPage({
   });
 
   useEffect(() => {
+    const nextLoopLimit = loopGuardLimit === null ? "" : String(loopGuardLimit);
+    const nextWorkflowLimit = String(workflowGuardLimit);
     setLocalLoopGuardEnabled(loopGuardEnabled);
-    setLocalLoopGuardLimit(loopGuardLimit === null ? "" : String(loopGuardLimit));
+    setLocalLoopGuardLimit(nextLoopLimit);
     setLocalWorkflowGuardEnabled(workflowGuardEnabled);
-    setLocalWorkflowGuardLimit(String(workflowGuardLimit));
+    setLocalWorkflowGuardLimit(nextWorkflowLimit);
+    setSavedGuard({
+      loopEnabled: loopGuardEnabled,
+      loopLimit: nextLoopLimit,
+      workflowEnabled: workflowGuardEnabled,
+      workflowLimit: nextWorkflowLimit,
+    });
     setGuardConfigError(null);
     setGuardSaving(null);
   }, [loopGuardEnabled, loopGuardLimit, slug, workflowGuardEnabled, workflowGuardLimit]);
@@ -823,29 +837,31 @@ export function ChannelPage({
       });
   }, [slug, token]);
 
-  const applyTaskUpdate = useCallback((id: number, body: Parameters<typeof updateTask>[3]) => {
-    if (taskActionBusyId !== null) return;
+  const applyTaskUpdate = useCallback((id: number, body: Parameters<typeof updateTask>[3]): Promise<boolean> => {
+    if (taskActionBusyId !== null) return Promise.resolve(false);
     setTaskActionBusyId(id);
     setTaskActionError(null);
-    updateTask(token, slug, id, body)
+    return updateTask(token, slug, id, body)
       .then((task) => {
         taskLedgerRequestRef.current += 1;
         setTasksLoading(false);
         setTasks((current) => current.map((item) => item.id === task.id ? task : item));
         void loadTaskSummary();
+        return true;
       })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
         else if (err instanceof ForbiddenError) setTaskActionError(t("Channel.tasks.error.updateForbidden"));
         else if (err instanceof ValidationError) setTaskActionError(t("Channel.tasks.error.updateRejected"));
         else setTaskActionError(t("Channel.tasks.error.updateFailed"));
+        return false;
       })
       .finally(() => setTaskActionBusyId(null));
   }, [loadTaskSummary, slug, taskActionBusyId, token, t]);
 
-  const setTaskState = useCallback((id: number, state: TaskState, blockedReason?: string) => {
+  const setTaskState = useCallback((id: number, state: TaskState, blockedReason?: string): Promise<boolean> => {
     const reason = blockedReason?.trim();
-    applyTaskUpdate(id, {
+    return applyTaskUpdate(id, {
       state,
       ...(state === "blocked" && reason !== undefined ? { blocked_reason: reason || null } : {}),
     });
@@ -897,29 +913,33 @@ export function ChannelPage({
       .finally(() => setTaskCreating(false));
   }, [loadTaskSummary, slug, taskCreating, token, t]);
 
-  const reviewTask = useCallback((task: TaskRecord, action: "approve" | "reject", reason?: string) => {
-    if (taskActionBusyId !== null) return;
+  const reviewTask = useCallback((task: TaskRecord, action: "approve" | "reject", reason?: string): Promise<boolean> => {
+    if (taskActionBusyId !== null) return Promise.resolve(false);
     const seq = taskCompletionSeq(task);
     if (seq === null) {
       setTaskActionError(t("Channel.tasks.error.noReviewable"));
-      return;
+      return Promise.resolve(false);
     }
     const rejectReason = reason?.trim();
-    if (action === "reject" && !rejectReason) return;
+    if (action === "reject" && !rejectReason) return Promise.resolve(false);
     setTaskActionBusyId(task.id);
     setTaskActionError(null);
-    reviewCompletion(
+    return reviewCompletion(
       token,
       slug,
       seq,
       action === "approve" ? { action: "approve" } : { action: "reject", reason: rejectReason! },
     )
-      .then(() => loadTaskLedger())
+      .then(() => {
+        void loadTaskLedger();
+        return true;
+      })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
         else if (err instanceof ForbiddenError) setTaskActionError(t("Channel.tasks.error.reviewForbidden"));
         else if (err instanceof ValidationError) setTaskActionError(t("Channel.tasks.error.reviewRejected"));
         else setTaskActionError(t("Channel.tasks.error.reviewFailed"));
+        return false;
       })
       .finally(() => setTaskActionBusyId(null));
   }, [loadTaskLedger, slug, taskActionBusyId, token, t]);
@@ -1916,8 +1936,10 @@ export function ChannelPage({
     setGuardConfigError(null);
     setLoopGuard(token, slug, localLoopGuardEnabled, localLoopGuardEnabled ? limit : undefined)
       .then((result) => {
+        const nextLimit = result.limit === null ? "" : String(result.limit);
         setLocalLoopGuardEnabled(result.enabled);
-        setLocalLoopGuardLimit(result.limit === null ? "" : String(result.limit));
+        setLocalLoopGuardLimit(nextLimit);
+        setSavedGuard((prev) => ({ ...prev, loopEnabled: result.enabled, loopLimit: nextLimit }));
       })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
@@ -1939,8 +1961,10 @@ export function ChannelPage({
     setGuardConfigError(null);
     setWorkflowGuard(token, slug, localWorkflowGuardEnabled, localWorkflowGuardEnabled ? limit : undefined)
       .then((result) => {
+        const nextLimit = String(result.limit ?? limit);
         setLocalWorkflowGuardEnabled(result.enabled);
-        setLocalWorkflowGuardLimit(String(result.limit ?? limit));
+        setLocalWorkflowGuardLimit(nextLimit);
+        setSavedGuard((prev) => ({ ...prev, workflowEnabled: result.enabled, workflowLimit: nextLimit }));
       })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
@@ -1959,8 +1983,10 @@ export function ChannelPage({
     setGuardConfigError(null);
     setLoopGuard(token, slug, false)
       .then((result) => {
+        const nextLimit = result.limit === null ? "" : String(result.limit);
         setLocalLoopGuardEnabled(result.enabled);
-        setLocalLoopGuardLimit(result.limit === null ? "" : String(result.limit));
+        setLocalLoopGuardLimit(nextLimit);
+        setSavedGuard((prev) => ({ ...prev, loopEnabled: result.enabled, loopLimit: nextLimit }));
       })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
@@ -1976,8 +2002,10 @@ export function ChannelPage({
     setGuardConfigError(null);
     setWorkflowGuard(token, slug, false)
       .then((result) => {
+        const nextLimit = result.limit === null ? String(workflowGuardLimit) : String(result.limit);
         setLocalWorkflowGuardEnabled(result.enabled);
-        setLocalWorkflowGuardLimit(result.limit === null ? String(workflowGuardLimit) : String(result.limit));
+        setLocalWorkflowGuardLimit(nextLimit);
+        setSavedGuard((prev) => ({ ...prev, workflowEnabled: result.enabled, workflowLimit: nextLimit }));
       })
       .catch((err: unknown) => {
         if (err instanceof AuthError) authFailedRef.current(tRef.current("Channel.error.tokenRevoked"));
@@ -2875,6 +2903,9 @@ export function ChannelPage({
     hostBoard.recommended_actions.length + hostBoard.conflicts.length;
   const hostBoardVisible =
     hostBoard.hosts.length > 0 || hostBoardAttentionCount > 0;
+  // Don't alarm every normal group at top-of-stream solely because no optional Host is assigned yet.
+  const hostBoardActionableInHeader =
+    hostBoard.conflicts.length > 0 || (hostBoard.hosts.length > 0 && hostBoardAttentionCount > 0);
   const hostBoardSummary = t("ChannelFocusBar.hostSummary", {
     hosts: String(hostBoard.hosts.length),
     attention: String(hostBoardAttentionCount),
@@ -2954,13 +2985,13 @@ export function ChannelPage({
         onOpenSearch={() => openPanel("search")}
         searchActive={q !== "" || agentFilterActive || completionOnly}
         onAddAgent={canMintAgent&&accountKey!==null&&!state.archived?()=>setAdminSurface("agentJoin",true):undefined}/>
-      {(channelFocus.waitingOnMe.length > 0 || hostBoardAttentionCount > 0) && (
+      {(channelFocus.waitingOnMe.length > 0 || hostBoardActionableInHeader) && (
         <div className="channel-attention-strip">
           <ChannelFocusBar
             displayOf={name => resolveIdentityPresentation(name, identityDisplay).label}
             focus={channelFocus}
             decisionState={pendingDecisionLoadState}
-            supplementalOverview={hostBoardVisible ? {
+            supplementalOverview={hostBoardActionableInHeader ? {
               label: hostBoardSummary,
               attention: hostBoardAttentionCount > 0,
             } : undefined}
@@ -3074,7 +3105,16 @@ export function ChannelPage({
               <span className="t-mono chan-tool-badge chan-tool-badge--hot">{t("Channel.tools.active")}</span>
             )}
           </button>
-          <button type="button" className="d-btn chan-tool-btn" onClick={() => openPanel("collaboration")}>
+          <button
+            type="button"
+            className="d-btn chan-tool-btn"
+            onClick={() => {
+              collaborationViewMemory.current = null;
+              setCloudConnectTarget(null);
+              setWorkspaceFiles(true);
+              openPanel("collaboration");
+            }}
+          >
             <StudioIcon name="coordination"/><span>{t("Collab.title")}</span>
           </button>
           {/* #700 的「本机 agent」独立入口已并入「我的 agent」(AgentTokens) 面板的本机运行段，此处不再单列。 */}
@@ -3301,6 +3341,7 @@ export function ChannelPage({
                 onOpenTask={openFocusedTask}
                 onReconnect={reconnectAgent}
                 onAssignHost={canModerate && !state.archived ? assignChannelHost : undefined}
+                onAddAgent={canMintAgent && accountKey !== null && !state.archived ? () => setAdminSurface("agentJoin", true) : undefined}
                 squadSaving={squadSaving}
                 squadError={squadError}
                 onCreateSquad={canModerate && !state.archived ? createTeamSquad : undefined}
@@ -3336,6 +3377,23 @@ export function ChannelPage({
                   assigningHost={roleSaving !== null}
                   assignError={hostAssignError}
                   onAssignHost={assignChannelHost}
+                  onRecommendedAction={(action) => {
+                    if (action.kind === "review-blockers") {
+                      const blocked = tasks.find((task) => task.state === "blocked");
+                      if (blocked) openFocusedTask(blocked.id);
+                      else openPanel("tasks");
+                    } else if (action.kind === "resolve-conflict") {
+                      openPanel("tasks");
+                    } else if (action.kind === "takeover") {
+                      if (action.target && authoritativeMemberNamesRef.current.has(action.target)) {
+                        openTeamMember(action.target);
+                      } else {
+                        openPanel("team");
+                      }
+                    } else if (action.kind === "clear-loop-guard") {
+                      openPanel("admin");
+                    }
+                  }}
                 />
               ) : null}
             </ChannelFocusPanel>
@@ -3413,6 +3471,7 @@ export function ChannelPage({
                   loopLimit={localLoopGuardLimit}
                   workflowEnabled={localWorkflowGuardEnabled}
                   workflowLimit={localWorkflowGuardLimit}
+                  saved={savedGuard}
                   saving={guardSaving}
                   error={guardConfigError}
                   onLoopEnabled={setLocalLoopGuardEnabled}

@@ -1,7 +1,9 @@
+import { useLocale } from "../../i18n/locale";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
 
 export interface GuardSettingsPanelProps {
+  saved?: { loopEnabled: boolean; loopLimit: string; workflowEnabled: boolean; workflowLimit: string };
   canModerate: boolean;
   loopEnabled: boolean;
   loopLimit: string;
@@ -20,6 +22,7 @@ export interface GuardSettingsPanelProps {
 }
 
 export function GuardSettingsPanel({
+  saved,
   canModerate,
   loopEnabled,
   loopLimit,
@@ -33,10 +36,11 @@ export function GuardSettingsPanel({
   onWorkflowLimit,
   onSaveLoop,
   onSaveWorkflow,
-  onLoopUnlimited,
-  onWorkflowUnlimited,
 }: GuardSettingsPanelProps) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
+  const loopDirty = !saved || saved.loopEnabled !== loopEnabled || (loopEnabled && saved.loopLimit !== loopLimit);
+  const workflowDirty = !saved || saved.workflowEnabled !== workflowEnabled || (workflowEnabled && saved.workflowLimit !== workflowLimit);
   return (
     <details className="guard-settings">
       <summary className="guard-settings-summary">
@@ -45,10 +49,12 @@ export function GuardSettingsPanel({
           <small>{t("Channel.settings.guardAdvancedHint")}</small>
         </span>
         <span className="guard-settings-state">
-          {loopEnabled || workflowEnabled ? t("Channel.settings.enabled") : t("Channel.settings.off")}
+          {saved ? (saved.loopEnabled || saved.workflowEnabled ? t("Channel.settings.enabled") : t("Channel.settings.off")) : (zh ? "保存后生效" : "Changes require saving")}
+          {(loopDirty || workflowDirty) && <small> · {zh ? "未保存" : "Unsaved"}</small>}
         </span>
       </summary>
       <div className="guard-settings-body">
+      {(loopDirty || workflowDirty) && <p role="status">{zh ? "有未保存的设置。点击各项的保存后才会生效。" : "Unsaved settings. Save each section to apply its changes."}</p>}
       <section className="guard-setting-row">
         <div className="guard-setting-head">
           <h3>{t("Channel.settings.loopGuard")}</h3>
@@ -72,17 +78,10 @@ export function GuardSettingsPanel({
             disabled={!canModerate || !loopEnabled || saving !== null}
             onChange={(event) => onLoopLimit(event.currentTarget.value)}
           />
-          <button type="button" className="d-btn d-btn--primary" disabled={!canModerate || saving !== null} onClick={onSaveLoop}>
+          <button type="button" className="d-btn d-btn--primary" disabled={!canModerate || saving !== null || !loopDirty} onClick={onSaveLoop}>
             {saving === "loop" ? t("Channel.settings.saving") : t("Channel.settings.save")}
           </button>
-          <button
-            type="button"
-            className="d-btn guard-unlimited-btn"
-            disabled={!canModerate || saving !== null || !loopEnabled}
-            onClick={onLoopUnlimited}
-          >
-            {t("Channel.settings.setUnlimited")}
-          </button>
+
         </div>
       </section>
       <section className="guard-setting-row">
@@ -108,20 +107,13 @@ export function GuardSettingsPanel({
             disabled={!canModerate || !workflowEnabled || saving !== null}
             onChange={(event) => onWorkflowLimit(event.currentTarget.value)}
           />
-          <button type="button" className="d-btn d-btn--primary" disabled={!canModerate || saving !== null} onClick={onSaveWorkflow}>
+          <button type="button" className="d-btn d-btn--primary" disabled={!canModerate || saving !== null || !workflowDirty} onClick={onSaveWorkflow}>
             {saving === "workflow" ? t("Channel.settings.saving") : t("Channel.settings.save")}
           </button>
-          <button
-            type="button"
-            className="d-btn guard-unlimited-btn"
-            disabled={!canModerate || saving !== null || !workflowEnabled}
-            onClick={onWorkflowUnlimited}
-          >
-            {t("Channel.settings.turnOff")}
-          </button>
+
         </div>
       </section>
-      {error !== null && <p className="guard-setting-error">{error}</p>}
+      {error !== null && <p className="guard-setting-error" role="alert">{error}</p>}
       </div>
     </details>
   );

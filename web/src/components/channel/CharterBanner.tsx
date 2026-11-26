@@ -55,7 +55,7 @@ export function CharterBanner({
             {updated ? <span className="charter-updated">{t("Channel.charter.updated")}</span> : null}
           </button>
         )}
-        {canModerate && (
+        {canModerate && !editing && (
           <button className="d-btn charter-edit" type="button" disabled={charter === null} onClick={onEdit}>
             {t("Channel.charter.edit")}
           </button>
@@ -71,6 +71,8 @@ export function CharterBanner({
               <textarea
                 className="charter-textarea t-mono"
                 value={draft}
+                disabled={saving}
+                aria-label={t("Channel.charter.label")}
                 onChange={(e) => onDraft(e.target.value)}
               />
               <div className="charter-actions">

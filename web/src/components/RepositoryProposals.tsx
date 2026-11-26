@@ -17,6 +17,7 @@ function ProposalReview({ token, slug, repositoryId, proposalId, canApprove, cli
   const [error, setError] = useState<string | null>(null);
   const [credential, setCredential] = useState("");
   const [reviewed, setReviewed] = useState(false);
+  const [openMode, setOpenMode] = useState<"first" | "all" | "none">("first");
   const [busy, setBusy] = useState<"publish" | "reject" | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const alive = useRef(true);
@@ -62,10 +63,11 @@ function ProposalReview({ token, slug, repositoryId, proposalId, canApprove, cli
       <p className="commons-review-description">{detail.description || detail.title}</p>
       <dl className="commons-review-meta"><div><dt>{t("Collab.baseCommit")}</dt><dd><code>{detail.base_sha}</code></dd></div><div><dt>{t("Collab.reviewDigest")}</dt><dd><code>{detail.digest}</code></dd></div></dl>
       {!completeReview && <p className="commons-error" role="alert">{t("Collab.reviewIncomplete")}</p>}
-      <div className="commons-changes">{detail.files.map((file) => {
+      <div className="commons-section-head commons-changes-head"><h4>{t("Collab.changedFiles", { count: detail.files.length })}</h4><div className="commons-actions"><button type="button" className="d-btn" onClick={() => setOpenMode("all")}>{t("Collab.expandAll")}</button><button type="button" className="d-btn" onClick={() => setOpenMode("none")}>{t("Collab.collapseAll")}</button></div></div>
+      <div className="commons-changes">{detail.files.map((file, index) => {
         const original = originalByPath.get(file.path);
         const change = file.content === null ? "Collab.deletedFile" : original === null ? "Collab.addedFile" : "Collab.changedFile";
-        return <details className="commons-change" key={file.path} open>
+        return <details className="commons-change" key={`${file.path}:${openMode}`} open={openMode === "all" || (openMode === "first" && index === 0)}>
           <summary><span>{file.path}</span><span className="commons-badge">{t(change)}</span></summary>
           <div className="commons-diff">
             <div className="commons-diff-before"><h4>{t("Collab.before")}</h4><pre>{original === undefined ? t("Collab.originalMissing") : original === null ? t("Collab.fileAbsent") : original}</pre></div>

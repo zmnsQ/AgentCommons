@@ -3,6 +3,9 @@ import { registerDict, type LocaleDict } from "../dict";
 // #725：桌面「常驻 agent 日志」查看器的文案。
 export const ResidentDutyLogsStrings: LocaleDict = {
   en: {
+    "ResidentDutyLogs.allError": "Could not read any log sources. Previously loaded logs are retained.",
+    "ResidentDutyLogs.lastRead": "Last successful read: {time}",
+    "ResidentDutyLogs.retryFailed": "Retry failed sources",
     "ResidentDutyLogs.title": "Local agent logs",
     "ResidentDutyLogs.lead": "One place for every app and resident agent. Filter by identity, channel, severity, or text.",
     "ResidentDutyLogs.refresh": "refresh",
@@ -30,6 +33,9 @@ export const ResidentDutyLogsStrings: LocaleDict = {
     "ResidentDutyLogs.level.info": "Info",
   },
   zh: {
+    "ResidentDutyLogs.allError": "所有日志来源均读取失败，已保留上次读取的日志。",
+    "ResidentDutyLogs.lastRead": "最近成功读取：{time}",
+    "ResidentDutyLogs.retryFailed": "重试失败来源",
     "ResidentDutyLogs.title": "本机 Agent 日志",
     "ResidentDutyLogs.lead": "统一查看 App 内与常驻 Agent；可按身份、频道、级别和内容筛选。",
     "ResidentDutyLogs.refresh": "刷新",

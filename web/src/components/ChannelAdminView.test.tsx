@@ -533,6 +533,12 @@ describe("ChannelAdminView focused management", () => {
     expect(text(list)).toContain("Worker One");
     expect(text(list)).not.toContain("Leo");
   });
+  test("archive-only authority is shown as view-only, not manager", () => {
+    const r = render({ capabilities: { ...ALL_CAPABILITIES, manageAccess: false, manageMembers: false, manageSafety: false } });
+    const overview = r.root.findByProps({ className: "channel-admin-overview" });
+    expect(text(overview)).toContain("View only");
+    expect(text(overview)).not.toContain("Manage channel");
+  });
   test("search and type filters persist across management tabs without changing identity keys", () => {
     const r = render({ onOpenMember: () => {} });
     act(() => r.root.findByProps({ "data-member-filter": "agent" }).props.onClick());

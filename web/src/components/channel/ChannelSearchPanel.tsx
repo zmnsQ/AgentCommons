@@ -4,6 +4,7 @@ import { agentHue } from "../../lib/agentColor";
 import { formatIdentityPresentation, resolveIdentityPresentation, resolveSenderLabel, type IdentityDisplayMap } from "../../lib/identityDisplay";
 import { seqFromQuery, type AgentFilter, type AgentFilterMode, type AgentFilterKind } from "../../lib/filters";
 import { fmtTime } from "../../lib/time";
+import { useLocale } from "../../i18n/locale";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
 
@@ -120,6 +121,7 @@ function SearchHitCard({
   disabled: boolean;
 }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
   const hueStyle = { "--ah": agentHue(hit.sender.name) } as CSSProperties;
   const senderPresentation = resolveIdentityPresentation(hit.sender.name, identityDisplay, {
     kind: hit.sender.kind,
@@ -131,28 +133,20 @@ function SearchHitCard({
     (owner, agent) => `${owner} · ${agent}`,
   );
   return (
-    <article className="d-card msg-card search-hit-card" style={hueStyle}>
-      <header className="d-meta msg-head">
+    <button type="button" className="d-card msg-card search-hit-card" style={{ ...hueStyle, width: "100%", textAlign: "left" }} disabled={disabled} onClick={() => onJump(hit.seq)} title={t("Channel.search.jumpTitle")} aria-label={`${zh ? "查看上下文" : "View context"} #${hit.seq}: ${hit.snippet}`}>
+      <span className="d-meta msg-head">
         <span className="msg-avatar" aria-hidden="true" />
         <span className="msg-sender">{senderLabel}</span>
         <span className={"msg-kind" + (hit.sender.kind === "human" ? " msg-kind--human" : "")}>
-          {hit.sender.kind}
+          {hit.sender.kind === "human" ? (zh ? "成员" : "Member") : (zh ? "智能体" : "Agent")}
         </span>
-        <span className="search-hit-field">{hit.match_field}</span>
+        <span className="search-hit-field">{({body: zh ? "消息正文" : "Message text", note: zh ? "状态说明" : "Status note", sender: zh ? "发送者" : "Sender"})[hit.match_field]}</span>
         <span className="msg-fill" />
-        <button
-          className="t-mono completion-jump"
-          type="button"
-          title={t("Channel.search.jumpTitle")}
-          disabled={disabled}
-          onClick={() => onJump(hit.seq)}
-        >
-          #{hit.seq}
-        </button>
+        <span className="t-mono completion-jump">#{hit.seq} · {zh ? "查看上下文" : "View context"}</span>
         <time>{fmtTime(hit.ts)}</time>
-      </header>
-      <p className="search-hit-snippet">{hit.snippet === "" ? t("Channel.empty.content") : hit.snippet}</p>
-    </article>
+      </span>
+      <span className="search-hit-snippet">{hit.snippet === "" ? t("Channel.empty.content") : hit.snippet}</span>
+    </button>
   );
 }
 
@@ -204,17 +198,22 @@ export function ChannelSearchPanel({
   onJump,
 }: ChannelSearchPanelProps) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
   // #716：纯 seq 号查询——面板给直达按钮，且搜索 effect 会跳过全文检索（见下方 seq 短路）。
   // isSeqQuery 时屏蔽所有全文检索专属 UI（计数/结果/空态），否则会与「跳到 #N」并存出现「0 命中」误导（#718 评审）。
   const seqQuery = seqFromQuery(search);
   const isSeqQuery = seqQuery !== null;
+  const [localJumpError, setLocalJumpError] = useState<string | null>(null);
   const [jumpingSeq, setJumpingSeq] = useState<number | null>(null);
   const selectHit = async (seq: number) => {
     if (jumpingSeq !== null) return;
     setJumpingSeq(seq);
-    const located = await onJump(seq);
-    setJumpingSeq(null);
-    if (located) onClose();
+    setLocalJumpError(null);
+    try {
+      if (await onJump(seq)) onClose();
+    } catch {
+      setLocalJumpError(zh ? "暂时无法打开消息，请重试。" : "Could not open the message. Please retry.");
+    } finally { setJumpingSeq(null); }
   };
 
   return (
@@ -272,6 +271,8 @@ export function ChannelSearchPanel({
               return <option key={name} value={name} label={label} />;
             })}
           </datalist>
+          <details open={Number(searchSince) > 0 || searchInputError !== null || undefined}>
+            <summary>{zh ? "高级筛选" : "Advanced"}</summary>
           <input
             className="t-mono chan-filter-input"
             type="number"
@@ -293,6 +294,7 @@ export function ChannelSearchPanel({
             placeholder={t("Channel.search.limitPlaceholder")}
             aria-label={t("Channel.search.limitAria")}
           />
+          </details>
         </div>
       )}
       {!isSeqQuery && searchInputError !== null && (
@@ -305,9 +307,9 @@ export function ChannelSearchPanel({
           {searchError}
         </p>
       )}
-      {jumpError !== null && (
+      {(jumpError !== null || localJumpError !== null) && (
         <p className="banner banner--yellow" role="alert">
-          {jumpError}
+          {jumpError ?? localJumpError}
         </p>
       )}
       {query !== "" && !isSeqQuery && visibleSearchHits.map((hit) => (

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { ModalPortal } from "../ModalPortal";
 import { StudioIcon } from "../StudioIcon";
+import { getModalFocusableElements } from "../useModalFocusTrap";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
 
@@ -46,14 +47,7 @@ export function ChannelPanelModal({
   const focusableElements = useCallback(() => {
     const card = cardRef.current;
     if (card === null) return [];
-    return [...card.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    )].filter(
-      (element) => (
-        element.tabIndex >= 0
-        && element.closest('[hidden], [aria-hidden="true"]') === null
-      ),
-    );
+    return getModalFocusableElements(card);
   }, []);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {

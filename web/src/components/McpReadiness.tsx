@@ -20,7 +20,7 @@ export function McpReadiness({token,slug}:{token:string;slug:string}){
  },[token,slug,base,revision]);
  const ready=!!state?.policy.enabled&&!!state.policy.owner_mfa_enabled;
  return <section className="ac-card mcp-readiness" aria-label={zh?'本群 MCP 前提检查':'Group MCP prerequisites'}>
-  <div className="ac-card-head"><div><span className="ac-kicker">READINESS</span><h4>{zh?'先检查本群服务状态':'Check group service readiness first'}</h4></div><span className={`ac-status-pill ${failed?'is-error':ready?'is-ok':'is-idle'}`}>{failed?(zh?'未知':'Unknown'):ready?(zh?'就绪':'Ready'):(zh?'待处理':'Action needed')}</span></div>
+  <div className="ac-card-head"><div><span className="ac-kicker">READINESS</span><h4>{zh?'先检查本群服务状态':'Check group service readiness first'}</h4></div><span className={`ac-status-pill ${failed?'is-error':state&&ready?'is-ok':''}`}>{failed?(zh?'未知':'Unknown'):!state?(zh?'检查中…':'Checking…'):ready?(zh?'就绪':'Ready'):(zh?'待处理':'Action needed')}</span></div>
   <p className="ac-card-hint">{zh?'生成 Token 不会自动开启 MCP。这里只检查服务侧前提，不代表第三方客户端已连接。':'Creating a Token does not enable MCP. This checks server prerequisites only, not your external client connection.'}</p>
   {!state&&!failed&&<p role="status" className="ac-inline-status">{zh?'正在读取本群设置…':'Reading group settings…'}</p>}
   {failed&&<p role="alert" className="commons-error">{zh?'暂时无法确认本群 MCP 状态；不要据此重复生成 Token。请刷新检查或让群主检查服务权限。':'Could not verify MCP readiness. Do not create another Token to fix this; refresh or ask the owner to check service permissions.'}</p>}

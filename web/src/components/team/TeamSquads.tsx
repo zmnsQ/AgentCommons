@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { ChannelSquad } from "@agentparty/shared";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/TeamBoard";
@@ -83,6 +83,9 @@ function SquadForm({
   const [picked, setPicked] = useState<string[]>(initial.members);
   const [leader, setLeader] = useState(initial.leader);
   const [localError, setLocalError] = useState<string | null>(null);
+  useEffect(() => {
+    if (leader !== "" && !picked.includes(leader)) setLeader("");
+  }, [leader, picked]);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim().replace(/^@/, "");
@@ -144,6 +147,7 @@ export function TeamSquads({
   const t = useT();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const displayOf = (name: string) => members.find((m) => m.name === name)?.display ?? name;
   const canWrite = canModerate && onCreate !== undefined && onUpdate !== undefined;
   if (squads.length === 0 && !canWrite) return null;
@@ -203,7 +207,7 @@ export function TeamSquads({
                           type="button"
                           className="team-card-linkbtn team-squad-delete"
                           disabled={saving !== null}
-                          onClick={() => { void onDelete(squad.name); }}
+                          onClick={() => setConfirmDelete(squad.name)}
                         >
                           {t("TeamBoard.squad.delete")}
                         </button>
@@ -211,6 +215,15 @@ export function TeamSquads({
                     </span>
                   )}
                 </div>
+                {confirmDelete === squad.name && (
+                  <div className="team-squad-confirm" role="alertdialog" aria-label={t("TeamBoard.squad.delete")}>
+                    <p>{t("TeamBoard.squad.deleteConfirm", { name: squad.name })}</p>
+                    <div className="team-card-edit-actions">
+                      <button type="button" className="d-btn d-btn--danger" disabled={saving !== null} onClick={() => { setConfirmDelete(null); void onDelete?.(squad.name); }}>{t("TeamBoard.squad.deleteConfirmAction")}</button>
+                      <button type="button" className="d-btn" disabled={saving !== null} onClick={() => setConfirmDelete(null)}>{t("TeamBoard.role.cancel")}</button>
+                    </div>
+                  </div>
+                )}
                 {!isEditing && (
                   <div className="team-squad-members">
                     {squad.members.map((name) => (

@@ -248,7 +248,8 @@ describe("desktop autostart behavior", () => {
     }));
 
     const toggle = renderer.root.findByProps({ role: "switch" });
-    expect(toggle.props.disabled).toBe(false);
+    expect(toggle.props.disabled).toBe(true);
+    expect(toggle.props["aria-describedby"]).toBe("autostart-unknown");
     expect(toggle.props["aria-checked"]).toBe(false);
     expect(renderer.root.findByProps({ role: "alert" }).children.join("")).toContain(
       "read or update this system setting.",
@@ -314,4 +315,16 @@ describe("desktop settings dismissal", () => {
 
     expect(calls).toEqual(["control", "trigger"]);
   });
+});
+
+test("unknown autostart state must be retried before it can be changed", async () => {
+  let failed=true;let writes=0;
+  const renderer=await renderEmbeddedSettings(runtime({isAutostartEnabled:async()=>{if(failed)throw Error('offline');return true;},setAutostartEnabled:async()=>{writes++;return true;}}));
+  expect(renderer.root.findByProps({role:'switch'}).props.disabled).toBe(true);
+  failed=false;await act(async()=>renderer.root.findAllByType('button').find(button=>button.children.includes('Retry reading setting'))!.props.onClick());
+  expect(renderer.root.findByProps({role:'switch'}).props['aria-checked']).toBe(true);expect(renderer.root.findByProps({role:'switch'}).props.disabled).toBe(false);expect(writes).toBe(0);
+  await act(async()=>renderer.unmount());
+});
+test("a failed write with failed readback reports unknown rather than the previous value", async()=>{
+  expect(await applyAutostartSetting(runtime({setAutostartEnabled:async()=>{throw Error('offline');},isAutostartEnabled:async()=>{throw Error('offline');}}),true,false)).toEqual({enabled:null,failed:true});
 });

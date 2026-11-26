@@ -977,10 +977,34 @@ export function PresenceBar({
           data-s={status}
           role="status"
           aria-live="polite"
-          aria-label={status === "open" ? t("PresenceBar.conn.open") : status}
-          title={status === "open" ? t("PresenceBar.conn.open") : status}
+          aria-label={
+            status === "open"
+              ? t("PresenceBar.conn.open")
+              : locale === "zh"
+                ? status === "connecting"
+                  ? "连接中"
+                  : status === "reconnecting"
+                    ? "重连中"
+                    : "连接已断开"
+                : status
+          }
+          title={
+            status === "open"
+              ? t("PresenceBar.conn.open")
+              : locale === "zh"
+                ? status === "connecting"
+                  ? "连接中"
+                  : status === "reconnecting"
+                    ? "重连中"
+                    : "连接已断开"
+                : status
+          }
         >
-          {status === "open" ? "●" : `◌ ${status}…`}
+          {status === "open"
+            ? "●"
+            : locale === "zh"
+              ? `◌ ${status === "connecting" ? "连接中" : status === "reconnecting" ? "重连中" : "已断开"}…`
+              : `◌ ${status}…`}
         </span>
       </div>}
       {rosterOpen && (

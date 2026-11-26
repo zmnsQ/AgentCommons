@@ -52,8 +52,19 @@ export function ManualMcpSetup({endpoint,slug,token,namePrefix,onBack,creationAt
   {notice&&<p role="status" className="ac-inline-status">{notice}</p>}
   {removedName&&<AgentAccessRecovery name={removedName} slug={slug} token={token} onBusyChange={setRecoveryBusy} onRestored={()=>{if(active()){setRemovedName(null);setError('');attempted.current=false;setNotice(zh?'身份已恢复。请再次点击创建；已有有效凭据时请使用原凭据或到“我的 Agent”管理。':'Identity restored. Click Create separately; if a credential is already active, use it or manage it in My Agents.');}}}/>}
 
+  {secure&&<section className="coding-step">
+   <div className="coding-step-head"><span className="ac-step-index" aria-hidden="true">1</span><h4>{zh?'确认本群地址与接入状态':'Group MCP URL & readiness'}</h4></div>
+   {block(endpoint,zh?'MCP 服务地址':'MCP server URL')}
+   <McpReadiness token={token} slug={slug}/>
+   <details className="ac-callout-details">
+    <summary>{zh?'权限范围与安全说明':'Token scope & safety notes'}</summary>
+    <p>{zh?'这是普通群组范围 Agent Token，不是仅限 MCP 的密钥：也可能调用该身份获准的本群 REST 接口。不会展示或复制你的人类登录凭据。':'This is a normal group-scoped Agent Token, not an MCP-only key: it may also access this identity’s permitted group REST APIs. Your human login credential is never shown or copied.'}</p>
+    <p>{zh?'返回或关闭只清除此页显示，不会撤销已创建的凭据。到群详情 → 我的 Agent 管理、撤销或重新生成凭据。':'Back or close clears this view, not the created credential. Use group details → My Agents to manage, revoke or regenerate credentials.'}</p>
+   </details>
+  </section>}
+
   <section className="coding-step">
-   <div className="coding-step-head"><span className="ac-step-index" aria-hidden="true">1</span><h4>{zh?'为本群生成专属 Agent Token':'Create a dedicated Agent Token for this group'}</h4></div>
+   <div className="coding-step-head"><span className="ac-step-index" aria-hidden="true">2</span><h4>{zh?'为本群生成专属 Agent Token':'Create a dedicated Agent Token for this group'}</h4></div>
    <p className="coding-note-line">{zh?'适合不支持 OAuth、只支持自定义 Header 或 Bearer Token 的 MCP 客户端。':'For MCP clients that use a custom Authorization header or Bearer Token instead of OAuth.'}</p>
    {!visibleCredential?(
     <div className="coding-create-card">
@@ -77,15 +88,5 @@ export function ManualMcpSetup({endpoint,slug,token,namePrefix,onBack,creationAt
    )}
   </section>
 
-  {secure&&<section className="coding-step">
-   <div className="coding-step-head"><span className="ac-step-index" aria-hidden="true">2</span><h4>{zh?'确认本群地址与接入状态':'Group MCP URL & readiness'}</h4></div>
-   {block(endpoint,zh?'MCP 服务地址':'MCP server URL')}
-   <McpReadiness token={token} slug={slug}/>
-   <details className="ac-callout-details">
-    <summary>{zh?'权限范围与安全说明':'Token scope & safety notes'}</summary>
-    <p>{zh?'这是普通群组范围 Agent Token，不是仅限 MCP 的密钥：也可能调用该身份获准的本群 REST 接口。不会展示或复制你的人类登录凭据。':'This is a normal group-scoped Agent Token, not an MCP-only key: it may also access this identity’s permitted group REST APIs. Your human login credential is never shown or copied.'}</p>
-    <p>{zh?'返回或关闭只清除此页显示，不会撤销已创建的凭据。到群详情 → 我的 Agent 管理、撤销或重新生成凭据。':'Back or close clears this view, not the created credential. Use group details → My Agents to manage, revoke or regenerate credentials.'}</p>
-   </details>
-  </section>}
  </section>;
 }

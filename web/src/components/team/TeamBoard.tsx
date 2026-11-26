@@ -1,4 +1,5 @@
 import { StudioIcon } from "../StudioIcon";
+import { PlatformIcon } from "../PlatformIcon";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { CollaborationRole } from "@agentparty/shared";
 import { useT, type TFunc } from "../../i18n/useT";
@@ -30,6 +31,8 @@ export interface TeamBoardProps {
   onReconnect?: (name: string) => void;
   /** #1060 PR C：把某个 agent 设为频道主持（走角色写路径）。 */
   onAssignHost?: (name: string) => Promise<boolean>;
+  /** Optional CTA for the empty board; the channel header owns the actual Add-Agent entry. */
+  onAddAgent?: () => void;
   squadSaving?: string | null;
   squadError?: string | null;
   onCreateSquad?: (name: string, draft: TeamSquadDraft) => Promise<boolean>;
@@ -65,7 +68,9 @@ function Avatar({ card }: { card: TeamCard }) {
   const src = card.avatarThumb ?? card.avatarUrl;
   return (
     <span className={`team-card-ava team-card-ava--${card.kind === "human" ? "human" : "agent"}`} aria-hidden="true">
-      {src ? <img src={src} alt="" /> : <span>{initials(card.display)}</span>}
+      {card.kind !== "human" && card.connectorType
+        ? <PlatformIcon platform={card.connectorType} size={24} decorative />
+        : src ? <img src={src} alt="" /> : <span>{initials(card.display)}</span>}
     </span>
   );
 }
@@ -177,7 +182,7 @@ function Card({
     ? (card.online ? t("TeamBoard.status.online") : presenceStateLabel("offline", t))
     : presenceStateLabel(card.presence.state, t);
   const lastSeen = card.lane === "offline" && card.lastSeen !== null ? teamAge(card.lastSeen, now, t) : null;
-  const canReconnect = onReconnect !== undefined && isAgent && !card.paused && (card.lane === "offline" || card.presence?.wake_block !== undefined);
+  const canReconnect = onReconnect !== undefined && isAgent && !card.online && !card.paused && (card.lane === "offline" || card.presence?.wake_block !== undefined);
   const showEdit = canModerate && onSaveRole !== undefined && isAgent;
   const relations = [
     card.reportsTo !== null ? t("TeamBoard.doing.reportsTo", { name: card.reportsTo }) : null,
@@ -395,6 +400,7 @@ export function TeamBoard({
   onOpenTask,
   onReconnect,
   onAssignHost,
+  onAddAgent,
   squadSaving = null,
   squadError = null,
   onCreateSquad,
@@ -461,7 +467,11 @@ export function TeamBoard({
         onDelete={onDeleteSquad}
       />
 
-      {model.cards.length === 0 && <p className="team-board-empty">{t("TeamBoard.empty")}</p>}
+      {model.cards.length === 0 && <div className="team-board-empty-state">
+        <p className="team-board-empty">{t("TeamBoard.empty")}</p>
+        <p className="team-card-muted">{t("TeamBoard.emptyHint")}</p>
+        {onAddAgent !== undefined && <button type="button" className="d-btn d-btn--primary team-board-empty-cta" onClick={onAddAgent}>{t("TeamBoard.emptyCta")}</button>}
+      </div>}
       {squadFilter !== null && (
         <p className="team-board-filter">
           {t("TeamBoard.squad.filtering", { name: squadFilter })}

@@ -52,6 +52,12 @@ describe("1-click personal and coding agent onboarding picker",()=>{
     expect(text(root)).not.toContain("AgentConnect.");
   });
 
+  test("cloud tiles are visible but disabled without channel manage permission",async()=>{
+    const root=await mount(<AgentConnectionPicker cloudDisabled onCloud={()=>{}} onLocal={()=>{}}/>);
+    expect(root.findByProps({"data-provider":"dot"}).props.disabled).toBe(true);
+    expect(root.findByProps({"data-coding-provider":"codex"}).props.disabled).toBe(false);
+    expect(text(root)).toContain("Only a group owner or moderator");
+  });
   test("MCP address contains no token and no policy changes happen until the human saves",async()=>{
     const calls:Array<{url:string;method:string;body:any}>=[];
     const policy={enabled:false,allow_write:false,allow_events:false,owner_mfa_enabled:true,require_mfa:true,updated_at:null};

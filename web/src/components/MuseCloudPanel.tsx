@@ -70,7 +70,10 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
    <button type="button" className="muse-method" onClick={()=>setMethod('gadget')}><strong>{locale==='zh'?'Gadget · 经已配对设备转发群任务':'Gadget · Relay tasks through a paired device'}</strong><span>{locale==='zh'?'用途：通过设备桥接把明确 @任务送到个人 Muse。':'Use: relay explicitly mentioned tasks to your personal Muse through a device bridge.'}</span><span>{locale==='zh'?'前提：隔离 Linux / BLE 设备、运行中的桥接服务，以及 Muse App 本人配对。':'Requires: an isolated Linux / BLE device, a running bridge service and your pairing confirmation in Muse App.'}</span><small>{locale==='zh'?'状态：本群设备条件未核验；不能在此网页登录 Muse 后直接连接。没有设备时请勿选这条路。':'Status: device prerequisites unverified. This is not web sign-in to Muse. Do not choose this route without a device.'}</small></button>
    <button type="button" className="muse-method" onClick={()=>setMethod('personal')}><strong>{t('Muse.personalTitle')}</strong><span>{t('Muse.personalCard')}</span></button>
   </div>}
-  {method==='personal'&&<PersonalMusePanel token={token} slug={slug} canManage={canManage}/>}
+  {method==='personal'&&<>
+   <p className="muse-safety">{t('Muse.personalWarning')}</p>
+   <PersonalMusePanel token={token} slug={slug} canManage={canManage}/>
+  </>}
   {method&&<button className="d-btn muse-method-back" type="button" onClick={()=>setMethod(null)}>{locale==='zh'?'← 返回选择接入方式':'← Choose a different method'}</button>}
   {method==='gadget'&&<section className="muse-gadget-primary" aria-label={locale==='zh'?'Gadget 设备桥接指南':'Gadget device bridge guide'}>
    <h4>{locale==='zh'?'这不是网页授权登录':'This is not web authorization'}</h4>
@@ -95,7 +98,8 @@ export function MuseCloudPanel({token,slug,canManage}:{token:string;slug:string;
    <details className="muse-technical"><summary>{locale==="zh"?"高级：OAuth 客户端注册与调试":"Advanced OAuth client registration"}</summary><ol className="muse-steps">
     <li><span className="muse-step-index">1</span><div><h4>{t('Muse.step1')}</h4><p>{t('Muse.step1Help')}</p>
      {!state.can_configure?<p className="commons-note">{t('Muse.mfa')} <a href="/auth/security">{t('Muse.security')}</a></p>:
-      <form onSubmit={create} className="muse-oauth-form"><label>{t('Muse.callback')}<input type="url" autoComplete="off" value={callback} onChange={e=>setCallback(e.target.value)} required maxLength={1400}/></label>
+      <form onSubmit={create} className="muse-oauth-form"><label>{t('Muse.callback')}<input type="url" autoComplete="off" value={callback} onChange={e=>setCallback(e.target.value)} placeholder="https://platform.muse.ai/callback" required maxLength={1400}/></label>
+      <small>{locale==='zh'?'填写 Muse 应用里登记的完整回调地址（含 https://）。':'Use the exact callback URL registered in your Muse app, including https://.'}</small>
       <button className="d-btn d-btn--primary" disabled={busy||blocked||!!created||!callback.trim()}><StudioIcon name="key"/>{t('Muse.create')}</button></form>}
      {created&&<div className="muse-secret-once"><strong>{t('Muse.secret')}</strong><p>{t('Muse.secretHint')}</p>
        <label>{t('Muse.client')}<input readOnly value={created.client_id}/></label>

@@ -71,6 +71,8 @@ export interface TeamCard {
   avatarThumb: string | null;
   lane: TeamLane;
   online: boolean;
+  /** Declared connector platform from the identities table; null when unknown/human. */
+  connectorType: string | null;
   paused: boolean;
   busy: boolean;
   queueDepth: number;
@@ -168,20 +170,24 @@ export function teamLaneOf(
   presence: PresenceEntry | null,
   deliveries: PublicDirectedDelivery[],
   tasks: TaskRecord[],
+  /** A connected WebSocket participant is evidence of presence even when no
+   * presence frame has arrived yet. Keep the default false for older callers. */
+  online = false,
 ): TeamLane {
-  if (presence === null || presence.state === "offline") return "offline";
-  if (presence.state === "blocked" || deliveries.some((d) => d.state === "waiting_owner")) return "blocked";
+  const offline = presence === null || presence.state === "offline";
+  if (offline && !online) return "offline";
+  if (presence?.state === "blocked" || deliveries.some((d) => d.state === "waiting_owner")) return "blocked";
   if (tasks.some((task) => task.state === "blocked")) return "blocked";
   if (
-    presence.state === "working"
-    || presence.busy === true
-    || presence.current_task !== undefined
+    presence?.state === "working"
+    || presence?.busy === true
+    || presence?.current_task !== undefined
     || deliveries.some((d) => d.state === "queued" || d.state === "claimed" || d.state === "running")
     || tasks.some((task) => task.state === "in_progress")
   ) {
     return "working";
   }
-  if (presence.state === "waiting" || tasks.some((task) => task.state === "needs_review" || task.state === "assigned")) {
+  if (presence?.state === "waiting" || tasks.some((task) => task.state === "needs_review" || task.state === "assigned")) {
     return "waiting";
   }
   return "idle";
@@ -287,7 +293,7 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
     });
     const memberTasks = tasksByName.get(name) ?? [];
     const memberDeliveries = deliveriesByName.get(name) ?? [];
-    const lane = teamLaneOf(entry, memberDeliveries, memberTasks);
+    const lane = teamLaneOf(entry, memberDeliveries, memberTasks, view.runtime.online);
     const host = hostByName.get(name);
     const lineage = lineageByName.get(name) ?? null;
     const currentTaskId = entry?.current_task ?? null;
@@ -308,6 +314,7 @@ export function buildTeamBoard(input: BuildTeamBoardInput): TeamBoardModel {
       avatarThumb: entry?.avatar_thumb ?? null,
       lane,
       online: view.runtime.online,
+      connectorType: identity?.connector_type ?? null,
       paused: entry?.paused === true,
       busy: entry?.busy === true,
       queueDepth: entry?.queue_depth ?? 0,

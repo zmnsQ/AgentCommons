@@ -142,7 +142,19 @@ export function ConversationHeader({
             className="header-action-btn"
             onClick={onOpenTasks}
             aria-label={zh ? "任务台账" : "Tasks"}
-            title={zh ? "任务台账" : "Tasks"}
+            title={
+              taskAttentionCount > 0
+                ? zh
+                  ? `任务：${taskAttentionCount} 项待验收或受阻`
+                  : `Tasks: ${taskAttentionCount} need review or blocked`
+                : taskOpenCount > 0
+                  ? zh
+                    ? `任务：${taskOpenCount} 项进行中`
+                    : `Tasks: ${taskOpenCount} open`
+                  : zh
+                    ? "任务台账"
+                    : "Tasks"
+            }
           >
             <StudioIcon name="tasks" />
             <span className="header-action-label">{zh ? "任务" : "Tasks"}</span>
@@ -164,10 +176,10 @@ export function ConversationHeader({
             className="header-action-btn header-action-btn--desktop-only"
             onClick={onOpenCollaboration}
             aria-label={zh ? "文件与代码" : "Files & Code"}
-            title={zh ? "协作空间：文件、仓库与云端 Agent" : "Workspace: files, repositories & cloud agents"}
+            title={zh ? "协作空间：共享文件、代码仓库与提案" : "Workspace: shared files, repositories & proposals"}
           >
             <StudioIcon name="folder" />
-            <span className="header-action-label">{zh ? "文件与代码" : "Workspace"}</span>
+            <span className="header-action-label">{zh ? "文件与代码" : "Files & Code"}</span>
           </button>
         )}
 
@@ -198,7 +210,7 @@ export function ConversationHeader({
         {onAddAgent && (
           <button type="button" className="invite-button" onClick={onAddAgent}>
             <StudioIcon name="plus" />
-            <span>{zh ? "邀请 Agent" : "Invite Agent"}</span>
+            <span>{zh ? "添加 Agent" : "Add Agent"}</span>
           </button>
         )}
       </div>

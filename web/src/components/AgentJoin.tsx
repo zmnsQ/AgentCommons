@@ -63,6 +63,7 @@ function isMacDesktop(): boolean {
 import { apiOrigin } from "../lib/base";
 import { forbiddenText } from "../lib/forbidden";
 import { useT, type TFunc } from "../i18n/useT";
+import { useLocale } from "../i18n/locale";
 import { useDismissableLayer } from "./useDismissableLayer";
 import { useModalFocusTrap } from "./useModalFocusTrap";
 import "../i18n/strings/AgentJoin";
@@ -347,6 +348,7 @@ export function AgentJoin({
   now: nowFn = Date.now,
 }: Props) {
   const t = useT();
+  const { locale } = useLocale(), zh = locale === "zh";
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [localChosen,setLocalChosen]=useState(false);
   const [nativeClient,setNativeClient]=useState<NativeCodingClient|null>(null);
@@ -436,10 +438,17 @@ export function AgentJoin({
     setSendErr(false);
   }, []);
 
+  const retryMint = useCallback(() => {
+    setMintUnknown(false);
+    mintPending.current = false;
+    setPhase({ kind: "compose" });
+  }, []);
   const close = useCallback(() => {
+    // Never drop a one-time token by closing while the mint request is live.
+    if (phase.kind === "loading") return;
     reset();
     onActiveChange?.(false);
-  }, [onActiveChange, reset]);
+  }, [onActiveChange, phase.kind, reset]);
 
   const previousActiveRef = useRef<boolean | undefined>(undefined);
   useEffect(() => {
@@ -880,11 +889,17 @@ export function AgentJoin({
         </button>
       )}
 
-      {mintUnknown&&phase.kind!=="error"&&<p role="alert" className="banner banner--red agent-join-err">{t("AgentJoin.errUnknown")}</p>}
+      {mintUnknown&&phase.kind!=="error"&&<div className="agent-join-unknown">
+        <p role="alert" className="banner banner--red agent-join-err">{t("AgentJoin.errUnknown")}</p>
+        <button type="button" className="d-btn agent-join-retry" onClick={retryMint}>{zh?"我已检查「我的 Agent」，重试":"I checked My Agents, retry"}</button>
+      </div>}
       {phase.kind === "error" && (
-        <p className="banner banner--red agent-join-err" role="alert">
-          {phase.message}
-        </p>
+        <div className="agent-join-error">
+          <p className="banner banner--red agent-join-err" role="alert">
+            {phase.message}
+          </p>
+          {mintUnknown && <button type="button" className="d-btn agent-join-retry" onClick={retryMint}>{zh ? "我已检查「我的 Agent」，重试" : "I checked My Agents, retry"}</button>}
+        </div>
       )}
 
       {removedIdentity?.mode==="mint"&&<AgentAccessRecovery key={mintKey+removedIdentity.name} name={removedIdentity.name} token={token} slug={slug} onBusyChange={setRecoveryBusy} onRestored={()=>{setRemovedIdentity(null);setNameErr(null);setPhase({kind:"compose"});}}/>}
@@ -904,7 +919,7 @@ export function AgentJoin({
               <h2 className="d-title agent-join-title">
                 {t("AgentJoin.titlePrefix")} <span className="d-hl">{channelTitle?.trim() || slug}</span>
               </h2>
-              <button type="button" className="agent-join-close t-mono" onClick={close} aria-label={t("AgentJoin.close")}>
+              <button type="button" className="agent-join-close t-mono" onClick={close} disabled={phase.kind === "loading"} aria-label={t("AgentJoin.close")}>
                 <StudioIcon name="close" />
               </button>
             </header>
@@ -921,6 +936,7 @@ export function AgentJoin({
                 onBack={() => setCloudProvider(null)}
               />
             ) : (onCloudConnect || canManageCloud !== undefined) && !localChosen ? <AgentConnectionPicker
+              cloudDisabled={canManageCloud === false}
               onCloud={provider=>{
                 if (canManageCloud !== undefined) {
                   setCloudProvider(provider);
@@ -1077,7 +1093,7 @@ export function AgentJoin({
                   {t(session.recover ? "AgentJoin.stepper.titleRecoverSuffix" : "AgentJoin.stepper.titleSuffix")}
                 </>
               </h2>
-              <button type="button" className="agent-join-close t-mono" onClick={close} aria-label={t("AgentJoin.close")}>
+              <button type="button" className="agent-join-close t-mono" onClick={close} disabled={phase.kind === "loading"} aria-label={t("AgentJoin.close")}>
                 <StudioIcon name="close" />
               </button>
             </header>

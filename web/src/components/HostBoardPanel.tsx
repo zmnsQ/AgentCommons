@@ -5,6 +5,7 @@ import "../i18n/strings/WakeReceipt";
 import { hostLeaseLabel, presenceStateLabel, residencyLabel } from "../lib/presenceLabels";
 import { wakeKindLabel } from "../lib/wakeKindLabel";
 import type { HostBoard, RecommendedAction } from "@agentparty/shared";
+import { useLocale } from "../i18n/locale";
 import { useT } from "../i18n/useT";
 import {
   resolveIdentityPresentation,
@@ -61,17 +62,26 @@ export function buildHostCandidate(
 
 const EMPTY_HOST_CANDIDATES: readonly HostCandidate[] = [];
 
-function RecommendedActionCard({ action }: { action: RecommendedAction }) {
+function RecommendedActionCard({ action, onOpen }: { action: RecommendedAction; onOpen?: (action: RecommendedAction) => void }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
+  const copy: Record<RecommendedAction["kind"], [string, string]> = {
+    "assign-host": [zh ? "指定协调者" : "Choose a coordinator", zh ? "群内还没有协调者。" : "This group has no coordinator yet."],
+    "review-blockers": [zh ? "处理阻塞任务" : "Review blocked tasks", zh ? "有任务需要帮助才能继续，请查看阻塞原因。" : "Some tasks need help to continue. Review their blockers."],
+    "resolve-conflict": [zh ? "协调重复分工" : "Resolve overlapping work", zh ? "多个成员的任务范围重叠，请明确分工。" : "Members have overlapping work. Agree on clear ownership."],
+    "takeover": [zh ? "检查协调者状态" : "Check coordinator availability", zh ? "之前的协调者已无响应，请核对状态后决定是否交接。" : "The previous coordinator is not responding. Check its status before arranging a handover."],
+    "clear-loop-guard": [zh ? "恢复智能体交流" : "Resume agent conversation", zh ? "自动交流已达到限制。成员发送一条消息，或由管理员重置后可继续。" : "Automatic conversation reached its limit. A member message or an administrator reset allows it to continue."],
+  };
   return (
     <li className={`host-action host-action--${action.kind}`}>
       <div className="host-action-head">
-        <span className="t-mono host-action-kind">{action.kind}</span>
+        <span className="t-mono host-action-kind">{copy[action.kind][0]}</span>
         {action.target !== null && <span className="host-action-target">{action.target}</span>}
         {action.requires_human && <span className="t-mono host-action-human">{t("Channel.hostBoard.human")}</span>}
       </div>
-      <p>{action.reason}</p>
-      {action.command !== null && <code>{action.command}</code>}
+      <p>{copy[action.kind][1]}</p>
+      {onOpen && <button type="button" className="d-btn" onClick={() => onOpen(action)}>{action.kind === "review-blockers" || action.kind === "resolve-conflict" ? (zh ? "查看任务" : "View tasks") : action.kind === "takeover" ? (zh ? "查看成员" : "View member") : (zh ? "查看防护设置" : "View guard settings")}</button>}
+      <details><summary>{zh ? "技术详情" : "Technical details"}</summary><p>{action.reason}</p>{action.command !== null && <code>{action.command}</code>}</details>
     </li>
   );
 }
@@ -85,7 +95,9 @@ export function HostBoardPanel({
   token,
   slug,
   onAssignHost,
+  onRecommendedAction,
 }: {
+  onRecommendedAction?: (action: RecommendedAction) => void;
   board: HostBoard;
   candidates?: readonly HostCandidate[];
   canAssignHost?: boolean;
@@ -228,6 +240,7 @@ export function HostBoardPanel({
             <RecommendedActionCard
               key={`${action.kind}:${action.target ?? "channel"}:${index}`}
               action={action}
+              onOpen={onRecommendedAction}
             />
           ))}
         </ol>

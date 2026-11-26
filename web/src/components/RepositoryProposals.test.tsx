@@ -56,6 +56,7 @@ describe("human approval of agent code proposals", () => {
     expect(renderer!.root.findAllByProps({ type: "password" })).toHaveLength(0);
     await openReview();
     expect(detailReads).toBe(1);
+    await act(async () => { button("Expand all").props.onClick(); });
     expect(text(renderer!.root)).toContain("export const max = 5;");
     expect(text(renderer!.root)).toContain("export const max = 10;");
     expect(text(renderer!.root)).toContain("Remove this note.");

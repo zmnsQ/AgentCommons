@@ -5,6 +5,7 @@ import { useCompactViewport } from "../../lib/useCompactViewport";
 import { fmtTime } from "../../lib/time";
 import { AttachmentList } from "../AttachmentList";
 import { StudioIcon } from "../StudioIcon";
+import { useLocale } from "../../i18n/locale";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
 
@@ -24,6 +25,41 @@ export interface TaskLedgerView {
   doneLimit: number;
   expanded: boolean;
   detail: number | null;
+}
+
+type AssigneeOption = { name: string; kind: TaskAssigneeKind; display: string };
+
+function TaskAssigneePicker({ name, kind, options, disabled, label, kindLabel, allowUnassigned = false, onChange }: {
+  name: string; kind: TaskAssigneeKind; options: AssigneeOption[]; disabled: boolean;
+  label: string; kindLabel: string; allowUnassigned?: boolean; onChange(name: string, kind: TaskAssigneeKind): void;
+}) {
+  const t = useT();
+  const { locale } = useLocale();
+  const [custom, setCustom] = useState(false);
+  const known = options.find(option => option.name === name.trim());
+  const customEntry = custom || (name !== "" && !known);
+  return <div className="task-assignee-picker">
+    <select aria-label={label} value={customEntry ? "__custom__" : name} disabled={disabled} onChange={event => {
+      const value = event.currentTarget.value;
+      if (value === "__custom__") { setCustom(true); onChange("", "agent"); return; }
+      setCustom(false);
+      onChange(value, options.find(option => option.name === value)?.kind ?? "agent");
+    }}>
+      <option value="">{allowUnassigned ? t("Channel.tasks.filterUnassigned") : (locale === "zh" ? "选择受理人" : "Choose an owner")}</option>
+      {options.map(option => <option key={option.name} value={option.name}>{option.display} · {t(`Channel.tasks.kind.${option.kind}`)}</option>)}
+      <option value="__custom__">{locale === "zh" ? "其他成员或小组…" : "Other member or team…"}</option>
+    </select>
+    {customEntry && <>
+      <input aria-label={locale === "zh" ? "成员或小组名称" : "Member or team name"} value={name} disabled={disabled} onChange={event => {
+        const value = event.currentTarget.value;
+        const match = options.find(option => option.name === value.trim());
+        onChange(value, match?.kind ?? kind);
+      }} />
+      <select aria-label={kindLabel} value={known?.kind ?? kind} disabled={disabled || !!known} onChange={event => onChange(name, event.currentTarget.value as TaskAssigneeKind)}>
+        {(["agent", "human", "squad"] as const).map(value => <option key={value} value={value}>{t(`Channel.tasks.kind.${value}`)}</option>)}
+      </select>
+    </>}
+  </div>;
 }
 
 export function TaskLedgerPanel({
@@ -58,9 +94,9 @@ export function TaskLedgerPanel({
   creating: boolean;
   createError: string | null;
   onRefresh: () => void;
-  onSetState: (id: number, state: TaskState, blockedReason?: string) => void;
+  onSetState: (id: number, state: TaskState, blockedReason?: string) => void | boolean | Promise<boolean | void>;
   onAssign: (id: number, name: string, kind: TaskAssigneeKind) => void;
-  onReview: (task: TaskRecord, action: "approve" | "reject", reason?: string) => void;
+  onReview: (task: TaskRecord, action: "approve" | "reject", reason?: string) => void | boolean | Promise<boolean | void>;
   onCreateTask: (input: {
     title: string;
     desc: string;
@@ -80,6 +116,8 @@ export function TaskLedgerPanel({
   viewMemory?: {current:TaskLedgerView|null};
 }) {
   const t = useT(), compact = useCompactViewport();
+  const { locale } = useLocale();
+  const zh = locale === "zh";
   const [assignDrafts, setAssignDrafts] = useState<Record<number, string>>({});
   const [assignKinds, setAssignKinds] = useState<Record<number, TaskAssigneeKind>>({});
   const [dragTaskId, setDragTaskId] = useState<number | null>(null);
@@ -92,13 +130,51 @@ export function TaskLedgerPanel({
   // #369：新建任务的待发附件（先上传到 R2 拿引用，随 createTask 带上）。
   const [newAtts, setNewAtts] = useState<Attachment[]>([]);
   const [attUploading, setAttUploading] = useState(false);
-  const onPickTaskFiles = (files: FileList | null) => {
-    if (files === null || files.length === 0 || onUploadAttachment === undefined) return;
+  const uploadEpoch = useRef(0);
+  const uploadPending = useRef(false);
+  const [failedFiles, setFailedFiles] = useState<File[]>([]);
+  const invalidateUploads = () => {
+    uploadEpoch.current++;
+    uploadPending.current = false;
+    setAttUploading(false);
+    setFailedFiles([]);
+  };
+  useEffect(() => () => { uploadEpoch.current++; }, []);
+  const onPickTaskFiles = (files: FileList | File[] | null) => {
+    if (!files?.length || !onUploadAttachment || uploadPending.current) return;
+    const batch = ++uploadEpoch.current;
+    const picked = Array.from(files);
+    uploadPending.current = true;
     setAttUploading(true);
-    Promise.all(Array.from(files).map((f) => onUploadAttachment(f)))
-      .then((refs) => setNewAtts((cur) => [...cur, ...refs]))
-      .catch(() => {})
-      .finally(() => setAttUploading(false));
+    setFailedFiles(current => current.filter(file => !picked.includes(file)));
+    void Promise.allSettled(picked.map(file => Promise.resolve().then(() => onUploadAttachment(file))))
+      .then(results => {
+        if (batch !== uploadEpoch.current) return;
+        const refs: Attachment[] = [];
+        const failed: File[] = [];
+        results.forEach((result, index) => {
+          if (result.status === "fulfilled") refs.push(result.value);
+          else failed.push(picked[index]!);
+        });
+        setNewAtts(current => [...current, ...refs]);
+        setFailedFiles(current => [...current, ...failed]);
+      }).finally(() => {
+        if (batch === uploadEpoch.current) { uploadPending.current = false; setAttUploading(false); }
+      });
+  };
+  const reasonPending = useRef(false);
+  const [reasonBusy, setReasonBusy] = useState<number | null>(null);
+  const [reasonError, setReasonError] = useState<string | null>(null);
+  const submitReason = async (id: number, action: () => void | boolean | Promise<boolean | void>, clear: () => void) => {
+    if (reasonPending.current) return;
+    reasonPending.current = true;
+    setReasonBusy(id);
+    setReasonError(null);
+    try {
+      if (await action() !== false) clear();
+    } catch {
+      setReasonError(zh ? "未能保存，请重试。输入已保留。" : "Could not save. Your input is preserved; please retry.");
+    } finally { reasonPending.current = false; setReasonBusy(null); }
   };
   const [rejectingTaskId, setRejectingTaskId] = useState<number | null>(null);
   const [rejectDraft, setRejectDraft] = useState("");
@@ -165,6 +241,10 @@ export function TaskLedgerPanel({
     return acc;
   }, {});
   const identityByName = new Map(identities.map((identity) => [identity.name, identity]));
+  const typedAssignees = new Map<string, AssigneeOption>();
+  for (const task of tasks) if (task.assignee) typedAssignees.set(task.assignee.name, { ...task.assignee, display: task.assignee.name });
+  for (const identity of identities) if (identity.kind === "human" || identity.kind === "agent") typedAssignees.set(identity.name, { name: identity.name, kind: identity.kind, display: identity.display });
+  const pickerOptions = [...typedAssignees.values()];
   const identityLabel = (name: string): string => identityByName.get(name)?.display ?? name;
   const assigneeOptions = [...new Set(
     tasks.flatMap((task) => (task.assignee !== null ? [task.assignee.name] : [])),
@@ -224,10 +304,11 @@ export function TaskLedgerPanel({
       title,
       desc: newDesc.trim(),
       priority: newPriority,
-      assignee: assigneeName === "" ? null : { name: assigneeName, kind: newAssigneeKind },
+      assignee: assigneeName === "" ? null : { name: assigneeName, kind: typedAssignees.get(assigneeName)?.kind ?? newAssigneeKind },
       attachments: newAtts,
     }).then((ok) => {
       if (!ok) return;
+      invalidateUploads();
       setNewTitle("");
       setNewDesc("");
       setNewPriority(0);
@@ -238,9 +319,9 @@ export function TaskLedgerPanel({
     });
   };
   const renderTaskControls = (task: TaskRecord) => {
-    const taskBusy = busyTaskId === task.id;
+    const taskBusy = busyTaskId === task.id || reasonBusy !== null;
     const assignDraft = assignDrafts[task.id] ?? task.assignee?.name ?? "";
-    const assignKind = assignKinds[task.id] ?? task.assignee?.kind ?? "agent";
+    const assignKind = typedAssignees.get(assignDraft.trim())?.kind ?? assignKinds[task.id] ?? task.assignee?.kind ?? "agent";
     const reviewSeq = taskCompletionSeq(task);
     return (
       <div className="task-detail-controls">
@@ -267,14 +348,13 @@ export function TaskLedgerPanel({
                 disabled={disabled || taskBusy}
                 aria-expanded={blockingTaskId === task.id}
                 onClick={() => {
-                  setBlockingTaskId(task.id);
-                  setBlockDraft("");
+                  if (blockingTaskId !== task.id) { setBlockingTaskId(task.id); setBlockDraft(""); }
                 }}
               >
                 {t("Channel.tasks.action.block")}
               </button>
             )}
-            {task.state !== "done" && (
+            {task.state !== "done" && reviewSeq === null && (
               <button className="task-action-btn" type="button" disabled={disabled || taskBusy} onClick={() => onSetState(task.id, "done")}>
                 {t("Channel.tasks.action.done")}
               </button>
@@ -284,7 +364,7 @@ export function TaskLedgerPanel({
                 <button className="task-action-btn task-action-btn--review" type="button" disabled={disabled || taskBusy} onClick={() => onReview(task, "approve")}>
                   {t("Channel.tasks.action.approve")}
                 </button>
-                <button className="task-action-btn" type="button" disabled={disabled || taskBusy} aria-expanded={rejectingTaskId === task.id} onClick={() => { setRejectingTaskId(task.id); setRejectDraft(""); }}>
+                <button className="task-action-btn" type="button" disabled={disabled || taskBusy} aria-expanded={rejectingTaskId === task.id} onClick={() => { if (rejectingTaskId !== task.id) { setRejectingTaskId(task.id); setRejectDraft(""); } }}>
                   {t("Channel.tasks.action.reject")}
                 </button>
               </>
@@ -297,9 +377,9 @@ export function TaskLedgerPanel({
                 event.preventDefault();
                 const reason = blockDraft.trim();
                 if (reason === "") return;
-                onSetState(task.id, "blocked", reason);
-                setBlockingTaskId(null);
-                setBlockDraft("");
+                void submitReason(task.id, () => onSetState(task.id, "blocked", reason), () => {
+                  setBlockingTaskId(null); setBlockDraft("");
+                });
               }}
             >
               <textarea
@@ -340,9 +420,9 @@ export function TaskLedgerPanel({
                   type="button"
                   disabled={taskBusy || rejectDraft.trim() === ""}
                   onClick={() => {
-                    onReview(task, "reject", rejectDraft.trim());
-                    setRejectingTaskId(null);
-                    setRejectDraft("");
+                    void submitReason(task.id, () => onReview(task, "reject", rejectDraft.trim()), () => {
+                      setRejectingTaskId(null); setRejectDraft("");
+                    });
                   }}
                 >
                   {t("Channel.reject.confirm")}
@@ -360,29 +440,12 @@ export function TaskLedgerPanel({
             className="task-assign-form"
             onSubmit={(event) => {
               event.preventDefault();
-              onAssign(task.id, assignDraft, assignKind);
+              onAssign(task.id, assignDraft.trim(), assignKind);
             }}
           >
-            <input
-              aria-label={t("Channel.tasks.assignAria", { id: task.id })}
-              disabled={disabled || taskBusy}
-              value={assignDraft}
-              placeholder={t("Channel.tasks.assignPlaceholder")}
-              list="task-assignee-targets"
-              autoComplete="off"
-              spellCheck={false}
-              onChange={(event) => setAssignDrafts((current) => ({ ...current, [task.id]: event.currentTarget.value }))}
-            />
-            <select
-              aria-label={t("Channel.tasks.kindAria", { id: task.id })}
-              disabled={disabled || taskBusy}
-              value={assignKind}
-              onChange={(event) => setAssignKinds((current) => ({ ...current, [task.id]: event.currentTarget.value as TaskAssigneeKind }))}
-            >
-              <option value="agent">{t("Channel.tasks.kind.agent")}</option>
-              <option value="human">{t("Channel.tasks.kind.human")}</option>
-              <option value="squad">{t("Channel.tasks.kind.squad")}</option>
-            </select>
+            <TaskAssigneePicker key={task.id} name={assignDraft} kind={assignKind} options={pickerOptions} disabled={disabled || taskBusy}
+              label={t("Channel.tasks.assignAria", { id: task.id })} kindLabel={t("Channel.tasks.kindAria", { id: task.id })}
+              onChange={(name, kind) => { setAssignDrafts(current => ({ ...current, [task.id]: name })); setAssignKinds(current => ({ ...current, [task.id]: kind })); }} />
             <button className="task-action-btn" type="submit" disabled={disabled || taskBusy || assignDraft.trim() === ""}>
               {t("Channel.tasks.action.assign")}
             </button>
@@ -397,7 +460,7 @@ export function TaskLedgerPanel({
     );
   };
   const renderTask = (task: TaskRecord) => {
-    const taskBusy = busyTaskId === task.id;
+    const taskBusy = busyTaskId === task.id || reasonBusy !== null;
     const assignee = task.assignee === null
       ? t("Channel.tasks.unassigned")
       : identityLabel(task.assignee.name);
@@ -459,11 +522,6 @@ export function TaskLedgerPanel({
         closeTaskDetail();
       }}
     >
-      <datalist id="task-assignee-targets">
-        {identities.map((identity) => (
-          <option key={identity.name} value={identity.name}>{identity.display}</option>
-        ))}
-      </datalist>
       {detailTask === null ? (
         <>
           <header className="task-blog-head">
@@ -486,7 +544,7 @@ export function TaskLedgerPanel({
                   aria-label={t("Channel.tasks.new")}
                   aria-expanded={composerOpen}
                   disabled={loading}
-                  onClick={() => setComposerOpen((open) => !open)}
+                  onClick={() => { if (composerOpen) invalidateUploads(); setComposerOpen((open) => !open); }}
                 >
                   {t("Channel.tasks.new")}
                 </button>
@@ -504,7 +562,7 @@ export function TaskLedgerPanel({
                 {expandedView ? t("Channel.tasks.collapse") : t("Channel.tasks.expand")}
               </button>
               {onClose !== undefined && (
-                <button type="button" className="d-btn task-blog-close" onClick={onClose}>
+                <button type="button" className="d-btn task-blog-close" onClick={() => { invalidateUploads(); onClose?.(); }}>
                   {t("Channel.tools.close")}
                 </button>
               )}
@@ -599,38 +657,10 @@ export function TaskLedgerPanel({
               <div className="task-new-options">
                 <label>
                   <span>{t("Channel.tasks.newAssignee")}</span>
-                  <select
-                    aria-label={t("Channel.tasks.newAssigneeAria")}
-                    value={newAssignee}
-                    disabled={creating}
-                    onChange={(event) => {
-                      const name = event.currentTarget.value;
-                      setNewAssignee(name);
-                      const kind = identityByName.get(name)?.kind;
-                      if (kind === "agent" || kind === "human") setNewAssigneeKind(kind);
-                    }}
-                  >
-                    <option value="">{t("Channel.tasks.filterUnassigned")}</option>
-                    {identities.map((identity) => (
-                      <option key={identity.name} value={identity.name}>{identity.display}</option>
-                    ))}
-                  </select>
+                  <TaskAssigneePicker allowUnassigned name={newAssignee} kind={newAssigneeKind} options={pickerOptions} disabled={creating}
+                    label={t("Channel.tasks.newAssigneeAria")} kindLabel={t("Channel.tasks.newAssigneeKindAria")}
+                    onChange={(name, kind) => { setNewAssignee(name); setNewAssigneeKind(kind); }} />
                 </label>
-                {newAssignee !== "" && (
-                  <label>
-                    <span>{t("Channel.tasks.newAssigneeKind")}</span>
-                    <select
-                      aria-label={t("Channel.tasks.newAssigneeKindAria")}
-                      value={newAssigneeKind}
-                      disabled={creating}
-                      onChange={(event) => setNewAssigneeKind(event.currentTarget.value as TaskAssigneeKind)}
-                    >
-                      <option value="agent">{t("Channel.tasks.kind.agent")}</option>
-                      <option value="human">{t("Channel.tasks.kind.human")}</option>
-                      <option value="squad">{t("Channel.tasks.kind.squad")}</option>
-                    </select>
-                  </label>
-                )}
                 <label>
                   <span>{t("Channel.tasks.newPriority")}</span>
                   <select
@@ -656,6 +686,15 @@ export function TaskLedgerPanel({
                     />
                     {attUploading ? t("Channel.tasks.attachUploading") : t("Channel.tasks.attach")}
                   </label>
+                  {failedFiles.length > 0 && <div role="alert">
+                    <p>{zh ? "以下文件上传失败，请重试或移除：" : "These files could not be uploaded. Retry or remove them:"}</p>
+                    <ul>{failedFiles.map((file, index) => <li key={`${file.name}:${index}`}>
+                      {file.name}
+                      <button type="button" className="d-btn" aria-label={`${zh ? "重试" : "Retry"} ${file.name}`} disabled={attUploading || creating} onClick={() => onPickTaskFiles([file])}>{zh ? "重试" : "Retry"}</button>
+                      <button type="button" className="d-btn" aria-label={`${zh ? "移除" : "Remove"} ${file.name}`} disabled={attUploading || creating} onClick={() => setFailedFiles(current => current.filter(item => item !== file))}>{zh ? "移除" : "Remove"}</button>
+                    </li>)}</ul>
+                    {failedFiles.length > 1 && <button type="button" className="d-btn" disabled={attUploading || creating} onClick={() => onPickTaskFiles(failedFiles)}>{zh ? "重试全部失败文件" : "Retry all failed files"}</button>}
+                  </div>}
                   {newAtts.length > 0 && (
                     <ul className="task-new-atts">
                       {newAtts.map((att) => (
@@ -685,6 +724,7 @@ export function TaskLedgerPanel({
                   type="button"
                   disabled={creating}
                   onClick={() => {
+                    invalidateUploads();
                     setComposerOpen(false);
                     setNewTitle("");
                     setNewDesc("");
@@ -701,6 +741,7 @@ export function TaskLedgerPanel({
           )}
           {error !== null && <p className="banner banner--red">{error}</p>}
           {actionError !== null && <p className="banner banner--red">{actionError}</p>}
+          {reasonError !== null && <p className="banner banner--red" role="alert">{reasonError}</p>}
           {tasks.length === 0 && error === null ? (
         <p className="charter-empty">{t("Channel.tasks.empty")}</p>
       ) : (
@@ -726,10 +767,14 @@ export function TaskLedgerPanel({
                   const rawId = event.dataTransfer.getData("text/plain");
                   const id = Number.parseInt(rawId, 10);
                   setDragTaskId(null);
-                  if (!Number.isInteger(id) || disabled) return;
+                  if (!Number.isInteger(id) || disabled || busyTaskId === id || reasonPending.current) return;
                   const task = tasks.find((item) => item.id === id);
                   if (task === undefined || task.state === state) return;
-                  onSetState(id, state);
+                  if (state === "blocked") {
+                    setDetailTaskId(id); setBlockingTaskId(id); setBlockDraft("");
+                  } else if (state === "done" && taskCompletionSeq(task) !== null) {
+                    setDetailTaskId(id);
+                  } else { void onSetState(id, state); }
                 }}
               >
                 <header className="task-column-head">
@@ -867,6 +912,7 @@ export function TaskLedgerPanel({
                 </dl>
               </section>
               {actionError !== null && <p className="banner banner--red">{actionError}</p>}
+              {reasonError !== null && <p className="banner banner--red" role="alert">{reasonError}</p>}
               {renderTaskControls(detailTask)}
             </aside>
           </div>

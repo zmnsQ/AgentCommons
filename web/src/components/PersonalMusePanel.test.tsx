@@ -16,7 +16,7 @@ beforeEach(()=>{
 afterEach(async()=>{if(renderer)await act(async()=>renderer?.unmount());renderer=null;globalThis.fetch=oldFetch;if(storage)Object.defineProperty(globalThis,'localStorage',storage);else Reflect.deleteProperty(globalThis,'localStorage');});
 async function render(canManage=true){await act(async()=>{renderer=create(<LocaleProvider><PersonalMusePanel token="fixture" slug="group" canManage={canManage}/></LocaleProvider>);});return renderer!.root;}
 test('default disabled is not connected and only GET is used, including refresh',async()=>{
- const root=await render();expect(text(root)).toContain('Not enabled on this server');expect(text(root)).toContain('not an official Muse login integration');
+ const root=await render();expect(text(root)).toContain('Not enabled on this server');expect(text(root)).toContain('Contact your administrator');expect(root.findAllByType('ol')).toHaveLength(0);
  expect(root.findAllByType('input')).toHaveLength(0);expect(root.findAllByType('form')).toHaveLength(0);
  await act(async()=>root.findByType('button').props.onClick());expect(calls).toEqual(['GET','GET']);
 });
@@ -43,7 +43,7 @@ test('an old group response cannot replace the current group state',async()=>{
 });
 async function fill(root:ReactTestInstance){for(const [name,value] of [['account_label','My account'],['sidechat_label','My dedicated chat'],['sidechat_id','chat_123']])await act(async()=>root.findByProps({name}).props.onChange({currentTarget:{value}}));}
 test('enabled form is collapsed and explicit save is the only binding mutation',async()=>{
- data={enabled:true,configured:false,state:'unconfigured'};const root=await render();expect(root.findByType('details').props.open).toBeUndefined();expect(calls).toEqual(['GET']);
+ data={enabled:true,configured:false,state:'unconfigured'};const root=await render();expect(root.findByProps({className:'muse-technical'}).props.open).toBeUndefined();expect(calls).toEqual(['GET']);
  expect(root.findAllByType('input').map(x=>x.props.name)).toEqual(['account_label','sidechat_label','sidechat_id']);await fill(root);
  const writes:unknown[]=[];globalThis.fetch=(async(_input:RequestInfo|URL,init?:RequestInit)=>{calls.push(init?.method??'GET');if(init?.method==='PUT'){writes.push(JSON.parse(String(init.body)));return Response.json({binding_id:'binding-1'});}return Response.json({enabled:true,configured:true,state:'reconnect_required',binding:{binding_id:'binding-1'}});}) as typeof fetch;
  await act(async()=>root.findByType('form').props.onSubmit({preventDefault(){}}));

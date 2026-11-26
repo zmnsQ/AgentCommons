@@ -123,6 +123,10 @@ export function ResidentDutyLogs({
   const [listError, setListError] = useState<string | null>(null);
   const [logError, setLogError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const targetSnapshot = useRef<LocalAgentRow[]>([]);
+  const snapshots = useRef(new Map<string, LogEntry[]>());
+  const failedSources = useRef(new Set<string>());
+  const [lastRead, setLastRead] = useState<number | null>(null);
   const requestRef = useRef(0);
   const activeRef = useRef(active);
   const selectedRef = useRef(selected);
@@ -167,20 +171,28 @@ export function ResidentDutyLogs({
     });
   }, [adapter, t]);
 
-  const loadLogs = useCallback(async (nextTargets: LocalAgentRow[], nextSelected: string) => {
+  const loadLogs = useCallback(async (nextTargets: LocalAgentRow[], nextSelected: string, retryFailed = false) => {
     const request = ++requestRef.current;
     const chosen = nextSelected === "all"
       ? nextTargets
       : nextTargets.filter((target) => target.key === nextSelected);
     setBusy(true);
     setLogError(null);
-    setEntries([]);
+    const requested = retryFailed ? chosen.filter(row => failedSources.current.has(row.key)) : chosen;
     try {
-      const results = await Promise.allSettled(chosen.map((row, index) => readRow(row, index)));
+      const results = await Promise.allSettled(requested.map(row => readRow(row, nextTargets.indexOf(row))));
       if (!activeRef.current || request !== requestRef.current) return;
-      const perSource = Math.max(1, Math.floor(1_500 / Math.max(1, chosen.length)));
-      const nextEntries = results
-        .flatMap((result) => result.status === "fulfilled" ? result.value.slice(-perSource) : [])
+      const perSource = Math.max(1, Math.floor(1_500 / Math.max(1, nextTargets.length)));
+      results.forEach((result, index) => {
+        const key = requested[index]!.key;
+        if (result.status === "fulfilled") {
+          snapshots.current.set(key, result.value.slice(-perSource));
+          failedSources.current.delete(key);
+        } else failedSources.current.add(key);
+      });
+      if (results.some(result => result.status === "fulfilled")) setLastRead(Date.now());
+      const nextEntries = chosen
+        .flatMap(row => snapshots.current.get(row.key) ?? [])
         .sort((left, right) => {
           // 最新在上：有时间的跨 Agent 合并为真实时间线；旧日志没有时间时，按来源和
           // 来源内倒序稳定展示，并明确标为「时间未知」，不伪造时间。
@@ -193,9 +205,8 @@ export function ResidentDutyLogs({
           return right.lineOrder - left.lineOrder;
         });
       setEntries(nextEntries);
-      if (results.some((result) => result.status === "rejected")) {
-        setLogError(t("ResidentDutyLogs.partialError"));
-      }
+      const failed = chosen.filter(row => failedSources.current.has(row.key)).length;
+      if (failed > 0) setLogError(t(failed === chosen.length ? "ResidentDutyLogs.allError" : "ResidentDutyLogs.partialError"));
     } finally {
       if (activeRef.current && request === requestRef.current) setBusy(false);
     }
@@ -222,8 +233,6 @@ export function ResidentDutyLogs({
     if (!activeRef.current || request !== requestRef.current) return;
     if (!dutiesResult.ok && !instancesResult.ok) {
       const cause = dutiesResult.error;
-      setTargets([]);
-      setEntries([]);
       setListError(cause instanceof Error ? cause.message : String(cause));
       setBusy(false);
       return;
@@ -233,6 +242,16 @@ export function ResidentDutyLogs({
       dutiesResult.ok ? dutiesResult.value : [],
       configs,
     );
+    for (const previous of targetSnapshot.current) {
+      if ((!dutiesResult.ok && previous.kind === "duty") || (!instancesResult.ok && previous.kind !== "duty")) {
+        if (!rows.some(row => row.key === previous.key)) rows.push(previous);
+      }
+    }
+    targetSnapshot.current = rows;
+    if (dutiesResult.ok && instancesResult.ok) {
+      const keys = new Set(rows.map(row => row.key));
+      for (const key of snapshots.current.keys()) if (!keys.has(key)) { snapshots.current.delete(key); failedSources.current.delete(key); }
+    }
     if (!dutiesResult.ok || !instancesResult.ok) {
       const cause = !dutiesResult.ok ? dutiesResult.error : instancesResult.ok ? null : instancesResult.error;
       if (cause !== null) setListError(cause instanceof Error ? cause.message : String(cause));
@@ -267,12 +286,13 @@ export function ResidentDutyLogs({
   const visibleEntries = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return entries.filter((entry) =>
+      (selected === "all" || entry.targetKey === selected) &&
       (level === "all" || entry.level === level) &&
       (
         normalized === "" ||
         `${entry.ownerLabel ?? ""} ${entry.agentName} ${entry.channel} ${entry.message}`.toLowerCase().includes(normalized)
       ));
-  }, [entries, level, query]);
+  }, [entries, level, query, selected]);
 
   const renderedLog = useMemo(
     () => visibleEntries.map((entry) =>
@@ -344,11 +364,11 @@ export function ResidentDutyLogs({
               </button>
             ))}
           </div>
-          {logError !== null && <p className="banner banner--yellow" role="status">{logError}</p>}
-          {busy ? (
-            <p className="resident-logs-empty" role="status">{t("ResidentDutyLogs.loading")}</p>
-          ) : renderedLog === "" ? (
-            <p className="resident-logs-empty">{t(entries.length === 0 ? "ResidentDutyLogs.noLog" : "ResidentDutyLogs.noMatch")}</p>
+          {lastRead !== null && <p role="status">{t("ResidentDutyLogs.lastRead", { time: formatLocalLogTime(lastRead) })}</p>}
+          {logError !== null && <div className="banner banner--yellow" role="status">{logError} <button type="button" className="d-btn" disabled={busy} onClick={() => void loadLogs(targets ?? [], selected, true)}>{t("ResidentDutyLogs.retryFailed")}</button></div>}
+          {busy && <p className="resident-logs-empty" role="status">{t("ResidentDutyLogs.loading")}</p>}
+          {renderedLog === "" ? (
+            !busy && logError === null && listError === null && <p className="resident-logs-empty">{t(entries.length === 0 ? "ResidentDutyLogs.noLog" : "ResidentDutyLogs.noMatch")}</p>
           ) : (
             <pre className="t-mono resident-logs-pre" tabIndex={0}>{renderedLog}</pre>
           )}

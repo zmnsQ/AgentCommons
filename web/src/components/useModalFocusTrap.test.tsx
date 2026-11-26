@@ -177,3 +177,31 @@ describe("useModalFocusTrap", () => {
     expect(activeElement).toBe(container);
   });
 });
+
+test("includes summary and excludes closed-details, inert and CSS-hidden descendants", async () => {
+  const { getModalFocusableElements } = await import("./useModalFocusTrap");
+  type Node = {tagName: string; tabIndex: number; parentElement: Node | null; children: Node[]; attrs: Set<string>; display: string; visibility: string; contains(node: Node): boolean; hasAttribute(name: string): boolean; closest(selector: string): Node | null; ownerDocument: unknown};
+  const node = (tagName: string, parent: Node | null = null): Node => {
+    const value: Node = {tagName, tabIndex: 0, parentElement: parent, children: [], attrs: new Set(), display: "block", visibility: "visible",
+      contains(other) {return other === this || this.children.some(child => child.contains(other));},
+      hasAttribute(name) {return this.attrs.has(name);},
+      closest() {for(let item: Node | null = this; item; item = item.parentElement) if(item.attrs.has("hidden") || item.attrs.has("inert")) return item; return null;},
+      ownerDocument: { defaultView: { getComputedStyle: (item: Node) => item } },
+    };
+    parent?.children.push(value); return value;
+  };
+  const details = node("DETAILS"); const summary = node("SUMMARY", details); const hidden = node("BUTTON", details);
+  const inert = node("DIV"); inert.attrs.add("inert"); const inertButton = node("BUTTON", inert);
+  const css = node("DIV"); css.display = "none"; const cssButton = node("BUTTON", css);
+  const invisible = node("DIV"); invisible.visibility = "hidden"; const invisibleButton = node("BUTTON", invisible);
+  let selector = "";
+  const root = {querySelectorAll(value: string) {selector = value; return [summary, hidden, inertButton, cssButton, invisibleButton];}} as unknown as HTMLElement;
+  expect(getModalFocusableElements(root)).toEqual([summary]);
+  expect(selector).toContain("summary");
+  details.attrs.add("open"); expect(getModalFocusableElements(root)).toEqual([summary, hidden]);
+});
+
+test("does not consume Escape already handled by a nested editor", () => {
+  let closed = 0; renderHarness({active:true,onEscape:()=>{closed++;}});
+  act(()=>events.emit({key:"Escape",defaultPrevented:true})); expect(closed).toBe(0);
+});

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "../i18n/locale";
 import { isTauriEnvironment } from "../lib/desktopUpdater";
+import { githubLoginUrl } from "../lib/browserAuth";
 
 interface Grant { id:string;group:string;agent_name:string;client_name:string;scopes:string[];updated_at:number; }
 export function ConnectorGrants({slug}:{slug?:string}) {
   const {locale}=useLocale(),zh=locale==="zh";
   const [grants,setGrants]=useState<Grant[]>([]);
   const [error,setError]=useState<string|null>(null);
+  const [authRequired,setAuthRequired]=useState(false);
   const [loading,setLoading]=useState(true);
   const [busy,setBusy]=useState<string|null>(null);
   const [confirmId,setConfirmId]=useState<string|null>(null);
@@ -16,11 +18,17 @@ export function ConnectorGrants({slug}:{slug?:string}) {
     void fetch("/oauth/grants",{credentials:"same-origin",signal:controller.signal,cache:"no-store"})
       .then(async r=>{if(!r.ok)throw new Error("not_authenticated");return r.json() as Promise<{connections:Grant[]}>;})
       .then(data=>{if(!controller.signal.aborted)setGrants(slug?data.connections.filter(grant=>grant.group===slug):data.connections);})
-      .catch(e=>{if(!controller.signal.aborted)setError(e instanceof Error?e.message:"unknown_error");})
+      .catch(e=>{
+        if(controller.signal.aborted)return;
+        const message=e instanceof Error?e.message:"unknown_error";
+        if(message==="not_authenticated")setAuthRequired(true);
+        else setError(message);
+      })
       .finally(()=>{if(!controller.signal.aborted)setLoading(false);});
     return ()=>controller.abort();
   },[slug]);
   if(isTauriEnvironment())return null;
+  const signInHref=(()=>{try{return typeof location==="undefined"?"/api/auth/github/start":githubLoginUrl();}catch{return "/api/auth/github/start";}})();
   const revoke=async(grant:Grant)=>{
     setBusy(grant.id);setError(null);setConfirmId(null);
     try {
@@ -38,8 +46,12 @@ export function ConnectorGrants({slug}:{slug?:string}) {
     <h3>{zh?"已授权的云端插件":"Authorized cloud plugins"}</h3>
     <p>{zh?"GitHub 登录后，可查看每个群授予 ChatGPT dot、Muse 或其他连接器的权限，并随时撤销。":"Once signed in with GitHub, review each plugin's group permissions and revoke a connector at any time."}</p>
     {loading?<p role="status">{zh?"正在读取连接…":"Loading connections…"}</p>:null}
+    {authRequired&&<div className="ac-callout is-warn">
+      <p>{zh?"请先使用 GitHub 登录后管理已授权连接。":"Sign in with GitHub to manage authorized connections."}</p>
+      <a className="d-btn" href={signInHref}>{zh?"使用 GitHub 登录":"Sign in with GitHub"}</a>
+    </div>}
     {error&&<p role="alert" className="commons-error">{error}</p>}
-    {!loading&&!error&&grants.length===0&&<p>{zh?"暂无授权连接":"No authorized connectors"}</p>}
+    {!loading&&!authRequired&&!error&&grants.length===0&&<p>{zh?"暂无授权连接":"No authorized connectors"}</p>}
     {grants.map(grant=><div className="cloud-bridge-grant" key={grant.id}>
       <p><strong>{grant.client_name}</strong> · #{grant.group}</p>
       <small>{grant.scopes.join(", ")} · {grant.agent_name}</small>

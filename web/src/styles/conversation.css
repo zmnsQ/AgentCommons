@@ -300,10 +300,15 @@
 .conversation-details-content .focus-inline {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
-  min-width: 0;
+  min-width: max-content;
   font-family: var(--t-sans);
   font-size: 12px;
+}
+
+.channel-attention-strip .focus-inline > * {
+  flex: none;
 }
 
 .channel-attention-strip .focus-heading,

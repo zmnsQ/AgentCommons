@@ -5979,6 +5979,9 @@ button.org-person-name {
 .msg-status-read {
   color: var(--t-green);
 }
+.msg-status-read--zero {
+  color: var(--t-dim);
+}
 .msg-status-unread {
   color: var(--t-muted, #8a8778);
 }
@@ -7960,7 +7963,8 @@ button.org-person-name {
 .task-blog-stat--triage { background: var(--d-yellow); color: var(--t-text); border-color: var(--t-border); font-weight: 600; }
 .task-blog-stat--done { background: var(--d-green-soft); color: var(--t-text); border-color: var(--t-border); }
 .task-blog-head-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.task-blog-new { background: var(--t-border); color: var(--t-bg); }
+.task-blog-new { background: var(--t-accent); color: var(--t-accent-ink); border-color: transparent; font-weight: 600; }
+.task-blog-new:hover:not(:disabled) { background: var(--t-accent-hover); color: var(--t-accent-ink); }
 .task-blog-close { flex: none; }
 
 .task-blog-filter { display: flex; flex-direction: column; gap: 9px; padding: 12px 0; border-bottom: 1.5px solid var(--t-faint); }
@@ -7972,7 +7976,7 @@ button.org-person-name {
   font: 12px var(--t-mono); cursor: pointer; white-space: nowrap;
 }
 .task-blog-chip b { font-weight: 700; }
-.task-blog-chip--on { background: var(--t-border); color: var(--t-bg); }
+.task-blog-chip--on { background: var(--ac-accent-soft); color: var(--t-accent); border-color: var(--ac-accent-border); font-weight: 600; }
 .task-blog-chip--dim { color: var(--t-dim); box-shadow: none; }
 .task-blog-clear, .task-blog-chip.task-blog-clear { color: var(--t-link); box-shadow: none; }
 .task-blog-search {
@@ -8105,7 +8109,8 @@ button.org-person-name {
 .task-detail-meta dt { color: var(--t-muted); }
 .task-detail-controls { display: flex; flex-direction: column; gap: 12px; }
 .task-detail-control-group .task-card-actions { margin: 0; }
-.task-action-btn--primary { background: var(--t-border); color: var(--t-bg); }
+.task-action-btn--primary { background: var(--t-accent); color: var(--t-accent-ink); border-color: transparent; font-weight: 600; }
+.task-action-btn--primary:hover:not(:disabled) { background: var(--t-accent-hover); color: var(--t-accent-ink); }
 .task-block-form, .task-reject-form { margin-top: 10px; padding: 9px; background: var(--t-panel); }
 .task-detail-current-assignee { margin: 8px 0 0; color: var(--t-muted); font-size: 11.5px; }
 .task-detail-sidebar .task-assign-form { align-items: stretch; }

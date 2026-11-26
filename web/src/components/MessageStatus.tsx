@@ -162,7 +162,7 @@ export function MessageStatus({
           >
             {hasRead ? (
               <>
-                <span className="msg-status-read">
+                <span className={"msg-status-read" + (readers.length === 0 ? " msg-status-read--zero" : "")}>
                   <StudioIcon name="success" /> {t("WakeReceipt.read.read", { n: readers.length })}
                 </span>
                 {unread.length > 0 && (

@@ -41,6 +41,7 @@ export function LarkMemberInvite({
   const [searched, setSearched] = useState(false);
   const [busy, setBusy] = useState(false);
   const [inviting, setInviting] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const invitingUser = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const activeQuery = useRef("");
@@ -165,7 +166,7 @@ export function LarkMemberInvite({
 
   async function removeUser(user: LarkDirectoryUser) {
     if (invitingUser.current !== null) return;
-    if (!globalThis.confirm(t("LarkInvite.removeConfirm", { name: user.name }))) return;
+    setConfirmRemove(null);
     invitingUser.current = user.id;
     setInviting(user.id);
     setError(null);
@@ -276,17 +277,27 @@ export function LarkMemberInvite({
               ? <img src={user.avatar_url} alt="" width={32} height={32} referrerPolicy="no-referrer" />
               : <span className="lark-invite-avatar" aria-hidden="true">{user.name.slice(0, 1).toUpperCase()}</span>}
             <span className="lark-invite-name">{user.name}</span>
-            <button
-              type="button"
-              className={`d-btn${user.already_member ? " lark-remove" : ""}`}
-              data-lark-user-id={user.id}
-              disabled={inviting !== null}
-              onClick={() => user.already_member ? removeUser(user) : add(user)}
-            >
-              {inviting === user.id
-                ? t(user.already_member ? "LarkInvite.removing" : "LarkInvite.inviting")
-                : t(user.already_member ? "LarkInvite.remove" : "LarkInvite.invite")}
-            </button>
+            {confirmRemove === user.id ? (
+              <span className="commons-confirm lark-invite-confirm" role="alertdialog" aria-label={t("LarkInvite.remove")}>
+                <span>{t("LarkInvite.removeConfirm", { name: user.name })}</span>
+                <span className="commons-actions">
+                  <button type="button" className="d-btn d-btn--danger" disabled={inviting !== null} onClick={() => void removeUser(user)}>{t("LarkInvite.confirmRemove")}</button>
+                  <button type="button" className="d-btn" disabled={inviting !== null} onClick={() => setConfirmRemove(null)}>{t("LarkInvite.cancel")}</button>
+                </span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={`d-btn${user.already_member ? " lark-remove" : ""}`}
+                data-lark-user-id={user.id}
+                disabled={inviting !== null}
+                onClick={() => user.already_member ? setConfirmRemove(user.id) : add(user)}
+              >
+                {inviting === user.id
+                  ? t(user.already_member ? "LarkInvite.removing" : "LarkInvite.inviting")
+                  : t(user.already_member ? "LarkInvite.remove" : "LarkInvite.invite")}
+              </button>
+            )}
           </li>
         ))}
       </ul>

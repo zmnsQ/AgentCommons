@@ -5,6 +5,9 @@ import { isTauriEnvironment } from "../lib/desktopUpdater";
 // 全局设置只承载个人与设备设置。跨频道的本机 Agent 监控、启停、常驻和日志
 // 已移到独立 LocalAgentCenter，避免打开偏好设置就启动多套本机 IPC/轮询。
 import { useCallback, useState, type ReactNode } from "react";
+import { useLocale } from "../i18n/locale";
+import { useCompactViewport } from "../lib/useCompactViewport";
+import { safeWorkspaceReturn } from "./BrowserSecurity";
 import { useT } from "../i18n/useT";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { HandleSetup } from "./HandleSetup";
@@ -61,6 +64,14 @@ export function SettingsPanel({
   restoreFocusOnUnmount?: boolean;
 }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
+  const compact = useCompactViewport();
+  const nav = typeof navigator === "undefined" ? null : navigator;
+  const ios = /iPhone|iPad|iPod/i.test(nav?.userAgent ?? "") || (/Mac/i.test(nav?.platform ?? "") && (nav?.maxTouchPoints ?? 0) > 1);
+  const showHomeScreen = ios || (compact && (nav?.maxTouchPoints ?? 0) > 0);
+  const returnTo = safeWorkspaceReturn(typeof location === "undefined" ? null : location.pathname + location.search + location.hash);
+  const securityHref = "/auth/security?" + new URLSearchParams({ return_to: returnTo });
+  const label = (value: string) => ({ human: zh ? "成员" : "Member", agent: zh ? "智能体" : "Agent", owner: zh ? "所有者" : "Owner", admin: zh ? "管理员" : "Administrator", member: zh ? "成员" : "Member" }[value] ?? value);
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
 
   const pickTheme = useCallback((next: Theme) => {
@@ -122,7 +133,7 @@ export function SettingsPanel({
               <p className="settings-hint" role="status">{notifyHint}</p>
             )}
           </section>
-          {!isTauriEnvironment() && <HomeScreenGuide />}
+          {!isTauriEnvironment() && showHomeScreen && <HomeScreenGuide />}
         </>
       ),
     },
@@ -138,11 +149,11 @@ export function SettingsPanel({
           <section className="settings-section">
             <div className="settings-account">
               <span className="settings-account-name">{preferredMeDisplay(me)}</span>
-              <span className={`settings-account-chip settings-account-chip--${me.kind}`}>{me.kind}</span>
-              {me.role !== me.kind && <span className="settings-account-chip">{me.role}</span>}
+              <span className={`settings-account-chip settings-account-chip--${me.kind}`}>{label(me.kind)}</span>
+              {me.role !== me.kind && <span className="settings-account-chip">{label(me.role)}</span>}
             </div>
             {me.owner !== null && me.owner !== me.name && (
-              <p className="settings-hint">owner: {me.owner}</p>
+              <p className="settings-hint">{zh ? "所属成员：" : "Owner: "}{me.owner}</p>
             )}
             {(me.email != null || me.provider != null) && (
               <dl className="settings-facts">
@@ -163,7 +174,7 @@ export function SettingsPanel({
                 />
               </div>
             )}
-            {!isTauriEnvironment() && me.provider === "github" && <p><a className="d-btn" href="/auth/security">{t("App.settings.section.account")} · GitHub / 2FA</a></p>}
+            {!isTauriEnvironment() && me.provider === "github" && <p><a className="d-btn" href={securityHref}>{zh ? "账号安全 · 二步验证" : "Account security · Two-step verification"}</a></p>}
             {onLogout !== null && (
               <button type="button" className="settings-logout" onClick={onLogout}>
                 <StudioIcon name="logout" />{t("App.settings.logout")}
@@ -192,6 +203,7 @@ export function SettingsPanel({
           <h3 className="settings-module-title">{t("App.settings.section.help")}</h3>
           <section className="settings-section">
             <OriginalProjectCredit />
+            {!isTauriEnvironment() && !showHomeScreen && <HomeScreenGuide />}
             <p className="studio-design-credit"><a href="https://github.com/Caho1/open-claude-ui" target="_blank" rel="noopener noreferrer">{t("Studio.reference")}</a> · <a href="/third-party-notices.txt" target="_blank" rel="noopener noreferrer">MIT</a></p>
             <p>{t("Collab.updatesDisabled")}</p>
           </section>

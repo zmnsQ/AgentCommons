@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {apiBase} from '../lib/base';
+import {useLocale} from '../i18n/locale';
 import {useT} from '../i18n/useT';
 import '../i18n/strings/MuseCloud';
 const states=['unconfigured','auth_required','ready_readonly','active','polling','reconnect_required','submission_unknown','disconnected'] as const;
@@ -7,6 +8,7 @@ type GatewayState=typeof states[number];
 type Snapshot={state:GatewayState;lastChecked:number|null;configured:boolean;labels:{account:string;sidechat:string}|null};
 export function PersonalMusePanel({token,slug,canManage}:{token:string;slug:string;canManage:boolean}){
  const t=useT(),base=apiBase();
+ const zh=useLocale().locale==='zh';
  const [account,setAccount]=useState(''),[sidechat,setSidechat]=useState(''),[sidechatId,setSidechatId]=useState(''),[busy,setBusy]=useState(false),[confirm,setConfirm]=useState(false),[feedback,setFeedback]=useState(''),[uncertain,setUncertain]=useState(false);
  const scope=useRef(0),inFlight=useRef(false);
  useEffect(()=>{++scope.current;setAccount('');setSidechat('');setSidechatId('');setConfirm(false);setFeedback('');setUncertain(false);setBusy(false);inFlight.current=false;return()=>{++scope.current;};},[token,slug,base,canManage]);
@@ -58,9 +60,9 @@ export function PersonalMusePanel({token,slug,canManage}:{token:string;slug:stri
  const submit=(e:FormEvent)=>{e.preventDefault();if(account.trim()&&sidechat.trim()&&/^[A-Za-z0-9_-]{1,128}$/.test(sidechatId.trim()))void mutate('PUT');};
  if(!canManage)return <p>{t('Muse.noManage')}</p>;
  return <section className="muse-personal-guide" aria-label={t('Muse.personalTitle')}>
-  <h4>{t('Muse.personalTitle')}</h4><p className="muse-safety">{t('Muse.personalWarning')}</p>
+  <h4>{zh?'个人 Muse 连接':'Personal Muse connection'}</h4>
   <p role="status">{t(`Muse.personal.${snapshot?.state??status}`)}</p>
-  <p>{t('Muse.personalEvidence')}</p>
+  {status==='disabled'&&<p>{zh?'此集成尚未启用，请联系管理员。':'This integration is not enabled. Contact your administrator.'}</p>}
   {snapshot?.lastChecked&&<small>{t('Muse.personalChecked')} {new Date(snapshot.lastChecked).toLocaleString()}</small>}
   <button type="button" className="d-btn" onClick={()=>{setUncertain(false);setFeedback('');refresh(x=>x+1);}} disabled={busy||status==='loading'}>{t('Muse.refresh')}</button>
   {feedback&&<p role={['saved','unbound'].includes(feedback)?'status':'alert'}>{t(`Muse.personal.${feedback}`)}</p>}
@@ -76,6 +78,6 @@ export function PersonalMusePanel({token,slug,canManage}:{token:string;slug:stri
    {snapshot.configured&&!confirm&&<button type="button" className="d-btn" disabled={busy||uncertain} onClick={()=>setConfirm(true)}>{t('Muse.personal.unbind')}</button>}
    {confirm&&<div><p>{t('Muse.personal.unbindConfirm')}</p><button type="button" className="d-btn" disabled={busy||uncertain} onClick={()=>void mutate('DELETE')}>{t('Muse.personal.confirmUnbind')}</button><button type="button" disabled={busy} onClick={()=>setConfirm(false)}>{t('Muse.personal.cancel')}</button></div>}
   </details>}
-  <ol className="muse-simple-steps"><li>{t('Muse.personalPrepare')}</li><li>{t('Muse.personalAuthorize')}</li><li>{t('Muse.personalVerify')}</li></ol>
+  {status==='loaded'&&<details><summary>{zh?'使用前须知':'Before connecting'}</summary><p className="muse-safety">{t('Muse.personalWarning')}</p><p>{t('Muse.personalEvidence')}</p><ol className="muse-simple-steps"><li>{t('Muse.personalPrepare')}</li><li>{t('Muse.personalAuthorize')}</li><li>{t('Muse.personalVerify')}</li></ol></details>}
  </section>;
 }

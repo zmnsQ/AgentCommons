@@ -131,3 +131,21 @@ describe("TokenGate", () => {
     });
   });
 });
+
+test("a failed configuration read offers retry and exposes the existing token fallback", async () => {
+  let retries = 0; let view!: ReactTestRenderer;
+  Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {configurable:true,value:true});
+  await act(async()=>{view=create(<LocaleProvider><TokenGate {...props} github={{configured:false,loading:false,error:Error('offline')}} onRetryGitHub={()=>{retries++;}}/></LocaleProvider>);});
+  const root=view.root;
+  expect(root.findByProps({className:'browser-auth-advanced'}).props.open).toBe(true);
+  expect(root.findByProps({className:'d-btn d-btn--primary'}).children.join('')).toBe('Could not load sign-in options');
+  await act(async()=>root.findAllByType('button').find(button=>button.children.includes('Retry'))!.props.onClick());
+  expect(retries).toBe(1);await act(async()=>view.unmount());
+});
+
+test("loading and unconfigured GitHub sign-in remain distinct", () => {
+  const loading=renderToStaticMarkup(<LocaleProvider><TokenGate {...props} github={{configured:false,loading:true,error:null}}/></LocaleProvider>);
+  const unavailable=renderToStaticMarkup(<LocaleProvider><TokenGate {...props} github={{configured:false,loading:false,error:null}}/></LocaleProvider>);
+  expect(loading).toContain('Loading sign-in');expect(loading).not.toContain('awaits administrator');
+  expect(unavailable).toContain('awaits administrator');expect(unavailable).toContain('open=""');
+});

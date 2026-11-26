@@ -15,6 +15,7 @@ export function McpSecurityPanel({token,slug,canManage}:{token:string;slug:strin
   useEffect(()=>{
     alive.current=true;const current=++generation.current;const abort=new AbortController();base.current=apiBase();setValue(null);setSaved(null);setError("");setNote("");setBusy(false);
     void cloudBridgesApi.security(token,slug,abort.signal).then(result=>{
+      if(!result?.policy||typeof result.policy.enabled!=="boolean"||typeof result.policy.owner_mfa_enabled!=="boolean")throw new Error("invalid_policy");
       if(!abort.signal.aborted&&generation.current===current&&apiBase()===base.current){setValue(result);setSaved(result);}
     }).catch(()=>{if(!abort.signal.aborted)setError(t("AgentConnect.error"));});
     return()=>{alive.current=false;abort.abort();};
@@ -37,15 +38,16 @@ export function McpSecurityPanel({token,slug,canManage}:{token:string;slug:strin
       ...(key==="enabled"&&!checked?{allow_write:false,allow_events:false}:{})}}:null);setNote("");
   };
   const editable=canManage&&value?.can_manage===true;
-  const statusKey=!saved?.policy.enabled||!saved.policy.owner_mfa_enabled?"AgentConnect.disabled":saved?.policy.allow_write?"AgentConnect.readwrite":"AgentConnect.readonly";
+  const statusKey=!saved?.policy?.enabled||!saved?.policy?.owner_mfa_enabled?"AgentConnect.disabled":saved.policy.allow_write?"AgentConnect.readwrite":"AgentConnect.readonly";
+  const statusLabel=value?t(statusKey):t("AgentConnect.loading");
   return <section className="ac-card mcp-security" aria-label={t("AgentConnect.security")}>
-    <div className="ac-card-head"><div><span className="ac-kicker">MCP POLICY</span><h3>{t("AgentConnect.security")}</h3></div><span className={`ac-status-pill ${!saved?.policy.enabled||!saved.policy.owner_mfa_enabled?"is-idle":"is-ok"}`}>{t(statusKey)}</span></div>
+    <div className="ac-card-head"><div><span className="ac-kicker">MCP POLICY</span><h3>{t("AgentConnect.security")}</h3></div><span className={`ac-status-pill ${value&&(!saved?.policy.enabled||!saved.policy.owner_mfa_enabled)?"is-idle":value?"is-ok":""}`}>{statusLabel}</span></div>
     <p className="ac-card-hint">{t("AgentConnect.urlWarning")}</p>
     {error&&<p role="alert" className="commons-error">{error}</p>}
     {note&&<p role="status" className="ac-inline-status">{note}</p>}
     {!value&&!error&&<p role="status" className="ac-inline-status">{t("AgentConnect.loading")}</p>}
     {value&&<>
-      <strong className="mcp-security-status">{t(statusKey)}</strong>
+      <strong className="mcp-security-status">{statusLabel}</strong>
       <p className="ac-card-hint">{t("AgentConnect.mfa")}</p>
       {!value.policy.owner_mfa_enabled&&<p className="ac-callout is-warn">{t("AgentConnect.noMfa")} <a href="/auth/security">{t("AgentConnect.setupMfa")}</a></p>}
       {editable?<div className="mcp-security-options">

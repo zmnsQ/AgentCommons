@@ -44,7 +44,8 @@ export function CollaborationHub(props: CollaborationHubProps) {
 function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, token, slug, archived = false, onAuthFailed, client = collaborationApi, server, initialTab, initialProvider, viewMemory }: CollaborationHubProps & { server: string }) {
   const t = useT();
   const [apiProvider,setApiProvider] = useState<"hermes"|"manus"|undefined>();
-  const [tab, setTab] = useState<Tab>(initialTab==="agents"?"bridges":initialTab??viewMemory?.current?.tab??"bridges");
+  const [apiPreset,setApiPreset] = useState<{remoteId?:string;name?:string}|null>(null);
+  const [tab, setTab] = useState<Tab>(initialTab==="agents"?"bridges":initialTab??(initialProvider!==undefined?"bridges":"files"));
   const [connectionView,setConnectionView]=useState<"setup"|"manage"|"configure">(viewMemory?.current?.view==="manage"?"manage":initialTab==="agents"?"manage":"setup");
   const [selectedProvider,setSelectedProvider]=useState<CloudAgentChoice|null>(initialProvider??viewMemory?.current?.provider??null);
   useEffect(()=>{if(viewMemory)viewMemory.current={tab,view:connectionView,provider:selectedProvider};},[tab,connectionView,selectedProvider,viewMemory]);
@@ -110,13 +111,13 @@ function ScopedCollaborationHub({ submissionSafety, dispatchScopeReady=true, tok
         {tab === "files" && <ChannelFiles token={token} slug={slug} canUpload={current.permissions.upload} client={client} />}
         {tab === "bridges" && <>
           <nav className="commons-actions commons-mode-switch" aria-label={t("Studio.addAgent")}>
-            <button className="d-btn" type="button" aria-pressed={connectionView!=="manage"} onClick={()=>{setApiProvider(undefined);setConnectionView("setup");}}>{t("Studio.setup")}</button>
-            <button className="d-btn" type="button" aria-pressed={connectionView==="manage"} onClick={()=>{setApiProvider(undefined);setConnectionView("manage");}}>{t("Studio.manage")}</button>
+            <button className="d-btn" type="button" aria-pressed={connectionView!=="manage"} onClick={()=>{setApiProvider(undefined);setApiPreset(null);setConnectionView("setup");}}>{t("Studio.setup")}</button>
+            <button className="d-btn" type="button" aria-pressed={connectionView==="manage"} onClick={()=>{setApiProvider(undefined);setApiPreset(null);setConnectionView("manage");}}>{t("Studio.manage")}</button>
           </nav>
-          {connectionView==="setup" && <CloudBridges submissionSafety={submissionSafety} showAuthorizationManagement={false} token={token} slug={slug} canManage={current.permissions.manage} canRun={current.permissions.run&&dispatchScopeReady} initialProvider={selectedProvider??undefined} onProviderChange={setSelectedProvider} onConfigureApi={provider=>{setApiProvider(provider);setConnectionView("configure");}} />}
+          {connectionView==="setup" && <CloudBridges submissionSafety={submissionSafety} showAuthorizationManagement={false} token={token} slug={slug} canManage={current.permissions.manage} canRun={current.permissions.run&&dispatchScopeReady} initialProvider={selectedProvider??undefined} onProviderChange={setSelectedProvider} onConfigureApi={(provider,preset)=>{setApiProvider(provider);setApiPreset(preset??null);setConnectionView("configure");}} />}
           {connectionView!=="setup" && <>
-            {connectionView==="configure" && <button className="d-btn" type="button" onClick={()=>setConnectionView("setup")}>{t("Studio.backPlatforms")}</button>}
-            <CloudAgentConnections key={connectionView+":"+(apiProvider??"")} initialProvider={connectionView==="configure"?apiProvider:undefined} token={token} slug={slug} summary={current} client={client} onChanged={()=>refresh()} onConnect={()=>{setApiProvider(undefined);setConnectionView("setup");}} />
+            {connectionView==="configure" && <button className="d-btn" type="button" onClick={()=>{setApiPreset(null);setConnectionView("setup");}}>{t("Studio.backPlatforms")}</button>}
+            <CloudAgentConnections key={connectionView+":"+(apiProvider??"")} initialProvider={connectionView==="configure"?apiProvider:undefined} initialRemoteId={apiPreset?.remoteId} initialName={apiPreset?.name} token={token} slug={slug} summary={current} client={client} onChanged={()=>refresh()} onConnect={()=>{setApiProvider(undefined);setApiPreset(null);setConnectionView("setup");}} />
             {connectionView==="manage" && current.permissions.manage && <section><h3>{t("Studio.authorizedConnections")}</h3><ConnectorGrants slug={slug}/></section>}
           </>}
         </>}

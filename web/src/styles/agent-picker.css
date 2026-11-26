@@ -66,6 +66,17 @@
 .agent-platform-tile:hover { border-color: var(--t-accent); background: var(--ac-accent-soft); }
 .agent-platform-tile:hover > .studio-icon { color: var(--t-accent); transform: translateX(2px); }
 .agent-platform-tile:active { transform: scale(0.99); }
+.agent-platform-tile:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.agent-platform-locked {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--d-amber-soft);
+  border-radius: var(--ac-radius-sm);
+  background: var(--d-amber-soft);
+  color: var(--t-body);
+  font-size: 12px;
+  line-height: 1.55;
+}
 .ac-chip--accent {
   border-color: var(--ac-accent-border);
   background: var(--ac-accent-soft);

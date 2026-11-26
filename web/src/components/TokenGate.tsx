@@ -13,13 +13,14 @@ import "../i18n/strings/TokenGate";
 
 interface Props {
   github?: { configured: boolean; loading: boolean; error: unknown };
+  onRetryGitHub?: () => void;
   error: string | null;
   providers: AuthProviderConfig[];
   onSso(provider: AuthProviderConfig): void;
   onSubmit(token: string): void;
 }
 
-export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) {
+export function TokenGate({ error, providers, onSso, onSubmit, github, onRetryGitHub }: Props) {
   const [value, setValue] = useState("");
   const t = useT();
   const { locale } = useLocale();
@@ -47,6 +48,8 @@ export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) 
                   ? zh
                     ? "正在读取登录方式…"
                     : "Loading sign-in…"
+                  : github.error != null
+                    ? zh ? "暂时无法读取登录方式" : "Could not load sign-in options"
                   : zh
                     ? "GitHub 登录等待管理员完成配置"
                     : "GitHub sign-in awaits administrator setup"}
@@ -54,13 +57,14 @@ export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) 
             )}
             <p className="gate-social">
               {zh
-                ? "无需填写 token。登录后可在账号安全中启用验证器二步验证。"
-                : "No token to paste. Enable authenticator verification in Account security after signing in."}
+                ? "选择登录方式。登录后可在账号安全中管理二步验证。"
+                : "Choose a sign-in method. Manage two-step verification in Account security after signing in."}
             </p>
             {github.error != null && (
-              <p className="banner banner--red" role="alert">
-                {securityError(github.error, zh)}
-              </p>
+              <div>
+                <p className="banner banner--red" role="alert">{securityError(github.error, zh)}</p>
+                <button type="button" className="d-btn" disabled={github.loading} onClick={() => onRetryGitHub ? onRetryGitHub() : window.location.reload()}>{zh ? "重试" : "Retry"}</button>
+              </div>
             )}
           </section>
         )}
@@ -85,7 +89,7 @@ export function TokenGate({ error, providers, onSso, onSubmit, github }: Props) 
           </>
         )}
 
-        <details className="browser-auth-advanced" open={error !== null || (!github && providers.length === 0)}>
+        <details className="browser-auth-advanced" open={error !== null || (!github?.configured && !github?.loading && providers.length === 0)}>
           <summary>{zh ? "使用访问令牌登录（高级）" : "Sign in with access token (advanced)"}</summary>
           <form
             className="gate-form"

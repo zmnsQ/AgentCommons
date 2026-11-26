@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useLocale } from "../../i18n/locale";
 import type { MsgFrame } from "@agentparty/shared";
 import { useT } from "../../i18n/useT";
 import "../../i18n/strings/Channel";
@@ -18,6 +20,8 @@ export function CompletionPanel({
   onJump: (seq: number) => void;
 }) {
   const t = useT();
+  const zh = useLocale().locale === "zh";
+  const [showAll, setShowAll] = useState(false);
   // The active filter must always retain its off switch. Search mode may hide
   // the completion rows, but it cannot make an already-enabled filter inert.
   if (completions.length === 0 && !enabled) return null;
@@ -27,14 +31,15 @@ export function CompletionPanel({
       <div className="completion-panel-head">
         <h2 className="completion-title">{t("Channel.heading.completions")}</h2>
         <span className="t-mono completion-count">
-          {visible}/{completions.length}
+          {zh ? `当前已加载 ${completions.length} 条 · 对话中显示 ${visible} 条` : `${completions.length} loaded · ${visible} visible in conversation`}
         </span>
         <button className={"d-btn completion-toggle" + (enabled ? " is-active" : "")} type="button" onClick={onToggle}>
           <span>{enabled ? t("Channel.filter.all") : t("Channel.filter.only")}</span>
         </button>
       </div>
+      {showItems && completions.length > 6 && <button type="button" className="d-btn" onClick={() => setShowAll(!showAll)}>{showAll ? (zh ? "收起为最近6条" : "Show latest 6") : (zh ? `查看全部已加载成果（${completions.length}）` : `View all loaded results (${completions.length})`)}</button>}
       {showItems && completions.length > 0 && <ol className="completion-list">
-        {completions.slice(-6).reverse().map((message) => {
+        {(showAll ? [...completions] : completions.slice(-6)).reverse().map((message) => {
           const artifact = message.completion_artifact!;
           const meta = [
             t("Channel.completion.meta.kickoff", { seq: artifact.kickoff_seq }),

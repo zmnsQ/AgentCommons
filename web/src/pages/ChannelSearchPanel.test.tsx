@@ -238,3 +238,15 @@ describe("Channel search modal (#351)", () => {
       .toBe(ChannelStrings.en["Channel.empty.searchFiltered"]);
   });
 });
+
+test("the entire search result is an accessible action and default advanced filters are collapsed", () => {
+  const root=render(baseProps());const card=root.findByProps({className:'d-card msg-card search-hit-card'});
+  expect(card.type).toBe('button');expect(card.props['aria-label']).toContain('View context');
+  expect(root.findByType('details').props.open).toBeUndefined();
+});
+test("a rejected jump unlocks results and reports an actionable error",async()=>{
+  const root=render(baseProps({onJump:async()=>{throw Error('offline');}}));
+  await act(async()=>root.findByProps({className:'d-card msg-card search-hit-card'}).props.onClick());
+  expect(root.findByProps({className:'d-card msg-card search-hit-card'}).props.disabled).toBe(false);
+  expect(root.findByProps({role:'alert'}).children.join('')).toContain('Please retry');
+});

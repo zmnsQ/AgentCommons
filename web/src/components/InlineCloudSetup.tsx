@@ -33,6 +33,7 @@ export function InlineCloudSetup({
   const { locale } = useLocale();
   const zh = locale === "zh";
   const [apiProvider, setApiProvider] = useState<"hermes" | "manus" | null>(null);
+  const [apiPreset, setApiPreset] = useState<{ remoteId?: string; name?: string } | null>(null);
   const [summary, setSummary] = useState<CollaborationSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,6 +62,7 @@ export function InlineCloudSetup({
 
   useEffect(() => {
     setApiProvider(null);
+    setApiPreset(null);
     setSummary(null);
     setError("");
   }, [provider, slug, token, server]);
@@ -112,12 +114,13 @@ export function InlineCloudSetup({
           <CloudAgentConnections
             key={`${slug}:${apiProvider}`}
             initialProvider={apiProvider}
+            initialRemoteId={apiPreset?.remoteId}
+            initialName={apiPreset?.name}
             token={token}
             slug={slug}
             summary={scopedSummary}
             client={collaborationApi}
             onChanged={() => loadSummary()}
-            onConnect={() => setApiProvider(null)}
           />
         )}
       </section>
@@ -135,7 +138,7 @@ export function InlineCloudSetup({
       canManage={canManage}
       canRun={canRun && dispatchScopeReady}
       initialProvider={provider}
-      onConfigureApi={(target) => setApiProvider(target)}
+      onConfigureApi={(target, preset) => { setApiProvider(target); setApiPreset(preset ?? null); }}
     />
   );
 }

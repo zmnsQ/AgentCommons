@@ -30,11 +30,11 @@ interface Props {
   onBackToPicker?():void;
   onProviderChange?(provider:CloudAgentChoice):void;
   showAuthorizationManagement?:boolean;
-  onConfigureApi?(provider:"hermes"|"manus"):void;
+  onConfigureApi?(provider:"hermes"|"manus", preset?:{remoteId?:string;name?:string}):void;
 }
 export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initialProvider,focusedProvider,onBackToPicker,onProviderChange,onConfigureApi,showAuthorizationManagement=true}:Props){
   const t=useT();
-  const [selectedState,setSelected]=useState<CloudAgentChoice|null>(focusedProvider??initialProvider??null);
+  const [selectedState,setSelected]=useState<CloudAgentChoice|null>(focusedProvider!==undefined?focusedProvider:(initialProvider??"dot"));
   const selected=focusedProvider??selectedState;
   const focused=focusedProvider!==undefined;
   const {locale}=useLocale();const zh=locale==="zh";
@@ -106,7 +106,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
   const discover=(e:FormEvent)=>{e.preventDefault();void task(async()=>{
     if(!canManage)throw new Error("owner_only");
     const result=await cloudBridgesApi.cue(token,slug,apiKey);
-    if(isActive()){setCue(result.agents);setApiKey("");setNotice(zh?"已读取你的 Cue Agent，复制 ID 后点击下方按钮完成绑定。":"Retrieved your Cue agents. Copy an ID and click below to bind.");}
+    if(isActive()){setCue(result.agents);setApiKey("");setNotice(zh?"已读取你的 Cue Agent；点击「使用此 Agent」即可带入绑定表单。":"Retrieved your Cue agents. Choose Use this Agent to prefill the binding form.");}
   });};
   const send=(e:FormEvent)=>{e.preventDefault();void task(async()=>{
     if(!canRun)throw new Error("human_member_required");
@@ -229,7 +229,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
         <label>{zh?"Manus API Key（仅用于临时查询，不保存）":"Manus API key (lookup only, not stored)"}<input type="password" autoComplete="new-password" value={apiKey} onChange={e=>setApiKey(e.target.value)} required disabled={busy}/></label>
         <button className="d-btn" disabled={busy||!apiKey}>{zh?"查找我的 Cue Agent":"Discover my Cue agents"}</button>
       </form>}
-      {cue.length>0&&<ul>{cue.map(agent=><li key={agent.id}><strong>{agent.name}</strong> · <code>{agent.id}</code> <button className="d-btn" type="button" onClick={()=>void navigator.clipboard?.writeText(agent.id)}>{zh?"复制 ID":"Copy ID"}</button></li>)}</ul>}
+      {cue.length>0&&<ul>{cue.map(agent=><li key={agent.id}><strong>{agent.name}</strong> · <code>{agent.id}</code> <button className="d-btn" type="button" onClick={()=>void navigator.clipboard?.writeText(agent.id)}>{zh?"复制 ID":"Copy ID"}</button>{onConfigureApi&&<button className="d-btn d-btn--primary" type="button" onClick={()=>onConfigureApi("manus",{remoteId:agent.id,name:agent.name})}>{zh?"使用此 Agent":"Use this Agent"}</button>}</li>)}</ul>}
       {onConfigureApi&&<button type="button" className="d-btn d-btn--primary" onClick={()=>onConfigureApi("manus")}>{zh?"继续连接 Cue":"Continue with Cue"}</button>}
       <p><small>{zh?"向已有个人 Cue 主会话投递任务已支持；不自动导入无法确定归属的私人聊天回复。":"Send to existing Cue main tasks is supported; private replies without reliable request correlation are not imported."}</small></p>
     </article>}
@@ -238,7 +238,7 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
       <h3>Grok · Automation Webhook</h3>
       <p className="coding-note-line">{zh?"使用你自己的 Automation HTTPS 触发地址与签名密钥；这不是个人 Grok Bot 登录。":"This uses your own Automation HTTPS trigger and signing secret; it is not a personal Grok Bot login."}</p>
       <details className="ac-callout-details"><summary>{zh?"前提与结果边界":"Prerequisites and result limits"}</summary><p>{zh?"该地址来源需由服务器管理员批准。若账号没有这些能力，请勿填写猜测的地址。保存不验证任务完成，回复也不会自动回群。":"The origin must be approved by the server administrator. If your account lacks these capabilities, do not guess an endpoint. Saving does not verify task completion; replies are not automatically imported."}</p></details>
-      <p>{state?.connection?zh?`配置已保存：${state.connection.name}`:`Configured: ${state.connection.name}`:zh?"尚未绑定":"Not configured"}</p>
+      <div className="cloud-bridge-status-row"><p>{state?.connection?zh?`配置已保存：${state.connection.name}`:`Configured: ${state.connection.name}`:zh?"尚未绑定":"Not configured"}</p>{canManage&&state?.connection&&(confirmDisconnect?<div className="commons-confirm"><p>{zh?"取消此群 Grok Automation 绑定？已发送的远程任务不会自动取消。":"Disconnect Grok Automation for this group? In-flight remote work is not cancelled."}</p><div className="commons-actions"><button type="button" className="d-btn d-btn--danger" disabled={busy} onClick={()=>void task(async()=>{await cloudBridgesApi.disconnectGrok(token,slug);if(isActive())setConfirmDisconnect(false);await reload();})}>{busy?(zh?"处理中…":"Working…"):(zh?"确认断开":"Confirm disconnect")}</button><button type="button" className="d-btn" disabled={busy} onClick={()=>setConfirmDisconnect(false)}>{zh?"取消":"Cancel"}</button></div></div>:<button type="button" className="d-btn d-btn--danger" disabled={busy} onClick={()=>setConfirmDisconnect(true)}>{zh?"断开连接":"Disconnect"}</button>)}</div>
       {canManage&&<form onSubmit={saveGrok} className="cloud-bridge-form">
         <label>{zh?"显示名称":"Name"}<input value={name} maxLength={80} onChange={e=>setName(e.target.value)} disabled={busy} required/></label>
         <label>{zh?"Automation HTTPS 触发地址":"Automation HTTPS trigger URL"}<input type="url" value={endpoint} onChange={e=>setEndpoint(e.target.value)} disabled={busy} required/></label>
@@ -250,7 +250,6 @@ export function CloudBridges({submissionSafety,token,slug,canManage,canRun,initi
         <button className="d-btn d-btn--primary" disabled={busy||!prompt.trim()}>{zh?"发送到 Automation":"Send to Automation"}</button>
       </form>}
       {state?.deliveries.slice(0,5).map(d=><p key={d.id}><small>{d.request_id}: {automationDeliveryLabel(d.state,zh)}</small></p>)}
-      {canManage&&state?.connection&&(confirmDisconnect?<div className="commons-confirm"><p>{zh?"取消此群 Grok Automation 绑定？已发送的远程任务不会自动取消。":"Disconnect Grok Automation for this group? In-flight remote work is not cancelled."}</p><div className="commons-actions"><button type="button" className="d-btn d-btn--danger" disabled={busy} onClick={()=>void task(async()=>{await cloudBridgesApi.disconnectGrok(token,slug);if(isActive())setConfirmDisconnect(false);await reload();})}>{busy?(zh?"处理中…":"Working…"):(zh?"确认断开":"Confirm disconnect")}</button><button type="button" className="d-btn" disabled={busy} onClick={()=>setConfirmDisconnect(false)}>{zh?"取消":"Cancel"}</button></div></div>:<button type="button" className="d-btn" disabled={busy} onClick={()=>setConfirmDisconnect(true)}>{zh?"断开连接":"Disconnect"}</button>)}
     </article>}
 
     {selected==="muse"&&<>

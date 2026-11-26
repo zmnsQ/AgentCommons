@@ -1,15 +1,42 @@
 /* Team board polish — scoped overrides, semantic tokens, calm status pills. */
-.team-shell { min-width: 0; }
-.team-shell-head {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--t-border);
+.team-shell { position: relative; min-width: 0; }
+.team-shell > .team-blog-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  min-height: 32px;
 }
+.team-shell .team-board-head { padding-right: 92px; }
 .team-shell-body { min-width: 0; }
-.team-blog-detail { min-width: 0; }
+.team-blog-detail { min-width: 0; padding-top: 2px; }
 .team-blog-detail-back { margin-bottom: 6px; }
+.team-board-empty-state {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 18px;
+  border: 1px dashed var(--ac-border-strong);
+  border-radius: var(--ac-radius-md);
+  background: var(--ac-surface-1);
+}
+.team-board-empty-cta { min-height: 36px; }
+.team-squad-confirm {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--d-red-soft);
+  border-radius: var(--ac-radius-sm);
+  background: var(--d-red-soft);
+}
+.team-squad-confirm > p { margin: 0; font-size: 12px; line-height: 1.55; }
+.team-squad-confirm .team-card-edit-actions { grid-column: auto; }
+.team-card-ava .platform-icon { --platform-icon-size: 24px; }
+@media (max-width: 720px) {
+  .team-shell > .team-blog-close { min-height: 44px; min-width: 44px; }
+  .team-shell .team-board-head { padding-right: 0; padding-top: 48px; }
+  .team-board-empty-state { padding: 14px; }
+}
 .team-board {
   display: flex;
   flex-direction: column;

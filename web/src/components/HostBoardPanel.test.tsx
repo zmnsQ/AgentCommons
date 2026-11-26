@@ -182,3 +182,13 @@ describe("HostBoardPanel", () => {
     expect(JSON.stringify(renderer!.toJSON())).toContain("2 blocked claims need host triage");
   });
 });
+
+test("recommendations offer a readable navigation action without executing their CLI", () => {
+  const recommendation=action({kind:'review-blockers',reason:'2 blocked claims need host triage',command:null});
+  const opened:RecommendedAction[]=[];
+  act(()=>{renderer=create(<LocaleProvider><HostBoardPanel board={board([recommendation])} onRecommendedAction={item=>{opened.push(item);}}/></LocaleProvider>);});
+  const root=renderer!.root;
+  expect(root.findByProps({className:'t-mono host-action-kind'}).children.join('')).toBe('Review blocked tasks');
+  expect(root.findByType('details').props.open).toBeUndefined();expect(opened).toHaveLength(0);
+  act(()=>root.findAllByType('button').find(button=>button.children.includes('View tasks'))!.props.onClick());expect(opened).toEqual([recommendation]);
+});

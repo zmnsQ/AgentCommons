@@ -279,7 +279,7 @@ describe("TaskLedgerPanel inline rejection (#357)", () => {
     const reviewable = task({ state: "needs_review", completion_artifact: {}, anchor_seqs: [42] });
     const r = render("en", baseProps({
       tasks: [reviewable],
-      onReview: (item, action, reason) => reviews.push({ id: item.id, action, reason }),
+      onReview: (item, action, reason) => { reviews.push({ id: item.id, action, reason }); },
     }));
 
     await openTask(r);
@@ -309,7 +309,7 @@ describe("TaskLedgerPanel detail actions", () => {
   test("blocking a task requires and forwards a trimmed reason", async () => {
     const stateChanges: Array<[number, string, string | undefined]> = [];
     const r = render("en", baseProps({
-      onSetState: (id, state, reason) => stateChanges.push([id, state, reason]),
+      onSetState: (id, state, reason) => { stateChanges.push([id, state, reason]); },
     }));
 
     await openTask(r);
@@ -411,29 +411,20 @@ describe("TaskLedgerPanel default scope", () => {
 });
 
 // #271(b)：指派输入框接 datalist，候选来自频道身份。
-describe("TaskLedgerPanel assignee datalist (#271)", () => {
-  test("assign input points at a datalist fed by channel identities", async () => {
-    const identities = [
-      { name: "worker-a", display: "worker-a · agent" },
-      { name: "human-b", display: "human-b · human" },
-    ];
-    const r = render("en", baseProps({ identities }));
-    await openTask(r);
-    const input = findByAria(r, "Assign task 1");
-    expect(input.props.list).toBe("task-assignee-targets");
-    const datalist = r.root.find((n) => n.type === "datalist");
-    expect(datalist.props.id).toBe("task-assignee-targets");
-    expect(datalist.findAllByType("option").map((o) => o.props.value)).toEqual(["worker-a", "human-b"]);
+describe("TaskLedgerPanel typed assignee picker", () => {
+  test("lists readable channel identities with their locked types", async () => {
+    const r=render("en",baseProps({identities:[{name:"worker-a",kind:"agent",display:"Alice's agent"},{name:"alice",kind:"human",display:"Alice"}]}));await openTask(r);
+    const picker=findByAria(r,"Assign task 1");
+    expect(picker.type).toBe("select");
+    expect(picker.findAllByType("option").map(option=>option.props.value)).toEqual(["","worker-a","alice","__custom__"]);
   });
-
-  test("datalist renders empty (not crashing) without identities", () => {
-    const r = render("en", baseProps());
-    const datalist = r.root.find((n) => n.type === "datalist");
-    expect(datalist.findAllByType("option")).toHaveLength(0);
+  test("supports an explicit custom target when no identities are loaded", async () => {
+    const r=render("en",baseProps());await openTask(r);
+    await act(async()=>findByAria(r,"Assign task 1").props.onChange({currentTarget:{value:"__custom__"}}));
+    expect(findByAria(r,"Member or team name")).toBeDefined();
   });
 });
 
-// #271(d)：展开/收起切换宽度 class。
 describe("TaskLedgerPanel expanded view (#271)", () => {
   test("toggle flips the --expanded class and aria-pressed", async () => {
     const r = render("en", baseProps());
@@ -608,4 +599,60 @@ test('leaving an externally selected task clears its request so the same task ca
  expect(r.root.findAll(n=>n.props.className==='task-detail-card task-detail-route')).toHaveLength(0);
  act(()=>{selected=1;r.update(draw());});
  expect(r.root.findAll(n=>n.props.className==='task-detail-card task-detail-route')).toHaveLength(1);
+});
+
+describe("task drafts survive asynchronous work", () => {
+  const attachment = (name: string): Attachment => ({key:name,filename:name,content_type:"text/plain",size:1,url:`/attachments/${name}`});
+  test("cancel invalidates pending uploads before the next draft opens", async () => {
+    let finish!: (value: Attachment) => void;
+    const r = render("en", baseProps({onUploadAttachment:()=>new Promise(resolve=>{finish=resolve;})}));
+    await act(async()=>findByAria(r,"New task").props.onClick());
+    await act(async()=>r.root.findByProps({type:"file"}).props.onChange({currentTarget:{files:[{name:"old.txt"}],value:""}}));
+    await act(async()=>r.root.findAllByType("button").find(button=>button.children.includes("Cancel"))!.props.onClick());
+    await act(async()=>findByAria(r,"New task").props.onClick());
+    await act(async()=>finish(attachment("old.txt")));
+    expect(r.root.findAllByProps({className:"task-new-att-name"})).toHaveLength(0);
+  });
+  test("partial failures retain successful files and retry only failed files", async () => {
+    const attempts: string[] = []; let fail = true;
+    const r = render("en",baseProps({onUploadAttachment:async file=>{attempts.push(file.name);if(file.name==='bad.txt'&&fail)throw Error('offline');return attachment(file.name);}}));
+    await act(async()=>findByAria(r,"New task").props.onClick());
+    await act(async()=>r.root.findByProps({type:"file"}).props.onChange({currentTarget:{files:[{name:"ok.txt"},{name:"bad.txt"}],value:""}}));
+    expect(r.root.findAllByProps({className:"task-new-att-name"}).map(node=>node.children.join(''))).toEqual(['ok.txt']);
+    expect(allText(r)).toContain('bad.txt'); fail=false;
+    await act(async()=>r.root.findByProps({'aria-label':'Retry bad.txt'}).props.onClick());
+    expect(attempts).toEqual(['ok.txt','bad.txt','bad.txt']);
+    expect(r.root.findAllByProps({className:"task-new-att-name"})).toHaveLength(2);
+  });
+  test("a failed block request retains its reason and retry clears only on success", async () => {
+    let success = false;
+    const r = render("en",baseProps({onSetState:async()=>success}));await openTask(r);
+    await act(async()=>r.root.findAllByType('button').find(button=>button.children.includes('Block'))!.props.onClick());
+    const form=()=>r.root.findByProps({className:'task-new-form task-block-form'});
+    await act(async()=>form().findByType('textarea').props.onChange({currentTarget:{value:'waiting for credentials'}}));
+    await act(async()=>form().props.onSubmit({preventDefault(){}}));
+    expect(form().findByType('textarea').props.value).toBe('waiting for credentials');
+    success=true;await act(async()=>form().props.onSubmit({preventDefault(){}}));
+    expect(r.root.findAllByProps({className:'task-new-form task-block-form'})).toHaveLength(0);
+  });
+  test("a rejected review promise retains the draft and offers retry", async () => {
+    const r=render('en',baseProps({tasks:[task({state:'needs_review',completion_artifact:{},anchor_seqs:[42]})],onReview:async()=>{throw Error('offline');}}));await openTask(r);
+    expect(r.root.findAllByType('button').some(button=>button.children.includes('Done'))).toBe(false);
+    await act(async()=>r.root.findAllByType('button').find(button=>button.children.includes('Reject'))!.props.onClick());
+    await act(async()=>findByAria(r,'Reject reason for task 1').props.onChange({currentTarget:{value:'missing evidence'}}));
+    await act(async()=>r.root.findByProps({className:'task-action-btn task-reject-confirm'}).props.onClick());
+    expect(findByAria(r,'Reject reason for task 1').props.value).toBe('missing evidence');expect(allText(r)).toContain('preserved');
+  });
+  test("selecting a human for assignment infers human without an editable kind control", async () => {
+    const assigned: unknown[]=[]; const r=render('en',baseProps({identities:[{name:'alice',kind:'human',display:'Alice'}],onAssign:(...args)=>{assigned.push(args);}}));await openTask(r);
+    const form=r.root.findByProps({className:'task-assign-form'});
+    await act(async()=>form.findByType('select').props.onChange({currentTarget:{value:'alice'}}));
+    await act(async()=>form.props.onSubmit({preventDefault(){}}));expect(assigned).toEqual([[1,'alice','human']]);expect(form.findAllByType('select')).toHaveLength(1);
+  });
+  test("dropping into blocked asks for a reason instead of changing state immediately", async () => {
+    let changes=0;const r=render('en',baseProps({onSetState:()=>{changes++;}}));
+    const column=r.root.findAll(node=>node.props.className==='task-column').find(node=>String(node.props['aria-label']).includes('Blocked'))!;
+    await act(async()=>column.props.onDrop({preventDefault(){},dataTransfer:{getData:()=> '1'}}));
+    expect(changes).toBe(0);expect(r.root.findAllByProps({className:'task-new-form task-block-form'})).toHaveLength(1);
+  });
 });

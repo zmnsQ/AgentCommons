@@ -229,3 +229,18 @@ describe("unified local agent logs", () => {
     }
   });
 });
+
+test("failed refresh retains the previous snapshot and distinguishes all-source failure", async () => {
+  let fail=false;
+  const root=await renderLogs({dutyLogRead:async()=>{if(fail)throw Error('offline');return 'last-known-duty';},logsInstance:async()=>{if(fail)throw Error('offline');return ['last-known-app'];}});
+  fail=true;await act(async()=>root.findByProps({className:'d-btn resident-logs-refresh'}).props.onClick());
+  expect(root.findByType('pre').children.join('')).toContain('last-known-duty');
+  expect(JSON.stringify(renderer!.toJSON())).toContain('Could not read any log sources');
+  expect(JSON.stringify(renderer!.toJSON())).not.toContain('No logs yet');
+});
+test("retry failed log sources keeps successful sources without rereading them", async () => {
+  let fail=true;let appReads=0;let dutyReads=0;
+  const root=await renderLogs({dutyLogRead:async()=>{dutyReads++;if(fail)throw Error('offline');return 'recovered';},logsInstance:async()=>{appReads++;return ['already loaded'];}});
+  fail=false;await act(async()=>findButton(root,'Retry failed sources').props.onClick());
+  expect(dutyReads).toBe(2);expect(appReads).toBe(1);expect(root.findByType('pre').children.join('')).toContain('already loaded');expect(root.findByType('pre').children.join('')).toContain('recovered');
+});

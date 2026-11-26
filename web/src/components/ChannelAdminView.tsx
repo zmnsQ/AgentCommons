@@ -142,6 +142,8 @@ export function ChannelAdminView({
   const [internalSection, setInternalSection] = useState<ChannelAdminSection>(() => remembered?.section ?? initialSection);
   const activeSection = controlledSection ?? internalSection;
   const tabRefs = useRef(new Map<ChannelAdminSection, HTMLButtonElement>());
+  const visibilityDetailsRef = useRef<HTMLDetailsElement | null>(null);
+  const invitationDetailsRef = useRef<HTMLDetailsElement | null>(null);
   const memberOpenRefs = useRef(new Map<string, HTMLButtonElement>());
   const detailBackRef = useRef<HTMLButtonElement | null>(null);
   const detailReturnMemberRef = useRef<string | null>(null);
@@ -209,14 +211,18 @@ export function ChannelAdminView({
           <div className="channel-admin-overview">
             <div><span>{t("ChannelAdmin.overview.people")}</span><strong>{humanCount}</strong></div>
             <div><span>{t("ChannelAdmin.overview.agents")}</span><strong>{agentCount}</strong></div>
-            <div><span>{t("ChannelAdmin.overview.permission")}</span><strong>{t(!archived && Object.values(capabilities).some(Boolean) ? "ChannelAdmin.overview.manager" : "ChannelAdmin.overview.reader")}</strong></div>
+            <div><span>{t("ChannelAdmin.overview.permission")}</span><strong>{t(!archived && (capabilities.manageAccess || capabilities.manageMembers || capabilities.manageSafety) ? "ChannelAdmin.overview.manager" : "ChannelAdmin.overview.reader")}</strong></div>
+          </div>
+          <div className="commons-actions channel-admin-quick-actions">
+            {!archived && capabilities.manageAccess && (onEditAccess !== undefined || accessControls !== undefined) && <button type="button" className="d-btn" onClick={() => { if (onEditAccess !== undefined) { onEditAccess(); return; } if (visibilityDetailsRef.current !== null) visibilityDetailsRef.current.open = true; }}>{t("ChannelAdmin.access.edit")}</button>}
+            {!archived && capabilities.manageAccess && (onManageInvitations !== undefined || invitationControls !== undefined) && <button type="button" className="d-btn" onClick={() => { if (onManageInvitations !== undefined) { onManageInvitations(); return; } if (invitationDetailsRef.current !== null) invitationDetailsRef.current.open = true; }}>{t("ChannelAdmin.access.manageInvitations")}</button>}
           </div>
           <p className="channel-admin-context">{t("ChannelAdmin.overview.hint")}</p>
           <div className="channel-admin-shortcuts">
             <button type="button" className="d-btn" onClick={() => selectSection("members")}><StudioIcon name="human" />{t("ChannelAdmin.overview.manageMembers")}</button>
             <button type="button" className="d-btn" onClick={() => { setMemberFilter("agent"); selectSection("members"); }}><StudioIcon name="agent" />{t("ChannelAdmin.overview.manageAgents")}</button>
           </div>
-          <details className="channel-admin-disclosure" onToggle={event => setAccessExpanded(event.currentTarget.open)}>
+          <details ref={visibilityDetailsRef} className="channel-admin-disclosure" onToggle={event => setAccessExpanded(event.currentTarget.open)}>
             <summary><strong>{t("ChannelAdmin.access.visibility")}</strong><span>{t(`Visibility.opt.${visibility}`)}</span></summary>
           <section className="settings-section">
             <div className="settings-label">{t("ChannelAdmin.access.visibility")}</div>
@@ -229,11 +235,7 @@ export function ChannelAdminView({
               ? typeof accessControls === "function"
                 ? accessControls(activeSection === "access" && accessExpanded)
                 : accessControls
-              : !archived && capabilities.manageAccess && onEditAccess !== undefined && (
-              <button type="button" className="d-btn" onClick={onEditAccess}>
-                {t("ChannelAdmin.access.edit")}
-              </button>
-              )}
+              : null}
             {!archived
               && capabilities.manageAccess
               && accessControls === undefined
@@ -243,16 +245,12 @@ export function ChannelAdminView({
             )}
           </section>
           </details>
-          <details className="channel-admin-disclosure">
+          <details ref={invitationDetailsRef} className="channel-admin-disclosure">
             <summary><strong>{t("ChannelAdmin.access.invitations")}</strong><span>{t("ChannelAdmin.invitations.hint")}</span></summary>
           <section className="settings-section">
             {!archived && capabilities.manageAccess && invitationControls !== undefined
               ? invitationControls
-              : !archived && capabilities.manageAccess && onManageInvitations !== undefined && (
-              <button type="button" className="d-btn" onClick={onManageInvitations}>
-                {t("ChannelAdmin.access.manageInvitations")}
-              </button>
-              )}
+              : null}
             {(archived || !capabilities.manageAccess) && (
               <p className="settings-hint">
                 {archived

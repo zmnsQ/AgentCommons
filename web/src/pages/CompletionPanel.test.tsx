@@ -106,3 +106,11 @@ describe("CompletionPanel", () => {
     expect(renderer!.root.findByProps({ className: "d-btn completion-toggle is-active" })).toBeTruthy();
   });
 });
+
+test("more than six loaded results can be expanded without changing the conversation filter", () => {
+  let toggles=0;
+  act(()=>{renderer=create(<LocaleProvider><CompletionPanel completions={Array.from({length:8},(_,i)=>completion(i+1))} visible={8} enabled={false} onToggle={()=>{toggles++;}} onJump={()=>{}}/></LocaleProvider>);});
+  expect(renderer!.root.findAllByType('li')).toHaveLength(6);
+  act(()=>renderer!.root.findAllByType('button').find(button=>button.children.includes('View all loaded results (8)'))!.props.onClick());
+  expect(renderer!.root.findAllByType('li')).toHaveLength(8);expect(toggles).toBe(0);
+});

@@ -121,7 +121,7 @@ function ScopedChannelFiles({ token, slug, canUpload, client, upload = uploadAtt
       <label className="commons-check"><input type="checkbox" checked={shareAfterUpload} disabled={busy !== null} onChange={(event) => setShareAfterUpload(event.target.checked)} />{t("Collab.fileShareOption")}</label>
     </div>}
     {error && <p className="commons-error" role="alert">{error}</p>}{notice && <p className="commons-success" role="status">{notice}</p>}
-    <div className="commons-section-head"><label className="commons-search"><span className="commons-muted">{t("Collab.fileSearch")}</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} /></label><span className="commons-muted">{t("Collab.loadedCount", { count: files.length })}</span></div>
+    <div className="commons-section-head"><label className="commons-search"><span className="commons-muted">{t("Collab.fileSearch")}</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} /></label><span className="commons-muted">{query ? t("Collab.matchCount", { visible: visible.length, total: files.length }) : t("Collab.loadedCount", { count: files.length })}</span></div>
     {!loading && !error && visible.length === 0 && <p className="commons-empty">{t(query ? "Collab.fileNoMatch" : "Collab.fileEmpty")}</p>}
     <div className="commons-file-list">{visible.map((file) => <article key={file.key} className="commons-file">
       <div className="commons-file-icon" aria-hidden="true"><StudioIcon name={/\.(ts|tsx|js|json|py|md)$/i.test(file.filename)?"code":"files"} size={20}/></div>

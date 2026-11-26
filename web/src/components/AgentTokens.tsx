@@ -165,12 +165,13 @@ export function AgentTokens({
   const isOpen = active ?? open;
   useEffect(()=>setBlockedAgentName(null),[slug,accountKey,token,isOpen]);
   const mutationEpochRef = useRef(0);
-  const mutationScopeRef = useRef(`${token}\u0000${slug}\u0000${isOpen}`);
-  const mutationScope = `${token}\u0000${slug}\u0000${isOpen}`;
+  const mutationScopeRef = useRef(`${accountKey}\u0000${token}\u0000${slug}\u0000${isOpen}`);
+  const mutationScope = `${accountKey}\u0000${token}\u0000${slug}\u0000${isOpen}`;
   if (mutationScopeRef.current !== mutationScope) {
     mutationScopeRef.current = mutationScope;
     mutationEpochRef.current += 1;
   }
+  const destructiveLocks = useRef(new Set<string>());
   const nicknamePendingRef = useRef(false);
   const profilePendingRef = useRef(false);
   const rulesPendingRef = useRef(false);
@@ -198,6 +199,20 @@ export function AgentTokens({
   const selectedAgent = filteredAgents.find((agent) => agent.name === selectedAgentName)
     ?? filteredAgents[0]
     ?? null;
+  const mutationView = `${isOpen}:${activeSection}:${selectedAgent?.name ?? ""}`;
+  const mutationViewRef = useRef(mutationView);
+  const viewEpoch = useRef(0);
+  if (mutationViewRef.current !== mutationView) { mutationViewRef.current = mutationView; viewEpoch.current++; }
+  function lockAgentMutation(name: string) {
+    const key = `${accountKey}\u0000${slug}\u0000${name}`;
+    if (destructiveLocks.current.has(key)) return null;
+    destructiveLocks.current.add(key);
+    const epoch = mutationEpochRef.current, view = viewEpoch.current;
+    return {
+      current: () => epoch === mutationEpochRef.current && view === viewEpoch.current,
+      release: () => destructiveLocks.current.delete(key),
+    };
+  }
   const selectedAgentOAuth=selectedAgent!==null&&isOAuthIdentity(selectedAgent);
   const selectedAgentSaved = selectedAgent === null
     ? null
@@ -420,23 +435,27 @@ export function AgentTokens({
 
   // #605：删除自己的 agent——撤 token、断连、清本地 vault 记录。不可逆，二次确认。
   async function removeAgent(name: string) {
+    const mutation = lockAgentMutation(name);
+    if (!mutation) return;
     const ok = window.confirm(t("AgentTokens.deleteConfirm", { name }));
-    if (!ok) return;
+    if (!ok) { mutation.release(); return; }
     setBusyName(name);
     setAgentError(null);
     try {
       await deleteChannelAgent(token, slug, name);
       removeSavedAgentToken(accountKey, slug, name);
-      await refreshAgents();
+      if (mutation.current()) await refreshAgents();
     } catch (err) {
+      if (!mutation.current()) return;
       if (err instanceof AuthError) onAuthFailed(err.message);
       else if (err instanceof ValidationError) {
         // 404 = 服务端早已没有这个 agent（别处已删/已撤销）——本地清理照做，幂等收尾。
         removeSavedAgentToken(accountKey, slug, name);
-        await refreshAgents();
+        if (mutation.current()) await refreshAgents();
       } else setAgentError(t("AgentTokens.errDelete"));
     } finally {
-      setBusyName(null);
+      mutation.release();
+      setBusyName(current => current === name ? null : current);
     }
   }
 
@@ -477,22 +496,28 @@ export function AgentTokens({
 
   async function rotate(name: string) {
     if(blockedAgentName===name)return;
+    const mutation = lockAgentMutation(name);
+    if (!mutation) return;
     const ok = window.confirm(t("AgentTokens.rotateConfirm", { name }));
-    if (!ok) return;
+    if (!ok) { mutation.release(); return; }
     setBusyName(name);
     setAgentError(null);
     try {
       await regenerateAndSaveToken(name);
+      if (!mutation.current()) return;
       await refreshAgents();
+      if (!mutation.current()) return;
       // #1009：重铸完直接进四步引导，② 就是含新 token 的那条命令——不再「生成完就没下文」。
       const saved = findSavedAgentToken(accountKey, slug, name);
       if (saved) guideFromSaved(saved, { forceJoin: true });
     } catch (err) {
+      if (!mutation.current()) return;
       if (err instanceof AuthError) onAuthFailed(err.message);
       else if (err instanceof ForbiddenError) {setAgentError(forbiddenText(err,t,"AgentTokens.errRotateForbidden"));if(err.code==="participant_removed")setBlockedAgentName(name);}
       else setAgentError(t("AgentTokens.errRotate"));
     } finally {
-      setBusyName(null);
+      mutation.release();
+      setBusyName(current => current === name ? null : current);
     }
   }
 
@@ -511,14 +536,16 @@ export function AgentTokens({
   // 连点会绕过 state 守卫并发触发 rotate/dutyAdopt（第二次 rotate 作废第一次的 token）。
   async function makeResident(name: string) {
     if (!canMakeResident || residentBusyRef.current !== null || agents?.some(a=>a.name===name&&a.access_status==="removed")) return;
+    const mutation = lockAgentMutation(name);
+    if (!mutation) return;
     residentBusyRef.current = name;
     setResidentBusy(name);
     setResidentError(null);
     try {
       const dir = await pickDirectory(t("AgentTokens.residentPickTitle", { name }));
-      if (dir === null) return; // 取消选目录 = 放弃整个操作
+      if (dir === null || !mutation.current()) return; // 取消选目录 = 放弃整个操作
       const agentToken = await tokenForResidency(name);
-      if (agentToken === null) return; // 未同意重新生成
+      if (agentToken === null || !mutation.current()) return; // 未同意重新生成
       await dutyAdapter.dutyAdopt({
         server: apiOrigin(),
         token: agentToken,
@@ -527,12 +554,15 @@ export function AgentTokens({
         runner: residentRunnerFor(name),
         workdir: dir,
       });
+      if (!mutation.current()) return;
       setResidentDone((s) => new Set(s).add(name));
       await refreshAgents();
     } catch (err) {
+      if (!mutation.current()) return;
       if (err instanceof AuthError) onAuthFailed(err.message);
       else setResidentError(err instanceof Error ? err.message : String(err));
     } finally {
+      mutation.release();
       residentBusyRef.current = null;
       setResidentBusy(null);
     }
@@ -902,7 +932,7 @@ export function AgentTokens({
                     <button
                       type="button"
                       className="d-btn d-btn--primary"
-                      disabled={busyName === selectedAgent.name||blockedAgentName===selectedAgent.name}
+                      disabled={busyName !== null||residentBusy === selectedAgent.name||blockedAgentName===selectedAgent.name}
                       onClick={() => void rotate(selectedAgent.name)}
                     >
                       {busyName === selectedAgent.name ? t("AgentTokens.rotating") : t("AgentTokens.rotateAndRecover")}
@@ -1011,7 +1041,7 @@ export function AgentTokens({
                       <button
                         type="button"
                         className="d-btn agenttokens-rotate"
-                        disabled={busyName === selectedAgent.name||blockedAgentName===selectedAgent.name}
+                        disabled={busyName !== null||residentBusy === selectedAgent.name||blockedAgentName===selectedAgent.name}
                         onClick={() => void rotate(selectedAgent.name)}
                       >
                         {busyName === selectedAgent.name ? t("AgentTokens.rotating") : t("AgentTokens.rotate")}
@@ -1020,7 +1050,7 @@ export function AgentTokens({
                     <button
                       type="button"
                       className="d-btn agenttokens-delete"
-                      disabled={busyName === selectedAgent.name||blockedAgentName===selectedAgent.name}
+                      disabled={busyName !== null||residentBusy === selectedAgent.name||blockedAgentName===selectedAgent.name}
                       onClick={() => void removeAgent(selectedAgent.name)}
                     >
                       {t("AgentTokens.delete")}
@@ -1386,7 +1416,7 @@ export function AgentTokens({
           initialSection="channel"
           activeSection={activeSection}
           onClose={close}
-          onBack={onBack}
+          onBack={onBack === undefined ? undefined : () => { mutationEpochRef.current++; onBack(); }}
           backLabel={backLabel}
           onActiveSectionChange={setActiveSection}
           panelClassName="settings-panel--agent-center agentmanager-dialog"
