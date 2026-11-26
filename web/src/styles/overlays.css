@@ -138,6 +138,66 @@
   display: none;
 }
 
+.conversation-details-content .presence-bar:has(.presence-mobile-summary) {
+  padding: 4px;
+}
+
+.presence-mobile-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--ac-radius-sm);
+  background: transparent;
+  color: var(--t-text);
+  font-family: var(--t-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--ac-duration-fast);
+}
+
+.presence-mobile-summary:hover {
+  background: var(--ac-hover);
+}
+
+.presence-mobile-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--t-dim);
+}
+
+.presence-mobile-dot[data-status="open"] {
+  background: var(--t-green);
+}
+
+.presence-mobile-attention {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: var(--ac-radius-pill);
+  background: var(--d-amber-soft);
+  color: var(--d-amber);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.presence-mobile-summary .studio-icon {
+  margin-left: auto;
+  color: var(--t-muted);
+  flex: none;
+}
+
+.presence-mobile-attention + .studio-icon {
+  margin-left: 4px;
+}
+
 .conversation-tools h3 {
   margin: 0 0 10px;
   font-size: 11.5px;
@@ -198,6 +258,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.conversation-admin-actions .chan-admin-group + .chan-admin-group {
+  border-left: 0;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 /* ---- Unified Modal Overlays (Channel Panels, Settings, Agent Join, Create Group) ---- */
@@ -1040,27 +1106,37 @@
   padding: 18px;
 }
 
-/* ---- Mobile Fullscreen Sheets ---- */
-@media (max-width: 760px), (max-height: 760px) and (pointer: coarse) {
+/* ---- Mobile Fullscreen Sheets (must stay in sync with COMPACT_MEDIA in mobileViewport.ts) ---- */
+@media (max-width: 760px), (max-height: 760px) and (pointer: coarse), (max-device-width: 760px) and (pointer: coarse), (max-device-height: 760px) and (pointer: coarse) {
   .channel-panel-overlay,
   .settings-overlay,
   .sectioned-dialog-overlay,
   .agent-join-overlay {
     padding: 0;
     align-items: stretch;
+    justify-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
     inset: var(--ac-viewport-top, 0px) 0 auto;
     height: var(--ac-viewport-height, 100dvh);
   }
 
-  .channel-panel-card,
-  .settings-panel,
-  .agent-join-card {
+  :root .channel-panel-overlay .channel-panel-card,
+  :root .settings-overlay .settings-panel,
+  :root .sectioned-dialog-overlay .sectioned-dialog,
+  :root .sectioned-dialog-overlay .sectioned-dialog-panel,
+  :root .agent-join-overlay .agent-join-card {
     width: 100%;
     max-width: 100%;
     height: 100%;
     max-height: 100%;
     border: 0;
     border-radius: 0;
+  }
+
+  :is(.agent-join-card, .channel-panel-body, .settings-content) :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    font-size: 16px;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .channel-panel-head,

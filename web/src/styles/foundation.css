@@ -497,7 +497,7 @@ button:disabled {
   border: 0;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 760px) and (pointer: coarse), (max-device-width: 760px) and (pointer: coarse), (max-device-height: 760px) and (pointer: coarse) {
   .d-btn,
   .d-pill {
     min-height: 44px;

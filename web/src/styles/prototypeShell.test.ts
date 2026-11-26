@@ -58,9 +58,25 @@ test("body portals receive public root surface tokens and Studio 2.0 layers load
 
 test("compact full-width drawer and form sizing preserve viewport and touch behavior", () => {
   expect(shell).toContain("(max-height: 760px) and (pointer: coarse)");
+  expect(shell).toContain("(max-device-width: 760px) and (pointer: coarse)");
+  expect(shell).toContain("(max-device-height: 760px) and (pointer: coarse)");
   expect(shell).toContain(".app-side.mobile-groups-drawer");
   expect(shell).not.toMatch(/zoom\s*:|scale\(/);
   expect(shell).toContain("font-size: 16px");
+});
+
+test("compact shell, conversation, overlays and foundation stay in sync with COMPACT_MEDIA and never strand main in column 1", () => {
+  const foundation = read("./foundation.css");
+  const mobileViewport = read("../lib/mobileViewport.ts");
+  const compactMedia = mobileViewport.match(/COMPACT_MEDIA\s*=\s*"([^"]+)"/)![1]!;
+  for (const sheet of [shell, conversation, overlays, foundation]) {
+    expect(sheet).toContain(`@media ${compactMedia}`);
+  }
+  expect(shell).toContain(":root.ac-mobile .app-shell.workspace-shell");
+  expect(shell).toContain(".app-shell.workspace-shell:not(:has(> .app-side.workspace-navigation))");
+  expect(shell).toContain(".app-shell.workspace-shell > .app-main:only-child");
+  expect(shell).toMatch(/\.app-main\s*\{[^}]*width:\s*100%;[^}]*padding:\s*0;/s);
+  expect(overlays).toContain(".presence-mobile-summary");
 });
 
 test("embedded invitation content overrides legacy popover positioning without clipping its form", () => {

@@ -1266,7 +1266,7 @@ div.composer .mention-tier--wakeable { color: var(--t-blue); }
   }
 }
 
-@media (max-width: 760px), (max-height: 760px) and (pointer: coarse) {
+@media (max-width: 760px), (max-height: 760px) and (pointer: coarse), (max-device-width: 760px) and (pointer: coarse), (max-device-height: 760px) and (pointer: coarse) {
   .chat-header.conversation-header {
     height: 54px;
     padding: 0 12px;
@@ -1312,7 +1312,7 @@ div.composer .mention-tier--wakeable { color: var(--t-blue); }
   }
 }
 
-@media (max-width: 760px), (max-height: 760px) and (pointer: coarse) {
+@media (max-width: 760px), (max-height: 760px) and (pointer: coarse), (max-device-width: 760px) and (pointer: coarse), (max-device-height: 760px) and (pointer: coarse) {
 
   .channel-attention-strip {
     padding: 6px 12px;

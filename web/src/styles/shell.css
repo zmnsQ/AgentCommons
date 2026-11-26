@@ -57,6 +57,22 @@
   grid-template-columns: 56px minmax(0, 1fr);
 }
 
+/* Never leave <main> stranded inside the sidebar track when no desktop sidebar
+   rail is mounted (mobile drawer mode, requested desktop viewport on a phone,
+   or any compact viewport where JS renders ResponsiveSidebar). */
+:root.ac-mobile .app-shell.workspace-shell,
+:root.ac-mobile .app-shell.workspace-shell.navigation-collapsed,
+.app-shell.workspace-shell:not(:has(> .app-side.workspace-navigation)),
+.app-shell.workspace-shell.navigation-collapsed:not(:has(> .app-side.workspace-navigation)) {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell.workspace-shell > .app-main:only-child {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 /* ---- Desktop Left Sidebar Rail ---- */
 .app-side.workspace-navigation {
   position: relative;
@@ -884,8 +900,10 @@
 /* ---- Main Content Viewport ---- */
 .app-main {
   flex: 1 1 0;
+  width: 100%;
   min-width: 0;
   min-height: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1028,8 +1046,8 @@
   background: var(--ac-surface-1);
 }
 
-/* ---- Compact / Touch Viewport ---- */
-@media (max-width: 760px), (max-height: 760px) and (pointer: coarse) {
+/* ---- Compact / Touch Viewport (must stay in sync with COMPACT_MEDIA in mobileViewport.ts) ---- */
+@media (max-width: 760px), (max-height: 760px) and (pointer: coarse), (max-device-width: 760px) and (pointer: coarse), (max-device-height: 760px) and (pointer: coarse) {
   .app-shell.workspace-shell,
   .app-shell.workspace-shell.navigation-collapsed {
     display: flex;
@@ -1054,6 +1072,16 @@
   .prototype-sidebar .side-archived-toggle,
   .prototype-sidebar-agents .agent-list button {
     min-height: 40px;
+  }
+
+  .mobile-drawer-actions .workspace-account-controls .prototype-rail-button,
+  .mobile-drawer-actions .workspace-account-controls .app-settings-btn,
+  .mobile-drawer-actions .workspace-account-controls .app-settings-icon-btn,
+  .mobile-drawer-actions .workspace-account-controls .app-agent-center-btn,
+  .mobile-drawer-actions .workspace-account-controls .notify-toggle-btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
   }
 
   .workspace-account-controls .prototype-rail-popover {
